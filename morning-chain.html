@@ -16,6 +16,8 @@
   <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Daily+Chain%22%2C%22short_name%22%3A%22Daily+Chain%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2304071a%22%2C%22theme_color%22%3A%22%2304071a%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg+xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'+viewBox%3D'0+0+512+512'%253E%253Crect+width%3D'512'+height%3D'512'+rx%3D'80'+fill%3D'%252304071a'%2F%253E%253Ctext+x%3D'256'+y%3D'340'+font-size%3D'300'+text-anchor%3D'middle'%253E%25F0%259F%258C%259F%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+  <!-- 提前设置主题，避免闪烁 -->
+  <script>(function(){const t=localStorage.getItem('dc_theme')||'dark';document.documentElement.dataset.theme=t;})();</script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -180,12 +182,27 @@
       display: flex; align-items: center; gap: 3px;
       margin-bottom: 16px;
     }
-    .pseg { flex:1; height:2px; background:var(--surf2); transition:all 0.4s; }
-    .pseg.done { background:var(--mg); box-shadow:0 0 5px var(--mg-glo); }
-    .pseg.active { background:rgba(255,0,128,0.35); }
-    .pdot { width:4px;height:4px; border-radius:50%; background:var(--surf2); flex-shrink:0; transition:all 0.4s; }
-    .pdot.done { background:var(--mg); box-shadow:0 0 5px var(--mg-glo); }
-    .pdot.active { background:rgba(255,0,128,0.4); }
+    .pseg {
+      flex: 1; height: 3px;
+      background: var(--surf2);
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* 填充层：scaleX 从 0→1 实现从左到右动画 */
+    .pseg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--mg);
+      box-shadow: 0 0 6px var(--mg-glo);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .pseg.done::after { transform: scaleX(1); }
+    .pseg.active { background: rgba(255,0,128,0.22); }
+    .pdot { display:none; }
 
     /* ═══ TASK ROWS ═══ */
     #chainList { display:flex; flex-direction:column; gap:6px; }
@@ -263,6 +280,29 @@
     .row-body { padding:12px 12px 14px 45px; }
 
     .row-hint { font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6; }
+
+    /* 内联编辑输入框 */
+    .inline-edit {
+      background: transparent; border: none;
+      border-bottom: 1px solid var(--mg);
+      color: inherit; font: inherit; font-size: inherit; font-weight: inherit;
+      padding: 0 2px; width: 100%; max-width: 100%;
+      outline: none; caret-color: var(--mg);
+    }
+    html[data-theme="light"] .inline-edit { border-bottom-color: var(--mg); }
+
+    /* 编辑模式 */
+    .icon-btn.edit-active { border-color: var(--mg); color: var(--mg); background: var(--mg-dim); }
+    html[data-theme="light"] .icon-btn.edit-active { border-color: var(--mg); color: var(--mg); background: rgba(124,92,231,0.08); }
+    body.edit-mode .task-row { cursor: default; }
+    body.edit-mode .row-title { cursor: text; text-decoration: underline dotted; text-decoration-color: rgba(255,0,128,0.35); text-underline-offset: 3px; }
+    html[data-theme="light"] body.edit-mode .row-title { text-decoration-color: rgba(124,92,231,0.35); }
+    body.edit-mode .task-row.edit-target { border-color: rgba(255,0,128,0.28); }
+    html[data-theme="light"] body.edit-mode .task-row.edit-target { border-color: rgba(124,92,231,0.28); box-shadow: 0 2px 12px rgba(124,92,231,0.1); }
+    body.edit-mode .task-row.edit-target .row-hint,
+    body.edit-mode .task-row.edit-target .clabel { cursor: text; text-decoration: underline dotted; text-decoration-color: rgba(255,0,128,0.25); text-underline-offset: 2px; }
+    html[data-theme="light"] body.edit-mode .task-row.edit-target .clabel { text-decoration-color: rgba(124,92,231,0.25); }
+    .edit-ph { color: var(--t3); font-style: normal; }
 
     /* first-thing */
     .ft-note {
@@ -437,6 +477,284 @@
       font-size:12px;font-family:inherit;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;
     }
     .back-btn:hover { border-color:var(--t2); }
+
+    /* ══════════════════════════════════════
+       浅色主题
+    ══════════════════════════════════════ */
+    html[data-theme="light"] {
+      --bg:     #f4f3ef;
+      --surf:   #ffffff;
+      --surf2:  #eeecea;
+      --mg:     #7c5ce7;
+      --mg-dim: rgba(124,92,231,0.07);
+      --mg-glo: rgba(124,92,231,0.22);
+      --cy:     #4ba878;
+      --cy-dim: rgba(75,168,120,0.08);
+      --cy-glo: rgba(75,168,120,0.2);
+      --text:   #1a1a2e;
+      --t2:     #5e6070;
+      --t3:     #b4b4c4;
+      --bmg:    rgba(124,92,231,0.2);
+      --bcy:    rgba(75,168,120,0.2);
+      --b:      rgba(0,0,0,0.07);
+    }
+
+    html[data-theme="light"] body {
+      background: var(--bg);
+      background-image: none;
+    }
+
+    /* ── 任务颜色系统（莫兰迪四色分类） ── */
+    html[data-theme="light"] .task-row { --task-color:#b8b4bc; --task-glow:rgba(184,180,188,0.2); }
+
+    /* 餐食类：dusty terracotta */
+    html[data-theme="light"] .task-row[data-id="breakfast"],
+    html[data-theme="light"] .task-row[data-id="lunch"],
+    html[data-theme="light"] .task-row[data-id="dinner"]
+    { --task-color:#c49680; --task-glow:rgba(196,150,128,0.22); }
+
+    /* 专注类（学习/工作/求职/开会/电话/阅读）：dusty steel blue */
+    html[data-theme="light"] .task-row[data-id="study"],
+    html[data-theme="light"] .task-row[data-id="work"],
+    html[data-theme="light"] .task-row[data-id="jobs"],
+    html[data-theme="light"] .task-row[data-id^="meeting"],
+    html[data-theme="light"] .task-row[data-id^="call"],
+    html[data-theme="light"] .task-row[data-id^="read"]
+    { --task-color:#7e96a8; --task-glow:rgba(126,150,168,0.22); }
+
+    /* 健康类（健身/补剂）：sage green */
+    html[data-theme="light"] .task-row[data-id="gym"],
+    html[data-theme="light"] .task-row[data-id="supps"]
+    { --task-color:#88a486; --task-glow:rgba(136,164,134,0.22); }
+
+    /* 生活类（出门/通勤/午睡/休息/冥想/摸鱼/买菜/消息）：dusty mauve */
+    html[data-theme="light"] .task-row[data-id="leave"],
+    html[data-theme="light"] .task-row[data-id^="commute"],
+    html[data-theme="light"] .task-row[data-id^="nap"],
+    html[data-theme="light"] .task-row[data-id^="break"],
+    html[data-theme="light"] .task-row[data-id^="meditate"],
+    html[data-theme="light"] .task-row[data-id^="slack"],
+    html[data-theme="light"] .task-row[data-id^="errand"],
+    html[data-theme="light"] .task-row[data-id^="message"]
+    { --task-color:#a090aa; --task-glow:rgba(160,144,170,0.22); }
+
+    /* 卡片：阴影代替发光边框 */
+    html[data-theme="light"] .task-row {
+      border-color: transparent;
+      overflow: visible;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html[data-theme="light"] .task-row.current {
+      /* inset box-shadow 代替 border-left：视觉相同但不影响 ::before 定位基准 */
+      box-shadow: inset 3px 0 0 var(--task-color), 0 4px 20px var(--task-glow), 0 1px 4px rgba(0,0,0,0.06);
+      background: color-mix(in srgb, var(--surf) 96%, var(--task-color) 4%);
+      animation: none;
+    }
+    html[data-theme="light"] .task-row.current::before {
+      /* 覆盖暗色角落渐变 → 时间轴圆点 */
+      /* left:-20px → 中心 = 24-20+4 = 8px ✓ */
+      top: 13px; right: auto;
+      left: -19px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--task-color);
+      opacity: 0.55;
+      box-shadow: 0 0 0 2px var(--bg);
+    }
+    html[data-theme="light"] .task-row.done {
+      opacity: 0.52;
+      box-shadow: none;
+    }
+    html[data-theme="light"] .task-row.locked {
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    /* 左侧时间轴 */
+    html[data-theme="light"] #chainList {
+      position: relative;
+      padding-left: 24px;
+    }
+    /* 不使用连续线，改为每段卡片各自画线段（见 ::after） */
+    html[data-theme="light"] #chainList::before { display: none; }
+
+    /* 圆点：left:-20px → 中心 = 24-20+5 = 9px（无 border 干扰）✓
+       z-index:3 确保在线段（z:1）和 done 卡 stacking context 之上 */
+    html[data-theme="light"] .task-row::before {
+      content: '';
+      position: absolute;
+      left: -19px; top: 14px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--task-color);
+      opacity: 0.55;
+      box-shadow: 0 0 0 2px var(--bg);   /* 白圈隔断 */
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    /* 线段：从本圆点底部画到下张卡的圆点顶部
+       dot top:24px + height:6px = 30px → top:30px
+       bottom:-30px = 6px gap + 24px into next card = 恰好到下一个点顶 */
+    html[data-theme="light"] .task-row::after {
+      content: '';
+      position: absolute;
+      left: -16px;    /* center: 24-16+1 = 9px ✓ */
+      top: 22px;      /* 圆点底(14+6=20px) + 2px gap */
+      bottom: -16px;  /* card gap(6px) + 下张卡圆点顶(14px) - 4px */
+      width: 1.5px;
+      background: #b8b4b0;
+      z-index: 1;
+    }
+    /* 最后一张卡不需要往下画线 */
+    html[data-theme="light"] .task-row:not(:has(~ .task-row))::after { display: none; }
+
+    /* 进度条 */
+    html[data-theme="light"] .pseg        { background: #e0ded8; }
+    html[data-theme="light"] .pseg::after { background: var(--mg); box-shadow: none; }
+    html[data-theme="light"] .pseg.active { background: rgba(124,92,231,0.18); }
+
+    /* 图标按钮 */
+    html[data-theme="light"] .icon-btn {
+      background: var(--surf);
+      border-color: rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    html[data-theme="light"] .icon-btn:hover {
+      border-color: var(--mg); color: var(--mg);
+      box-shadow: 0 2px 8px rgba(124,92,231,0.15);
+    }
+
+    /* Checklist 改为横向 pill 标签 */
+    html[data-theme="light"] .row-checks {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+    html[data-theme="light"] .check-row {
+      border-radius: 99px;
+      padding: 6px 13px;
+      background: var(--surf2);
+      border: 1px solid rgba(0,0,0,0.09);
+      display: inline-flex; gap: 6px;
+    }
+    html[data-theme="light"] .check-row .cbox { display: none; }
+    html[data-theme="light"] .check-row.checked {
+      background: rgba(75,168,120,0.1);
+      border-color: rgba(75,168,120,0.28);
+    }
+    html[data-theme="light"] .check-row.checked .clabel {
+      color: var(--cy);
+      text-decoration: line-through;
+      text-decoration-color: rgba(75,168,120,0.4);
+    }
+
+    /* 完成按钮：跟随任务色 */
+    html[data-theme="light"] .complete-btn {
+      background: var(--task-color);
+      animation: none;
+      box-shadow: 0 4px 16px var(--task-glow);
+      border-color: var(--task-color);
+    }
+    html[data-theme="light"] .complete-btn:hover:not(:disabled) {
+      filter: brightness(1.1);
+      box-shadow: 0 8px 24px var(--task-glow) !important;
+    }
+    html[data-theme="light"] .complete-btn:disabled {
+      background: var(--surf2); border-color: var(--t3); color: var(--t3);
+    }
+
+    /* 退回按钮 */
+    html[data-theme="light"] .undo-btn {
+      border-color: rgba(0,0,0,0.1); color: var(--t2);
+    }
+    html[data-theme="light"] .undo-btn:hover {
+      border-color: var(--cy); color: var(--cy);
+      box-shadow: 0 0 8px var(--cy-glo);
+    }
+
+    /* ft-note 跟随任务色 */
+    html[data-theme="light"] .ft-note {
+      background: color-mix(in srgb, white 93%, var(--task-color) 7%);
+      border-color: color-mix(in srgb, transparent 78%, var(--task-color) 22%);
+    }
+    html[data-theme="light"] .ft-label { text-shadow: none; }
+
+    /* 调板 */
+    html[data-theme="light"] #palDrawer {
+      background: #f8f7f3;
+      border-right-color: rgba(0,0,0,0.08);
+    }
+    html[data-theme="light"] .pal-head-title { text-shadow: none; }
+    html[data-theme="light"] .pal-tile {
+      background: var(--surf);
+      border-color: rgba(0,0,0,0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    html[data-theme="light"] .pal-tile:hover {
+      border-color: var(--mg);
+      box-shadow: 0 2px 10px rgba(124,92,231,0.14);
+    }
+    html[data-theme="light"] .pal-add-btn {
+      border-color: rgba(0,0,0,0.1); color: var(--t2);
+    }
+    html[data-theme="light"] .pal-add-btn:hover {
+      border-style: solid; border-color: var(--mg);
+      color: var(--mg); background: var(--mg-dim);
+    }
+
+    /* 自定义弹窗 */
+    html[data-theme="light"] .modal-box {
+      background: var(--surf);
+      border-color: rgba(0,0,0,0.1);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+    }
+    html[data-theme="light"] .modal-field input {
+      background: var(--surf2);
+      border-color: rgba(0,0,0,0.1);
+      color: var(--text);
+    }
+    html[data-theme="light"] .modal-field input:focus {
+      border-color: var(--mg);
+      box-shadow: 0 0 0 3px rgba(124,92,231,0.1);
+    }
+    html[data-theme="light"] .modal-save {
+      border-color: var(--mg); background: var(--mg-dim); color: var(--mg);
+    }
+    html[data-theme="light"] .modal-save:hover {
+      background: var(--mg); color: #fff;
+      box-shadow: 0 4px 16px rgba(124,92,231,0.3);
+    }
+
+    /* 睡前浮层 */
+    html[data-theme="light"] #bedtimeView { background: rgba(244,243,239,0.97); }
+    html[data-theme="light"] .night-row { background: var(--surf); border-color: rgba(0,0,0,0.07); }
+    html[data-theme="light"] .input-group { background: var(--surf); border-color: rgba(0,0,0,0.07); }
+    html[data-theme="light"] .save-btn {
+      border-color: var(--mg); background: var(--mg-dim); color: var(--mg);
+    }
+    html[data-theme="light"] .save-btn:hover {
+      background: var(--mg); color: #fff;
+      box-shadow: 0 4px 16px rgba(124,92,231,0.3);
+    }
+
+    /* 全部完成 */
+    html[data-theme="light"] .all-done h2 {
+      color: var(--mg); text-shadow: none;
+    }
+
+    /* row-now badge */
+    html[data-theme="light"] .row-now {
+      color: var(--mg); text-shadow: none;
+      border-color: rgba(124,92,231,0.28);
+    }
+
+    /* 删除按钮 */
+    html[data-theme="light"] .row-del { color: var(--t3); }
+    html[data-theme="light"] .row-del:hover { color: #e03060; background: rgba(224,48,96,0.07); }
+
+    /* 背景网格去掉 */
+    html[data-theme="light"] body { background-image: none; }
   </style>
 </head>
 <body>
@@ -476,7 +794,9 @@
     </div>
     <div class="topbar-date" id="dateLabel"></div>
     <div style="display:flex;gap:6px">
-      <div class="icon-btn" onclick="openBedtime()">🌙</div>
+      <div class="icon-btn" id="editBtn" onclick="toggleEditMode()" title="编辑模式" style="font-size:14px">✏️</div>
+      <div class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="切换主题" style="font-size:14px">☀️</div>
+      <div class="icon-btn" onclick="openBedtime()">💤</div>
       <div class="icon-btn" onclick="resetDay()" title="重置">
         <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
           <path d="M11.5 6.5A5 5 0 1 1 6.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -521,7 +841,7 @@
     <div style="font-size:11px;color:var(--t2);letter-spacing:0.1em;text-transform:uppercase">睡前清单</div>
     <div class="icon-btn" onclick="closeBedtime()">✕</div>
   </div>
-  <div class="bt-title">🌙 准备明天</div>
+  <div class="bt-title">💤 准备明天</div>
   <div class="bt-sub">整理好，明天醒来直接出发</div>
   <div class="sec-label">背包确认</div>
   <div id="nightChecklist"></div>
@@ -592,12 +912,16 @@ const SAMPLE_JOBS = [
 // ════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════
-const SK = 'dc_v7', CK = 'dc_custom_v1';
+const SK = 'dc_v7', CK = 'dc_custom_v1', DK = 'dc_defaults_v1', NK = 'dc_night_v1';
 
 function todayKey() { return new Date().toISOString().slice(0,10); }
 
 function fresh() {
-  return { date:todayKey(), chain:JSON.parse(JSON.stringify(DEFAULT_TASKS)), completed:{}, checks:{}, studyFirst:'', workFirst:'', uid:0 };
+  let chain;
+  try { const d=localStorage.getItem(DK); chain=d?JSON.parse(d):null; } catch{}
+  if (!chain) chain = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  else chain = JSON.parse(JSON.stringify(chain)); // deep clone
+  return { date:todayKey(), chain, completed:{}, checks:{}, studyFirst:'', workFirst:'', uid:0 };
 }
 
 function loadS() {
@@ -616,10 +940,18 @@ function loadCustom() {
 
 function persist()       { localStorage.setItem(SK, JSON.stringify(S)); }
 function persistCustom() { localStorage.setItem(CK, JSON.stringify(customTemplates)); }
+function saveDefaults()  { localStorage.setItem(DK, JSON.stringify(S.chain)); }
+function loadNightItems() {
+  try { const d=localStorage.getItem(NK); return d?JSON.parse(d):JSON.parse(JSON.stringify(NIGHT_ITEMS)); } catch { return JSON.parse(JSON.stringify(NIGHT_ITEMS)); }
+}
+function saveNightItems() { localStorage.setItem(NK, JSON.stringify(nightItems)); }
 
 let S = loadS();
 let customTemplates = loadCustom();
+let nightItems = loadNightItems();
 let chainSortable = null;
+let editMode = false;
+let editTarget = null;
 
 // ════════════════════════════════════════
 //  HELPERS
@@ -649,14 +981,17 @@ function render() {
 
 function renderRail() {
   const ci = currentIdx();
-  let html = '';
-  S.chain.forEach((t,i) => {
-    const dc = 'pdot'+(S.completed[t.id]?' done':i===ci?' active':'');
-    const sc = 'pseg'+(S.completed[t.id]?' done':i===ci?' active':'');
-    if(i>0) html+=`<div class="${dc}"></div>`;
-    html+=`<div class="${sc}"></div>`;
+  const rail = document.getElementById('progressRail');
+  // 只在任务数量变化时重建 DOM，否则只更新 class
+  // 这样新完成的 segment 才能触发 scaleX 过渡动画
+  const existing = rail.querySelectorAll('.pseg');
+  if (existing.length !== S.chain.length) {
+    rail.innerHTML = S.chain.map(() => '<div class="pseg"></div>').join('');
+  }
+  const segs = rail.querySelectorAll('.pseg');
+  S.chain.forEach((t, i) => {
+    segs[i].className = 'pseg' + (S.completed[t.id] ? ' done' : i === ci ? ' active' : '');
   });
-  document.getElementById('progressRail').innerHTML = html;
 }
 
 function renderChain() {
@@ -669,17 +1004,20 @@ function renderChain() {
     const current = i === ci;
     const locked  = !done && !current;
 
-    let cls = 'task-row' + (done?' done':current?' current':' locked');
+    const isEditTarget = editMode && task.id === editTarget;
+    let cls = 'task-row' + (done?' done':current?' current':' locked') + (isEditTarget?' edit-target':'');
 
     // right badge
     let badge = '';
-    if (done)    badge = `<span class="row-check">${I.check}</span>`;
-    if (locked)  badge = `<span class="row-lock">${I.lock}</span>`;
-    if (current) badge = `<span class="row-now">NOW</span>`;
+    if (!editMode) {
+      if (done)    badge = `<span class="row-check">${I.check}</span>`;
+      if (locked)  badge = `<span class="row-lock">${I.lock}</span>`;
+      if (current) badge = `<span class="row-now">NOW</span>`;
+    }
 
     // body
     let body = '';
-    if (current) {
+    if (current && !editMode) {
       if (task.hint) body += `<div class="row-hint">${task.hint}</div>`;
 
       if (task.type==='simple' || task.type==='palette') {
@@ -687,7 +1025,7 @@ function renderChain() {
       } else if (task.type==='checklist') {
         body += `<div class="row-checks">` + (task.items||[]).map(it => {
           const chk = !!S.checks[it.id];
-          return `<div class="check-row${chk?' checked':''}" onclick="toggleCheck('${it.id}')">
+          return `<div class="check-row${chk?' checked':''}" data-item-id="${it.id}" onclick="toggleCheck('${it.id}')">
             <div class="cbox">${chk?I.check:''}</div>
             <div class="clabel">${it.label}</div>
           </div>`;
@@ -706,23 +1044,37 @@ function renderChain() {
         body += mkBtn(task.btnLabel||'完成');
       }
       if (canUndo) body += `<button class="undo-btn" onclick="undoLast()">${I.undo} 退回上一步</button>`;
+    } else if (isEditTarget) {
+      // 编辑模式展开体：显示可编辑的描述和打勾事项
+      const hintTxt = task.hint || '';
+      body += `<div class="row-hint" onclick="editField(event,'${task.id}','hint')">${hintTxt || '<em class="edit-ph">点击添加描述…</em>'}</div>`;
+      if (task.type==='checklist') {
+        body += '<div class="row-checks">' + (task.items||[]).map(it =>
+          `<div class="check-row" data-item-id="${it.id}">
+            <div class="cbox"></div>
+            <div class="clabel" onclick="editCheckItem(event,'${task.id}','${it.id}')">${it.label}</div>
+          </div>`
+        ).join('') + '</div>';
+      }
     }
 
-    return `<div class="${cls}" data-id="${task.id}">
+    const titleClick = editMode ? `onclick="editField(event,'${task.id}','title')"` : '';
+    const cardClick  = editMode && !isEditTarget ? `onclick="setEditTarget('${task.id}')"` : '';
+    return `<div class="${cls}" data-id="${task.id}" data-type="${task.type}" ${cardClick}>
       <div class="row-top">
         <span class="row-icon">${task.icon}</span>
-        <span class="row-title">${task.title}</span>
+        <span class="row-title" ${titleClick}>${task.title}</span>
         <span class="row-right">
           ${badge}
           <button class="row-del" onclick="delTask('${task.id}')" title="删除">×</button>
         </span>
       </div>
-      ${current?`<div class="row-body">${body}</div>`:''}
+      ${body?`<div class="row-body">${body}</div>`:''}
     </div>`;
   }).join('');
 
   if (allDone) {
-    html += `<div class="all-done"><span class="big">🌟</span><h2>今天完成了</h2></div>`;
+    html += `<div class="all-done"><span class="big">🌟</span><h2>今天完成了！</h2></div>`;
   }
 
   document.getElementById('chainList').innerHTML = html;
@@ -753,7 +1105,8 @@ function renderPalette() {
 //  SORTABLE (long-press on mobile)
 // ════════════════════════════════════════
 function initSortable() {
-  if (chainSortable) { try { chainSortable.destroy(); } catch(e){} }
+  if (chainSortable) { try { chainSortable.destroy(); } catch(e){} chainSortable = null; }
+  if (editMode) return; // 编辑模式下禁用拖拽，避免 touch 事件冲突
   const el = document.getElementById('chainList');
 
   chainSortable = new Sortable(el, {
@@ -807,13 +1160,13 @@ function toggleCheck(id) { S.checks[id]=!S.checks[id]; persist(); render(); }
 function delTask(id) {
   S.chain = S.chain.filter(t=>t.id!==id);
   delete S.completed[id];
-  persist(); render();
+  saveDefaults(); persist(); render();
 }
 
 function reorder(newIds) {
   const map={}; S.chain.forEach(t=>map[t.id]=t);
   S.chain = newIds.map(id=>map[id]).filter(Boolean);
-  persist();
+  saveDefaults(); persist();
 }
 
 function addFromPalette(templateId) {
@@ -945,14 +1298,17 @@ function delCustomTemplate(id) {
 // ════════════════════════════════════════
 function openBedtime() {
   document.getElementById('bedtimeView').classList.add('active');
-  document.getElementById('nightChecklist').innerHTML = NIGHT_ITEMS.map(item => {
+  renderNightChecklist();
+  document.getElementById('studyFirst').value = S.studyFirst||'';
+  document.getElementById('workFirst').value  = S.workFirst||'';
+}
+function renderNightChecklist() {
+  document.getElementById('nightChecklist').innerHTML = nightItems.map(item => {
     const chk=!!S.checks[item.id];
-    return `<div class="night-row${chk?' checked':''}" onclick="toggleNight('${item.id}',this)">
+    return `<div class="night-row${chk?' checked':''}" data-item-id="${item.id}" onclick="toggleNight('${item.id}',this)">
       <div class="cbox">${chk?I.check:''}</div><div class="clabel">${item.label}</div>
     </div>`;
   }).join('');
-  document.getElementById('studyFirst').value = S.studyFirst||'';
-  document.getElementById('workFirst').value  = S.workFirst||'';
 }
 function closeBedtime() { document.getElementById('bedtimeView').classList.remove('active'); }
 function toggleNight(id, el) {
@@ -968,13 +1324,134 @@ function saveBedtime() {
 }
 
 // ════════════════════════════════════════
+//  THEME
+// ════════════════════════════════════════
+function toggleTheme() {
+  const h = document.documentElement;
+  const goLight = h.dataset.theme !== 'light';
+  h.dataset.theme = goLight ? 'light' : 'dark';
+  localStorage.setItem('dc_theme', h.dataset.theme);
+  document.getElementById('themeBtn').textContent = goLight ? '🌑' : '☀️';
+}
+
+// ════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════
 document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('zh-CN',{
   month:'long',day:'numeric',weekday:'short'
 }).toUpperCase();
 
+// 同步主题按钮图标
+(function(){
+  const t = document.documentElement.dataset.theme || 'dark';
+  document.getElementById('themeBtn').textContent = t === 'light' ? '🌑' : '☀️';
+})();
+
 render();
+
+// ════════════════════════════════════════
+//  EDIT MODE
+// ════════════════════════════════════════
+function toggleEditMode() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+  document.getElementById('editBtn').classList.toggle('edit-active', editMode);
+  if (editMode) {
+    // 默认展开当前任务卡片
+    editTarget = S.chain[currentIdx()]?.id || S.chain[0]?.id || null;
+  } else {
+    editTarget = null;
+    saveDefaults();
+    persist();
+  }
+  render();
+}
+
+function setEditTarget(id) {
+  if (!editMode) return;
+  editTarget = id;
+  render();
+}
+
+// 直接 onclick 调用（绑在元素上，不走委托，移动端更可靠）
+function editField(e, taskId, field) {
+  if (!editMode) return;
+  e.stopPropagation();
+  const task = S.chain.find(t => t.id === taskId);
+  if (!task) return;
+  const el = e.currentTarget;
+  if (el.dataset.editing) return;
+  // 编辑完只更新元素文字 + 持久化，不调 render()（避免 DOM 重建触发二次 blur）
+  startInlineEdit(el, task[field] || '', (val, inputEl) => {
+    task[field] = val;
+    saveDefaults();
+    persist();
+    inputEl.parentElement && (inputEl.parentElement.textContent = val);
+  });
+}
+function editCheckItem(e, taskId, itemId) {
+  if (!editMode) return;
+  e.stopPropagation();
+  const task = S.chain.find(t => t.id === taskId);
+  const item = task && (task.items||[]).find(it => it.id === itemId);
+  if (!item) return;
+  const el = e.currentTarget;
+  if (el.dataset.editing) return;
+  startInlineEdit(el, item.label, (val, inputEl) => {
+    item.label = val;
+    saveDefaults();
+    persist();
+    inputEl.parentElement && (inputEl.parentElement.textContent = val);
+  });
+}
+
+function startInlineEdit(el, value, onSave) {
+  if (el.dataset.editing) return;
+  el.dataset.editing = '1';
+  el.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'inline-edit';
+  input.value = value;
+  el.appendChild(input);
+  input.focus(); input.select();
+
+  let done = false, cancelled = false;
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { cancelled = true; input.blur(); }
+  });
+  input.addEventListener('blur', () => {
+    if (done) return; done = true;
+    delete el.dataset.editing;
+    const val = input.value.trim();
+    if (!cancelled && val) onSave(val, input);
+    else el.textContent = value;
+  });
+}
+
+// click 委托只负责：在编辑模式下点击非编辑区域时切换 editTarget
+// 字段编辑由元素上的 onclick 直接触发（移动端更可靠）
+document.getElementById('chainList').addEventListener('click', e => {
+  if (!editMode) return;
+  if (e.target.closest('.row-title,.row-hint,.clabel,.row-del,.complete-btn,.undo-btn')) return;
+  const row = e.target.closest('[data-id]');
+  if (!row || row.dataset.id === editTarget) return;
+  setEditTarget(row.dataset.id);
+});
+
+// 睡前清单点击编辑
+document.getElementById('nightChecklist').addEventListener('click', e => {
+  const clabelEl = e.target.closest('.clabel');
+  if (!clabelEl || clabelEl.dataset.editing) return;
+  const nightRow = clabelEl.closest('[data-item-id]');
+  if (!nightRow) return;
+  const item = nightItems.find(it => it.id === nightRow.dataset.itemId);
+  if (!item) return;
+  startInlineEdit(clabelEl, item.label, val => {
+    item.label = val; saveNightItems(); renderNightChecklist();
+  });
+});
+
 </script>
 </body>
 </html>
