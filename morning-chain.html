@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Daily Chain</title>
+
+  <!-- PWA: iOS 添加到主屏幕支持 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Daily Chain" />
+  <meta name="theme-color" content="#04071a" />
+  <!-- 图标：深蓝底 + 🌟 -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%2304071a'/%3E%3Ctext x='90' y='118' font-size='88' text-anchor='middle'%3E🌟%3C/text%3E%3C/svg%3E" />
+  <!-- PWA Manifest (inline) -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Daily+Chain%22%2C%22short_name%22%3A%22Daily+Chain%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2304071a%22%2C%22theme_color%22%3A%22%2304071a%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg+xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'+viewBox%3D'0+0+512+512'%253E%253Crect+width%3D'512'+height%3D'512'+rx%3D'80'+fill%3D'%252304071a'%2F%253E%253Ctext+x%3D'256'+y%3D'340'+font-size%3D'300'+text-anchor%3D'middle'%253E%25F0%259F%258C%259F%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg:      #04071a;
+      --surf:    #080f2a;
+      --surf2:   #0c1438;
+      --mg:      #ff0080;
+      --mg-dim:  rgba(255,0,128,0.10);
+      --mg-glo:  rgba(255,0,128,0.32);
+      --cy:      #00e5ff;
+      --cy-dim:  rgba(0,229,255,0.07);
+      --cy-glo:  rgba(0,229,255,0.26);
+      --text:    #ddeeff;
+      --t2:      #567898;
+      --t3:      #263650;
+      --bmg:     rgba(255,0,128,0.26);
+      --bcy:     rgba(0,229,255,0.18);
+      --b:       rgba(255,255,255,0.055);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      background-image:
+        linear-gradient(rgba(0,229,255,0.022) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,229,255,0.022) 1px,transparent 1px);
+      background-size: 36px 36px;
+      color: var(--text);
+      font-family: 'Space Grotesk',-apple-system,'PingFang SC',sans-serif;
+    }
+
+    /* ═══ PALETTE DRAWER (left) ═══ */
+    #backdrop {
+      position: fixed; inset: 0;
+      z-index: 49;
+      background: rgba(4,7,26,0.72);
+      backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.28s;
+    }
+    #backdrop.on { opacity: 1; pointer-events: all; }
+
+    #palDrawer {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 210px;
+      z-index: 50;
+      background: #050a1e;
+      border-right: 1px solid rgba(0,229,255,0.14);
+      display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      will-change: transform;
+    }
+    #palDrawer.open { transform: translateX(0); }
+
+    .pal-head {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 22px 14px 14px;
+      border-bottom: 1px solid var(--b);
+      flex-shrink: 0;
+    }
+    .pal-head-title {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--cy);
+      text-shadow: 0 0 8px var(--cy-glo);
+    }
+
+    .pal-body {
+      flex: 1; overflow-y: auto;
+      padding: 14px 12px 24px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .pal-body::-webkit-scrollbar { width: 3px; }
+    .pal-body::-webkit-scrollbar-thumb { background: var(--t3); border-radius: 99px; }
+
+    .pal-sec {
+      font-size: 9px; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--t3); margin: 14px 0 8px 2px;
+    }
+
+    .pal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .pal-tile {
+      background: var(--surf);
+      border: 1px solid var(--bcy);
+      border-radius: 8px;
+      padding: 10px 6px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      cursor: pointer; user-select: none;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .pal-tile:active { transform: scale(0.94); }
+    .pal-tile:hover { border-color: var(--cy); box-shadow: 0 0 10px var(--cy-glo); }
+    .pal-tile .pt-icon { font-size: 22px; line-height: 1; }
+    .pal-tile .pt-name { font-size: 11px; color: var(--t2); text-align: center; line-height: 1.2; }
+    .pal-tile .pt-del {
+      position: absolute; top: 3px; right: 4px;
+      background: none; border: none;
+      color: var(--t3); font-size: 12px;
+      cursor: pointer; padding: 2px;
+      line-height: 1; border-radius: 3px;
+      transition: color 0.15s;
+    }
+    .pal-tile .pt-del:hover { color: var(--mg); }
+
+    .pal-add-btn {
+      margin-top: 14px;
+      width: 100%; padding: 10px;
+      background: transparent;
+      border: 1px dashed var(--bcy);
+      border-radius: 8px;
+      color: var(--cy); font-size: 12px;
+      font-family: inherit; letter-spacing: 0.08em;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .pal-add-btn:hover { background: var(--cy-dim); border-style: solid; }
+
+    /* ═══ MAIN VIEW ═══ */
+    .main-view {
+      max-width: 390px;
+      margin: 0 auto;
+      padding: 20px 16px 70px;
+      min-height: 100vh;
+    }
+
+    /* topbar */
+    .topbar {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .topbar-date {
+      flex: 1;
+      font-size: 11px; color: var(--t2);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      text-align: center;
+    }
+    .icon-btn {
+      width: 32px; height: 32px;
+      background: var(--surf); border: 1px solid var(--bcy);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--t2);
+      font-size: 13px; font-family: inherit;
+      flex-shrink: 0;
+      transition: all 0.18s;
+    }
+    .icon-btn:hover { border-color: var(--cy); color: var(--cy); box-shadow: 0 0 8px var(--cy-glo); }
+
+    /* progress rail */
+    .progress-rail {
+      display: flex; align-items: center; gap: 3px;
+      margin-bottom: 16px;
+    }
+    .pseg { flex:1; height:2px; background:var(--surf2); transition:all 0.4s; }
+    .pseg.done { background:var(--mg); box-shadow:0 0 5px var(--mg-glo); }
+    .pseg.active { background:rgba(255,0,128,0.35); }
+    .pdot { width:4px;height:4px; border-radius:50%; background:var(--surf2); flex-shrink:0; transition:all 0.4s; }
+    .pdot.done { background:var(--mg); box-shadow:0 0 5px var(--mg-glo); }
+    .pdot.active { background:rgba(255,0,128,0.4); }
+
+    /* ═══ TASK ROWS ═══ */
+    #chainList { display:flex; flex-direction:column; gap:6px; }
+
+    .task-row {
+      background: var(--surf);
+      border: 1px solid var(--b);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s, opacity 0.3s, transform 0.15s;
+      position: relative;
+    }
+    .task-row.done    { opacity:0.42; border-color:rgba(255,0,128,0.12); }
+    .task-row.locked  { opacity:0.3; }
+
+    @keyframes rowFloat {
+      0%,100% { transform:translateY(0);    box-shadow:0 0 0 1px var(--bmg),0 8px 26px rgba(255,0,128,0.14),0 18px 40px rgba(0,0,0,0.5); }
+      50%     { transform:translateY(-5px); box-shadow:0 0 0 1px rgba(255,0,128,0.46),0 14px 34px rgba(255,0,128,0.22),0 26px 50px rgba(0,0,0,0.6); }
+    }
+    .task-row.current {
+      border-color: var(--bmg);
+      animation: rowFloat 5s ease-in-out infinite;
+    }
+    .task-row.current::before {
+      content:''; position:absolute; top:0;right:0;
+      width:52px;height:52px;
+      background:linear-gradient(225deg,rgba(255,0,128,0.1),transparent 60%);
+      pointer-events:none;
+    }
+
+    /* long-press feedback */
+    @keyframes lpRing {
+      from { box-shadow:0 0 0 0 rgba(255,0,128,0.6),0 4px 20px rgba(0,0,0,0.4); }
+      to   { box-shadow:0 0 0 10px rgba(255,0,128,0),0 4px 20px rgba(0,0,0,0.4); }
+    }
+    .task-row.pressing { animation:lpRing 0.4s ease-out forwards; }
+
+    /* sortable states */
+    .task-row.sortable-ghost   { opacity:0.2; background:var(--mg-dim)!important; border-color:var(--bmg)!important; }
+    .task-row.sortable-chosen  { opacity:0.9; border-color:var(--bmg); box-shadow:0 12px 36px rgba(255,0,128,0.35)!important; transform:scale(1.02); animation:none!important; }
+    .task-row.sortable-drag    { opacity:0.98; box-shadow:0 16px 48px rgba(255,0,128,0.4)!important; animation:none!important; }
+
+    .row-top {
+      display:flex; align-items:center; gap:10px;
+      padding:12px 12px 12px 14px;
+    }
+    .task-row.current .row-top { padding-bottom:0; }
+
+    .row-icon { font-size:21px; flex-shrink:0; line-height:1; }
+    .row-title {
+      font-size:15px; font-weight:500; flex:1; min-width:0;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .task-row.done .row-title { text-decoration:line-through; text-decoration-color:rgba(255,0,128,0.3); color:var(--t2); }
+
+    .row-right { display:flex;align-items:center;gap:6px;flex-shrink:0; }
+    .row-now {
+      font-size:8px;font-weight:600;letter-spacing:0.14em;
+      color:var(--mg);text-shadow:0 0 8px var(--mg-glo);
+      border:1px solid var(--bmg);border-radius:3px;padding:2px 5px;
+    }
+    .row-check { color:var(--mg); display:flex;align-items:center; }
+    .row-lock  { color:var(--t3); display:flex;align-items:center; }
+
+    .row-del {
+      background:none;border:none;color:var(--t3);
+      cursor:pointer;font-size:15px;line-height:1;
+      padding:3px 5px;border-radius:4px;
+      transition:color 0.15s,background 0.15s;
+      font-family:inherit;
+    }
+    .row-del:hover { color:var(--mg); background:var(--mg-dim); }
+
+    /* row body */
+    .row-body { padding:12px 12px 14px 45px; }
+
+    .row-hint { font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6; }
+
+    /* first-thing */
+    .ft-note {
+      background:var(--cy-dim);border:1px solid var(--bcy);
+      border-radius:8px;padding:11px 13px;margin-bottom:13px;
+    }
+    .ft-label {
+      font-size:9px;font-weight:500;color:var(--cy);
+      letter-spacing:0.14em;text-transform:uppercase;margin-bottom:5px;
+      text-shadow:0 0 7px var(--cy-glo);
+    }
+    .ft-text  { font-size:14px;color:var(--text);line-height:1.5; }
+    .ft-empty { font-size:12px;color:var(--t3);font-style:italic; }
+
+    /* checklist */
+    .row-checks { display:flex;flex-direction:column;gap:6px;margin-bottom:13px; }
+    .check-row {
+      display:flex;align-items:center;gap:10px;
+      padding:9px 11px;
+      background:var(--surf2);border:1px solid var(--b);
+      border-radius:7px;cursor:pointer;user-select:none;
+      transition:all 0.18s;
+    }
+    .check-row.checked { background:var(--mg-dim);border-color:var(--bmg); }
+    .cbox {
+      width:18px;height:18px;border:1.5px solid var(--t3);
+      border-radius:4px;display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;color:transparent;transition:all 0.18s;
+    }
+    .check-row.checked .cbox { background:var(--mg);border-color:var(--mg);color:#fff;box-shadow:0 0 7px var(--mg-glo); }
+    .clabel { font-size:13px;color:var(--t2);transition:color 0.2s; }
+    .check-row.checked .clabel { color:var(--mg);text-decoration:line-through;text-decoration-color:rgba(255,0,128,0.35); }
+
+    /* jobs */
+    .job-list { display:flex;flex-direction:column;gap:6px;margin-bottom:12px; }
+    .job-item { padding:9px 12px;background:var(--surf2);border:1px solid var(--b);border-radius:7px; }
+    .job-title { font-size:13px;font-weight:500;color:var(--cy);margin-bottom:2px; }
+    .job-co    { font-size:11px;color:var(--t3); }
+    .feed-hint { font-size:11px;color:var(--t3);margin-bottom:13px;line-height:1.6; }
+    .feed-link { color:var(--cy);cursor:pointer;text-decoration:underline; }
+
+    /* complete btn */
+    @keyframes btnPulse {
+      0%,100% { box-shadow:0 4px 16px rgba(255,0,128,0.28); }
+      50%     { box-shadow:0 4px 22px rgba(255,0,128,0.45),0 0 0 3px rgba(255,0,128,0.05); }
+    }
+    .complete-btn {
+      width:100%;padding:13px 16px;
+      border-radius:8px;border:1px solid var(--mg);
+      font-size:13px;font-weight:500;font-family:inherit;
+      cursor:pointer;letter-spacing:0.06em;
+      background:linear-gradient(135deg,rgba(255,0,128,0.88),rgba(190,0,90,0.84));
+      color:#fff;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:transform 0.2s,box-shadow 0.2s;
+      animation:btnPulse 3s ease-in-out infinite;
+    }
+    .complete-btn:hover:not(:disabled) { transform:translateY(-3px);box-shadow:0 10px 30px rgba(255,0,128,0.5)!important;animation:none; }
+    .complete-btn:active:not(:disabled){ transform:translateY(-1px); }
+    .complete-btn:disabled { background:var(--surf2);border-color:var(--t3);color:var(--t3);cursor:not-allowed;animation:none;box-shadow:none; }
+
+    /* undo btn */
+    .undo-btn {
+      width:100%;margin-top:7px;padding:9px;
+      border-radius:8px;border:1px solid var(--bcy);
+      background:transparent;color:var(--t2);
+      font-size:11px;font-family:inherit;letter-spacing:0.06em;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+      transition:all 0.2s;
+    }
+    .undo-btn:hover { border-color:var(--cy);color:var(--cy);box-shadow:0 0 10px rgba(0,229,255,0.18);transform:translateY(-1px); }
+
+    /* all done */
+    .all-done { text-align:center;padding:52px 24px; }
+    .all-done .big {
+      font-size:52px;margin-bottom:16px;display:block;
+      filter:drop-shadow(0 0 16px rgba(255,215,0,0.5));
+      animation:starFloat 3s ease-in-out infinite;
+    }
+    @keyframes starFloat {
+      0%,100%{transform:translateY(0);}
+      50%{transform:translateY(-8px);filter:drop-shadow(0 0 24px rgba(255,215,0,0.7));}
+    }
+    .all-done h2 { font-size:20px;font-weight:300;color:var(--mg);letter-spacing:0.06em;text-shadow:0 0 16px var(--mg-glo); }
+
+    /* ═══ CUSTOM MODAL ═══ */
+    .modal-overlay {
+      position:fixed;inset:0;z-index:80;
+      background:rgba(4,7,26,0.82);backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+      opacity:1;transition:opacity 0.2s;
+    }
+    .modal-overlay.hidden { display:none; }
+    .modal-box {
+      background:#080f2a;border:1px solid var(--bcy);
+      border-radius:14px;padding:24px;width:100%;max-width:320px;
+      box-shadow:0 0 40px rgba(0,229,255,0.12);
+    }
+    .modal-title { font-size:16px;font-weight:600;margin-bottom:20px;color:var(--cy);text-shadow:0 0 10px var(--cy-glo); }
+    .modal-field { margin-bottom:14px; }
+    .modal-field label { display:block;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--t2);margin-bottom:6px; }
+    .modal-field input {
+      width:100%;background:var(--surf2);border:1px solid var(--b);
+      border-radius:7px;padding:10px 12px;
+      color:var(--text);font-size:14px;font-family:inherit;
+      outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .modal-field input:focus { border-color:var(--bcy);box-shadow:0 0 8px rgba(0,229,255,0.12); }
+    .modal-field input::placeholder { color:var(--t3); }
+    .modal-actions { display:flex;gap:8px;margin-top:20px; }
+    .modal-save {
+      flex:1;padding:12px;border-radius:8px;
+      border:1px solid var(--mg);background:var(--mg-dim);
+      color:var(--mg);font-size:12px;font-family:inherit;
+      letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;
+    }
+    .modal-save:hover { background:var(--mg);color:#fff;box-shadow:0 4px 16px var(--mg-glo);transform:translateY(-1px); }
+    .modal-cancel {
+      padding:12px 16px;border-radius:8px;
+      border:1px solid var(--b);background:transparent;
+      color:var(--t2);font-size:12px;font-family:inherit;
+      cursor:pointer;transition:all 0.2s;
+    }
+    .modal-cancel:hover { border-color:var(--t2); }
+
+    /* ═══ BEDTIME OVERLAY ═══ */
+    #bedtimeView {
+      display:none;position:fixed;inset:0;z-index:70;
+      background:rgba(4,7,26,0.96);backdrop-filter:blur(8px);
+      overflow-y:auto;padding:28px 20px 60px;
+    }
+    #bedtimeView.active { display:block; }
+    .bt-head { display:flex;justify-content:space-between;align-items:center;margin-bottom:20px; }
+    .bt-title { font-size:20px;font-weight:600;margin:4px 0; }
+    .bt-sub { font-size:13px;color:var(--t2); }
+    .sec-label {
+      font-size:10px;font-weight:500;color:var(--t3);
+      letter-spacing:0.16em;text-transform:uppercase;
+      margin:22px 0 10px;display:flex;align-items:center;gap:8px;
+    }
+    .sec-label::after { content:'';flex:1;height:1px;background:var(--surf2); }
+    .night-row {
+      display:flex;align-items:center;gap:12px;
+      padding:11px 13px;background:var(--surf);border:1px solid var(--b);
+      border-radius:8px;cursor:pointer;margin-bottom:6px;user-select:none;transition:all 0.2s;
+    }
+    .night-row.checked { background:var(--mg-dim);border-color:var(--bmg); }
+    .night-row.checked .cbox { background:var(--mg);border-color:var(--mg);color:#fff;box-shadow:0 0 7px var(--mg-glo); }
+    .night-row.checked .clabel { color:var(--mg);text-decoration:line-through;text-decoration-color:rgba(255,0,128,0.35); }
+    .input-group {
+      background:var(--surf);border:1px solid var(--b);border-radius:10px;
+      padding:13px;margin-bottom:8px;transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .input-group:focus-within { border-color:var(--bcy);box-shadow:0 0 10px rgba(0,229,255,0.1); }
+    .input-label { font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:7px; }
+    textarea.ni {
+      width:100%;background:transparent;border:none;outline:none;
+      color:var(--text);font-size:14px;font-family:inherit;line-height:1.6;resize:none;
+    }
+    textarea.ni::placeholder { color:var(--t3); }
+    .save-btn {
+      width:100%;padding:13px;margin-top:20px;border-radius:8px;
+      border:1px solid var(--mg);background:var(--mg-dim);color:var(--mg);
+      font-size:12px;font-weight:500;font-family:inherit;letter-spacing:0.1em;
+      cursor:pointer;transition:all 0.2s;
+    }
+    .save-btn:hover { background:var(--mg);color:#fff;box-shadow:0 4px 16px var(--mg-glo);transform:translateY(-1px); }
+    .back-btn {
+      width:100%;padding:11px;margin-top:7px;border-radius:8px;
+      border:1px solid var(--b);background:transparent;color:var(--t2);
+      font-size:12px;font-family:inherit;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;
+    }
+    .back-btn:hover { border-color:var(--t2); }
+  </style>
+</head>
+<body>
+
+<!-- ════ PALETTE BACKDROP ════ -->
+<div id="backdrop" onclick="closePalette()"></div>
+
+<!-- ════ PALETTE DRAWER ════ -->
+<div id="palDrawer">
+  <div class="pal-head">
+    <span class="pal-head-title">事件调板</span>
+    <div class="icon-btn" onclick="closePalette()">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+        <line x1="1" y1="1" x2="10" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="10" y1="1" x2="1" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+  <div class="pal-body">
+    <div class="pal-sec">点击加入日程</div>
+    <div id="paletteGrid" class="pal-grid"></div>
+    <div class="pal-sec" style="margin-top:18px;">自定义</div>
+    <div id="customGrid" class="pal-grid"></div>
+    <button class="pal-add-btn" onclick="openCustomModal()">＋ 新建事件</button>
+  </div>
+</div>
+
+<!-- ════ MAIN VIEW ════ -->
+<div class="main-view">
+  <div class="topbar">
+    <div class="icon-btn" onclick="openPalette()">
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor">
+        <rect width="14" height="1.5" rx="0.75"/>
+        <rect y="4.25" width="10" height="1.5" rx="0.75"/>
+        <rect y="8.5" width="14" height="1.5" rx="0.75"/>
+      </svg>
+    </div>
+    <div class="topbar-date" id="dateLabel"></div>
+    <div style="display:flex;gap:6px">
+      <div class="icon-btn" onclick="openBedtime()">🌙</div>
+      <div class="icon-btn" onclick="resetDay()" title="重置">
+        <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+          <path d="M11.5 6.5A5 5 0 1 1 6.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <polyline points="6.5,0 6.5,3.5 10,3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="progress-rail" id="progressRail"></div>
+  <div id="chainList"></div>
+</div>
+
+<!-- ════ CUSTOM EVENT MODAL ════ -->
+<div id="customModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title">新建自定义事件</div>
+    <div class="modal-field">
+      <label>图标（填一个 emoji）</label>
+      <input id="ci" type="text" maxlength="2" placeholder="📌">
+    </div>
+    <div class="modal-field">
+      <label>名称</label>
+      <input id="ct" type="text" placeholder="事件名称">
+    </div>
+    <div class="modal-field">
+      <label>完成后的按钮文字</label>
+      <input id="cl" type="text" placeholder="完成了">
+    </div>
+    <div style="font-size:11px;color:var(--t2);margin-top:-6px;margin-bottom:4px;line-height:1.6">
+      💾 自动保存在本设备，无需登录。跨设备同步需要后端服务。
+    </div>
+    <div class="modal-actions">
+      <button class="modal-save" onclick="saveCustomTemplate()">保存到调板</button>
+      <button class="modal-cancel" onclick="closeCustomModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ BEDTIME OVERLAY ════ -->
+<div id="bedtimeView">
+  <div class="bt-head">
+    <div style="font-size:11px;color:var(--t2);letter-spacing:0.1em;text-transform:uppercase">睡前清单</div>
+    <div class="icon-btn" onclick="closeBedtime()">✕</div>
+  </div>
+  <div class="bt-title">🌙 准备明天</div>
+  <div class="bt-sub">整理好，明天醒来直接出发</div>
+  <div class="sec-label">背包确认</div>
+  <div id="nightChecklist"></div>
+  <div class="sec-label">明天的第一件事</div>
+  <div class="input-group">
+    <div class="input-label">📚 学习</div>
+    <textarea class="ni" id="studyFirst" rows="2" placeholder="打开 xx 课程，继续第 x 课…"></textarea>
+  </div>
+  <div class="input-group">
+    <div class="input-label">🖥 工作</div>
+    <textarea class="ni" id="workFirst" rows="2" placeholder="打开 xx，继续做 xx…"></textarea>
+  </div>
+  <button class="save-btn" onclick="saveBedtime()">保存 · 明天见</button>
+  <button class="back-btn" onclick="closeBedtime()">← 返回今日</button>
+</div>
+
+<script>
+// ════════════════════════════════════════
+//  SVG
+// ════════════════════════════════════════
+const I = {
+  check: `<svg width="11" height="8" viewBox="0 0 11 8" fill="none"><polyline points="1,4 4.5,7 10,1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  lock:  `<svg width="10" height="12" viewBox="0 0 10 12" fill="none"><rect x=".75" y="5.25" width="8.5" height="6" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2.2 5.2V3.5C2.2 2.1 3.46 1 5 1C6.54 1 7.8 2.1 7.8 3.5V5.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  arrow: `<svg width="16" height="9" viewBox="0 0 16 9" fill="none"><line x1="0" y1="4.5" x2="12" y2="4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><polyline points="8.5,1 13,4.5 8.5,8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+  undo:  `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 5.5A4.5 4.5 0 1 1 5.5 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><polyline points="5,0 5,3 2,3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+};
+
+// ════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════
+const DEFAULT_TASKS = [
+  { id:'breakfast', icon:'🥣', title:'早餐',   hint:'酸奶在冰箱 · 麦片在桌上', type:'simple',     btnLabel:'吃完了' },
+  { id:'leave',     icon:'🎒', title:'出门',   hint:'全部打勾才能出门',         type:'checklist',  btnLabel:'背包确认 · 出门',
+    items:[{id:'cl',label:'💻 电脑'},{id:'cc',label:'🔌 充电器'},{id:'ce',label:'🎧 耳机'},{id:'cw',label:'💧 水杯'},{id:'cg',label:'👕 运动服（已装）'}] },
+  { id:'study',  icon:'📚', title:'学习',   hint:null, type:'first-thing', ftKey:'studyFirst', btnLabel:'学完了' },
+  { id:'lunch',  icon:'🍱', title:'午餐',   hint:null, type:'simple',     btnLabel:'吃完了' },
+  { id:'jobs',   icon:'💼', title:'今日求职', hint:null, type:'jobs',     btnLabel:'已查阅' },
+  { id:'work',   icon:'🖥', title:'工作',   hint:null, type:'first-thing', ftKey:'workFirst', btnLabel:'工作完成' },
+  { id:'gym',    icon:'🏋️', title:'健身',  hint:'运动服在包里', type:'simple', btnLabel:'练完了' },
+  { id:'dinner', icon:'🍽', title:'晚饭',   hint:null, type:'simple',     btnLabel:'吃完了' },
+  { id:'supps',  icon:'💊', title:'补剂',   hint:null, type:'simple',     btnLabel:'今天完成 🎉' },
+];
+
+const PAL_TEMPLATES = [
+  {templateId:'meeting', icon:'📋', title:'会议',  btnLabel:'开完了'},
+  {templateId:'call',    icon:'📞', title:'电话',  btnLabel:'打完了'},
+  {templateId:'slack',   icon:'🐟', title:'摸鱼',  btnLabel:'摸完了'},
+  {templateId:'break',   icon:'☕', title:'休息',  btnLabel:'休息好了'},
+  {templateId:'commute', icon:'🚇', title:'通勤',  btnLabel:'到了'},
+  {templateId:'errand',  icon:'🛒', title:'买菜',  btnLabel:'买完了'},
+  {templateId:'message', icon:'💬', title:'消息',  btnLabel:'回完了'},
+  {templateId:'nap',     icon:'😴', title:'午睡',  btnLabel:'睡醒了'},
+  {templateId:'meditate',icon:'🧘', title:'冥想',  btnLabel:'完成了'},
+  {templateId:'read',    icon:'📖', title:'阅读',  btnLabel:'看完了'},
+];
+
+const NIGHT_ITEMS = [
+  {id:'nl',label:'💻 电脑装包'},{id:'nc',label:'🔌 充电器装包'},
+  {id:'ne',label:'🎧 耳机装包'},{id:'nw',label:'💧 水杯装包'},{id:'ng',label:'👕 运动服装包'},
+];
+
+const SAMPLE_JOBS = [
+  {title:'Software Engineer',company:'示例公司 A · 旧金山',url:'#'},
+  {title:'Frontend Developer',company:'示例公司 B · 远程',url:'#'},
+  {title:'Product Designer',company:'示例公司 C · 纽约',url:'#'},
+];
+
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+const SK = 'dc_v7', CK = 'dc_custom_v1';
+
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function fresh() {
+  return { date:todayKey(), chain:JSON.parse(JSON.stringify(DEFAULT_TASKS)), completed:{}, checks:{}, studyFirst:'', workFirst:'', uid:0 };
+}
+
+function loadS() {
+  try {
+    const d = JSON.parse(localStorage.getItem(SK));
+    if (!d) return fresh();
+    if (d.date !== todayKey()) { const f=fresh(); f.studyFirst=d.studyFirst||''; f.workFirst=d.workFirst||''; return f; }
+    if (!d.chain) d.chain = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+    return d;
+  } catch { return fresh(); }
+}
+
+function loadCustom() {
+  try { return JSON.parse(localStorage.getItem(CK)) || []; } catch { return []; }
+}
+
+function persist()       { localStorage.setItem(SK, JSON.stringify(S)); }
+function persistCustom() { localStorage.setItem(CK, JSON.stringify(customTemplates)); }
+
+let S = loadS();
+let customTemplates = loadCustom();
+let chainSortable = null;
+
+// ════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════
+function currentIdx() {
+  for (let i=0;i<S.chain.length;i++) if (!S.completed[S.chain[i].id]) return i;
+  return S.chain.length;
+}
+function lastDoneIdx() {
+  let l=-1; S.chain.forEach((t,i)=>{ if(S.completed[t.id]) l=i; }); return l;
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function mkBtn(label, disabled=false) {
+  return `<button class="complete-btn" onclick="completeTask()" ${disabled?'disabled':''}><span>${label}</span>${I.arrow}</button>`;
+}
+function genId() { S.uid=(S.uid||0)+1; return S.uid; }
+
+// ════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════
+function render() {
+  renderRail();
+  renderChain();
+  renderPalette();
+  initSortable();
+}
+
+function renderRail() {
+  const ci = currentIdx();
+  let html = '';
+  S.chain.forEach((t,i) => {
+    const dc = 'pdot'+(S.completed[t.id]?' done':i===ci?' active':'');
+    const sc = 'pseg'+(S.completed[t.id]?' done':i===ci?' active':'');
+    if(i>0) html+=`<div class="${dc}"></div>`;
+    html+=`<div class="${sc}"></div>`;
+  });
+  document.getElementById('progressRail').innerHTML = html;
+}
+
+function renderChain() {
+  const ci = currentIdx();
+  const canUndo = lastDoneIdx() >= 0;
+  const allDone = ci >= S.chain.length;
+
+  let html = S.chain.map((task, i) => {
+    const done    = !!S.completed[task.id];
+    const current = i === ci;
+    const locked  = !done && !current;
+
+    let cls = 'task-row' + (done?' done':current?' current':' locked');
+
+    // right badge
+    let badge = '';
+    if (done)    badge = `<span class="row-check">${I.check}</span>`;
+    if (locked)  badge = `<span class="row-lock">${I.lock}</span>`;
+    if (current) badge = `<span class="row-now">NOW</span>`;
+
+    // body
+    let body = '';
+    if (current) {
+      if (task.hint) body += `<div class="row-hint">${task.hint}</div>`;
+
+      if (task.type==='simple' || task.type==='palette') {
+        body += mkBtn(task.btnLabel||'完成');
+      } else if (task.type==='checklist') {
+        body += `<div class="row-checks">` + (task.items||[]).map(it => {
+          const chk = !!S.checks[it.id];
+          return `<div class="check-row${chk?' checked':''}" onclick="toggleCheck('${it.id}')">
+            <div class="cbox">${chk?I.check:''}</div>
+            <div class="clabel">${it.label}</div>
+          </div>`;
+        }).join('') + `</div>`;
+        const all = (task.items||[]).every(it=>S.checks[it.id]);
+        body += mkBtn(task.btnLabel||'完成', !all);
+      } else if (task.type==='first-thing') {
+        const note = S[task.ftKey]||'';
+        body += `<div class="ft-note">
+          <div class="ft-label">第一件事</div>
+          ${note?`<div class="ft-text">${esc(note)}</div>`:`<div class="ft-empty">在睡前清单里写下，明天自动显示</div>`}
+        </div>`;
+        body += mkBtn(task.btnLabel||'完成');
+      } else if (task.type==='jobs') {
+        body += jobsHTML();
+        body += mkBtn(task.btnLabel||'完成');
+      }
+      if (canUndo) body += `<button class="undo-btn" onclick="undoLast()">${I.undo} 退回上一步</button>`;
+    }
+
+    return `<div class="${cls}" data-id="${task.id}">
+      <div class="row-top">
+        <span class="row-icon">${task.icon}</span>
+        <span class="row-title">${task.title}</span>
+        <span class="row-right">
+          ${badge}
+          <button class="row-del" onclick="delTask('${task.id}')" title="删除">×</button>
+        </span>
+      </div>
+      ${current?`<div class="row-body">${body}</div>`:''}
+    </div>`;
+  }).join('');
+
+  if (allDone) {
+    html += `<div class="all-done"><span class="big">🌟</span><h2>今天完成了</h2></div>`;
+  }
+
+  document.getElementById('chainList').innerHTML = html;
+
+  if (S.chain.find(t=>t.id==='jobs') && currentIdx()===S.chain.findIndex(t=>t.id==='jobs') && localStorage.getItem('job_feed_url')) {
+    setTimeout(fetchJobs, 0);
+  }
+}
+
+function renderPalette() {
+  document.getElementById('paletteGrid').innerHTML = PAL_TEMPLATES.map(t =>
+    `<div class="pal-tile" onclick="addFromPalette('${t.templateId}')">
+      <span class="pt-icon">${t.icon}</span>
+      <span class="pt-name">${t.title}</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('customGrid').innerHTML = customTemplates.map(t =>
+    `<div class="pal-tile" onclick="addCustomFromPalette('${t.id}')">
+      <button class="pt-del" onclick="event.stopPropagation();delCustomTemplate('${t.id}')">×</button>
+      <span class="pt-icon">${t.icon}</span>
+      <span class="pt-name">${t.title}</span>
+    </div>`
+  ).join('');
+}
+
+// ════════════════════════════════════════
+//  SORTABLE (long-press on mobile)
+// ════════════════════════════════════════
+function initSortable() {
+  if (chainSortable) { try { chainSortable.destroy(); } catch(e){} }
+  const el = document.getElementById('chainList');
+
+  chainSortable = new Sortable(el, {
+    animation:            220,
+    ghostClass:           'sortable-ghost',
+    chosenClass:          'sortable-chosen',
+    dragClass:            'sortable-drag',
+    delay:                400,
+    delayOnTouchOnly:     true,
+    touchStartThreshold:  6,
+    filter:               '.complete-btn,.row-del,.undo-btn,.cbox,.check-row,.feed-link,.all-done',
+    preventOnFilter:      true,
+
+    onChoose(evt) {
+      evt.item.classList.add('pressing');
+      setTimeout(() => evt.item.classList.remove('pressing'), 420);
+      if (navigator.vibrate) navigator.vibrate(40);
+    },
+    onEnd(evt) {
+      if (evt.oldIndex === evt.newIndex) return;
+      const ids = Array.from(el.querySelectorAll('[data-id]')).map(e=>e.dataset.id);
+      reorder(ids);
+      setTimeout(render, 0);
+    }
+  });
+}
+
+// ════════════════════════════════════════
+//  ACTIONS
+// ════════════════════════════════════════
+function completeTask() {
+  const ci = currentIdx();
+  if (ci >= S.chain.length) return;
+  const t = S.chain[ci];
+  if (t.type==='checklist' && !(t.items||[]).every(it=>S.checks[it.id])) return;
+  S.completed[t.id] = true;
+  persist(); render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function undoLast() {
+  const li = lastDoneIdx();
+  if (li < 0) return;
+  delete S.completed[S.chain[li].id];
+  persist(); render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleCheck(id) { S.checks[id]=!S.checks[id]; persist(); render(); }
+
+function delTask(id) {
+  S.chain = S.chain.filter(t=>t.id!==id);
+  delete S.completed[id];
+  persist(); render();
+}
+
+function reorder(newIds) {
+  const map={}; S.chain.forEach(t=>map[t.id]=t);
+  S.chain = newIds.map(id=>map[id]).filter(Boolean);
+  persist();
+}
+
+function addFromPalette(templateId) {
+  const tmpl = PAL_TEMPLATES.find(t=>t.templateId===templateId);
+  if (!tmpl) return;
+  insertTask({ id:templateId+'_'+genId(), icon:tmpl.icon, title:tmpl.title, hint:null, type:'palette', btnLabel:tmpl.btnLabel });
+}
+
+function addCustomFromPalette(customId) {
+  const tmpl = customTemplates.find(t=>t.id===customId);
+  if (!tmpl) return;
+  insertTask({ id:'cust_'+genId(), icon:tmpl.icon, title:tmpl.title, hint:null, type:'palette', btnLabel:tmpl.btnLabel });
+}
+
+function insertTask(task) {
+  const ci = currentIdx();
+  const at = ci < S.chain.length ? ci+1 : S.chain.length;
+  S.chain.splice(at, 0, task);
+  persist(); closePalette(); render();
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#chainList .task-row');
+    if (rows[at]) rows[at].scrollIntoView({behavior:'smooth',block:'center'});
+  }, 100);
+}
+
+function resetDay() {
+  if (!confirm('重置今日进度？（自定义事件也会清除）')) return;
+  const k={studyFirst:S.studyFirst,workFirst:S.workFirst};
+  S={...fresh(),...k}; persist(); render();
+}
+
+// ════════════════════════════════════════
+//  JOBS
+// ════════════════════════════════════════
+function jobsHTML() {
+  const url = localStorage.getItem('job_feed_url');
+  let h = `<div class="job-list" id="jobList">` +
+    SAMPLE_JOBS.map(j=>`<div class="job-item"><div class="job-title">${j.title}</div><div class="job-co">${j.company}</div></div>`).join('') +
+    `</div>`;
+  if (!url) h += `<div class="feed-hint">接入 GitHub Action → <span class="feed-link" onclick="setFeedUrl()">设置 JSON URL</span></div>`;
+  return h;
+}
+function fetchJobs() {
+  const url = localStorage.getItem('job_feed_url'); if(!url) return;
+  fetch(url).then(r=>r.json()).then(jobs=>{
+    const el=document.getElementById('jobList'); if(!el) return;
+    el.innerHTML=jobs.slice(0,6).map(j=>`<div class="job-item"><div class="job-title"><a href="${j.url||'#'}" target="_blank" style="color:inherit;text-decoration:none">${j.title}</a></div><div class="job-co">${j.company}</div></div>`).join('');
+  }).catch(()=>{});
+}
+function setFeedUrl() {
+  const url=prompt('输入 GitHub Action JSON URL：'); if(url){localStorage.setItem('job_feed_url',url);render();}
+}
+
+// ════════════════════════════════════════
+//  PALETTE DRAWER
+// ════════════════════════════════════════
+let palOpen = false;
+let touchX0 = 0, drawerX = 0;
+const drawer = document.getElementById('palDrawer');
+const back   = document.getElementById('backdrop');
+
+function openPalette() {
+  palOpen = true;
+  drawer.classList.add('open');
+  back.classList.add('on');
+  renderPalette();
+}
+function closePalette() {
+  palOpen = false;
+  drawer.classList.remove('open');
+  back.classList.remove('on');
+  drawer.style.transform = '';
+}
+
+// Swipe left to close
+drawer.addEventListener('touchstart', e => {
+  touchX0 = e.touches[0].clientX;
+  drawerX  = 0;
+}, {passive:true});
+
+drawer.addEventListener('touchmove', e => {
+  const dx = e.touches[0].clientX - touchX0;
+  if (dx < 0) {
+    drawerX = dx;
+    drawer.style.transform = `translateX(${dx}px)`;
+    const pct = Math.max(0, 1 + dx/210);
+    back.style.opacity = pct;
+  }
+}, {passive:true});
+
+drawer.addEventListener('touchend', () => {
+  if (drawerX < -60) { closePalette(); }
+  else { drawer.style.transform = ''; back.style.opacity = ''; }
+  drawerX = 0;
+});
+
+// ════════════════════════════════════════
+//  CUSTOM TEMPLATES
+// ════════════════════════════════════════
+function openCustomModal() {
+  document.getElementById('ci').value = '';
+  document.getElementById('ct').value = '';
+  document.getElementById('cl').value = '';
+  document.getElementById('customModal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('ct').focus(), 100);
+}
+function closeCustomModal() { document.getElementById('customModal').classList.add('hidden'); }
+
+document.getElementById('customModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('customModal')) closeCustomModal();
+});
+
+function saveCustomTemplate() {
+  const icon  = document.getElementById('ci').value.trim() || '📌';
+  const title = document.getElementById('ct').value.trim();
+  const label = document.getElementById('cl').value.trim() || '完成了';
+  if (!title) { document.getElementById('ct').focus(); return; }
+  customTemplates.push({ id:'ct_'+Date.now(), icon, title, btnLabel:label });
+  persistCustom(); closeCustomModal(); renderPalette();
+}
+
+function delCustomTemplate(id) {
+  customTemplates = customTemplates.filter(t=>t.id!==id);
+  persistCustom(); renderPalette();
+}
+
+// ════════════════════════════════════════
+//  BEDTIME
+// ════════════════════════════════════════
+function openBedtime() {
+  document.getElementById('bedtimeView').classList.add('active');
+  document.getElementById('nightChecklist').innerHTML = NIGHT_ITEMS.map(item => {
+    const chk=!!S.checks[item.id];
+    return `<div class="night-row${chk?' checked':''}" onclick="toggleNight('${item.id}',this)">
+      <div class="cbox">${chk?I.check:''}</div><div class="clabel">${item.label}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('studyFirst').value = S.studyFirst||'';
+  document.getElementById('workFirst').value  = S.workFirst||'';
+}
+function closeBedtime() { document.getElementById('bedtimeView').classList.remove('active'); }
+function toggleNight(id, el) {
+  S.checks[id]=!S.checks[id]; persist();
+  const chk=S.checks[id];
+  el.className=`night-row${chk?' checked':''}`;
+  el.querySelector('.cbox').innerHTML=chk?I.check:'';
+}
+function saveBedtime() {
+  S.studyFirst=document.getElementById('studyFirst').value.trim();
+  S.workFirst =document.getElementById('workFirst').value.trim();
+  persist(); closeBedtime(); render();
+}
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('zh-CN',{
+  month:'long',day:'numeric',weekday:'short'
+}).toUpperCase();
+
+render();
+</script>
+</body>
+</html>
