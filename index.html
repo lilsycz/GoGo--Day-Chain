@@ -914,7 +914,13 @@ const SAMPLE_JOBS = [
 // ════════════════════════════════════════
 const SK = 'dc_v7', CK = 'dc_custom_v1', DK = 'dc_defaults_v1', NK = 'dc_night_v1';
 
-function todayKey() { return new Date().toISOString().slice(0,10); }
+function todayKey() {
+  const d = new Date();
+  // 用本地日期，避免 UTC 偏差导致跨午夜 bug（UTC+8 早上 8 点前 UTC 还是前一天）
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
 
 function fresh() {
   let chain;
@@ -928,7 +934,6 @@ function loadS() {
   try {
     const d = JSON.parse(localStorage.getItem(SK));
     if (!d) return fresh();
-    if (d.date !== todayKey()) { const f=fresh(); f.studyFirst=d.studyFirst||''; f.workFirst=d.workFirst||''; return f; }
     if (!d.chain) d.chain = JSON.parse(JSON.stringify(DEFAULT_TASKS));
     return d;
   } catch { return fresh(); }
@@ -1107,9 +1112,10 @@ function renderPalette() {
 function initSortable() {
   if (chainSortable) { try { chainSortable.destroy(); } catch(e){} chainSortable = null; }
   if (editMode) return; // 编辑模式下禁用拖拽，避免 touch 事件冲突
+  if (typeof Sortable === 'undefined') return; // CDN 未加载时（PWA 离线）跳过
   const el = document.getElementById('chainList');
 
-  chainSortable = new Sortable(el, {
+  try { chainSortable = new Sortable(el, {
     animation:            220,
     ghostClass:           'sortable-ghost',
     chosenClass:          'sortable-chosen',
@@ -1131,7 +1137,7 @@ function initSortable() {
       reorder(ids);
       setTimeout(render, 0);
     }
-  });
+  }); } catch(e) { console.warn('Sortable init failed', e); }
 }
 
 // ════════════════════════════════════════
