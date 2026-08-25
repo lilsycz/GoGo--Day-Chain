@@ -20,7 +20,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 
 ## Tech Stack
 
-- Vanilla HTML / CSS / JavaScript
+- Vanilla HTML (Inline CSS / JavaScript)
 - localStorage for persistence
 - GitHub Pages for hosting
 
