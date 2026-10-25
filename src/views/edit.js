@@ -1,0 +1,94 @@
+// 编辑模式：点卡片展开，点文字直接改
+// → Swift: Views/EditTaskSheet.swift
+
+import { S, currentIdx, commitEdits, updateTaskField, updateCheckItemLabel } from '../store/store.js';
+import { render } from './render.js';
+
+export let editMode = false;
+export let editTarget = null;
+
+export function toggleEditMode() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+  document.getElementById('editBtn').classList.toggle('edit-active', editMode);
+  if (editMode) {
+    // 默认展开当前任务卡片
+    editTarget = S.chain[currentIdx()]?.id || S.chain[0]?.id || null;
+  } else {
+    editTarget = null;
+    commitEdits();
+  }
+  render();
+}
+
+export function setEditTarget(id) {
+  if (!editMode) return;
+  editTarget = id;
+  render();
+}
+
+// 直接 onclick 调用（绑在元素上，不走委托，移动端更可靠）
+// 编辑完只更新元素文字 + 持久化，不调 render()（避免 DOM 重建触发二次 blur）
+export function editField(e, taskId, field) {
+  if (!editMode) return;
+  e.stopPropagation();
+  const task = S.chain.find(t => t.id === taskId);
+  if (!task) return;
+  const el = e.currentTarget;
+  if (el.dataset.editing) return;
+  startInlineEdit(el, task[field] || '', (val, inputEl) => {
+    updateTaskField(taskId, field, val);
+    inputEl.parentElement && (inputEl.parentElement.textContent = val);
+  });
+}
+
+export function editCheckItem(e, taskId, itemId) {
+  if (!editMode) return;
+  e.stopPropagation();
+  const task = S.chain.find(t => t.id === taskId);
+  const item = task && (task.items||[]).find(it => it.id === itemId);
+  if (!item) return;
+  const el = e.currentTarget;
+  if (el.dataset.editing) return;
+  startInlineEdit(el, item.label, (val, inputEl) => {
+    updateCheckItemLabel(taskId, itemId, val);
+    inputEl.parentElement && (inputEl.parentElement.textContent = val);
+  });
+}
+
+// 把元素换成输入框；回车保存，Esc 取消
+export function startInlineEdit(el, value, onSave) {
+  if (el.dataset.editing) return;
+  el.dataset.editing = '1';
+  el.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'inline-edit';
+  input.value = value;
+  el.appendChild(input);
+  input.focus(); input.select();
+
+  let done = false, cancelled = false;
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { cancelled = true; input.blur(); }
+  });
+  input.addEventListener('blur', () => {
+    if (done) return; done = true;
+    delete el.dataset.editing;
+    const val = input.value.trim();
+    if (!cancelled && val) onSave(val, input);
+    else el.textContent = value;
+  });
+}
+
+// click 委托只负责：在编辑模式下点击非编辑区域时切换 editTarget
+// 字段编辑由元素上的 onclick 直接触发（移动端更可靠）
+export function initEdit() {
+  document.getElementById('chainList').addEventListener('click', e => {
+    if (!editMode) return;
+    if (e.target.closest('.row-title,.row-hint,.clabel,.row-del,.complete-btn,.undo-btn')) return;
+    const row = e.target.closest('[data-id]');
+    if (!row || row.dataset.id === editTarget) return;
+    setEditTarget(row.dataset.id);
+  });
+}
