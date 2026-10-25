@@ -15,7 +15,7 @@ export default {
   'edit.bar': '编辑中 · 点文字改，拖 ≡ 排序', 'edit.done': '完成',
 
   // 插入调板 / 新建事件
-  'pal.title': '插入一件事', 'pal.hint': '只加在今天，接在当前这件后面', 'pal.custom': '自定义', 'pal.new': '＋ 新建事件',
+  'pal.title': '插入一件事', 'pal.hint': '点一下：加在当前这件后面 · 按住拖到上面：放在哪就插在哪（只在今天）', 'pal.custom': '自定义', 'pal.new': '＋ 新建事件',
   'cm.title': '新建事件', 'cm.icon': '图标', 'cm.name': '名称', 'cm.name.ph': '事件名称',
   'cm.step': '第一步（可选）', 'cm.step.ph': '比如：把琴拿出来',
   'cm.cat': '类别（决定颜色）', 'cm.btn': '完成后的按钮文字', 'cm.btn.ph': '完成了',

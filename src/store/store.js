@@ -263,6 +263,16 @@ export function insertAfterCurrent(task) {
   return at;
 }
 
+// 插在某件任务前面（只属于今天）；beforeId 为空就放到最后。返回插入位置
+// 插到当前任务前面，它就变成新的当前任务
+export function insertBefore(task, beforeId) {
+  const i = beforeId ? S.chain.findIndex(x => x.id === beforeId) : -1;
+  const at = i < 0 ? S.chain.length : i;
+  S.chain.splice(at, 0, task);
+  afterChainChange(); persist();
+  return at;
+}
+
 // 重置今日进度（今天的记录也清掉），保留睡前写的"第一件事"
 export function resetDay() {
   const k = {studyFirst:S.studyFirst, workFirst:S.workFirst};

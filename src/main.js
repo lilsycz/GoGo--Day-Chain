@@ -12,7 +12,7 @@ import { openToday, closeHistory } from './views/history.js';
 import { openCalendar, closeCalendar, shiftMonth, openDayFromCalendar, backToCalendar } from './views/calendar.js';
 import { rollOverIfNewDay } from './store/store.js';
 import {
-  initPalette, openPalette, closePalette, addFromPalette, addCustomFromPalette,
+  initPalette, openPalette, closePalette, addTpl, pickCat,
   openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
 } from './views/palette.js';
 import { initBedtime, openBedtime, closeBedtime, toggleNight, saveBedtime } from './views/bedtime.js';
@@ -28,7 +28,7 @@ Object.assign(window, {
   openSwap, closeSwap, chooseNext, laterCurrent, skipCurrent,
   openToday, closeHistory,
   openCalendar, closeCalendar, shiftMonth, openDayFromCalendar, backToCalendar,
-  openPalette, closePalette, addFromPalette, addCustomFromPalette,
+  openPalette, closePalette, addTpl, pickCat,
   openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
   openBedtime, closeBedtime, toggleNight, saveBedtime,
   toggleEditMode, setEditTarget, editField, editCheckItem,

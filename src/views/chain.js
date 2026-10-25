@@ -21,6 +21,7 @@ import { editMode, editTarget, startInlineEdit } from './edit.js';
 import { jobsHTML, loadJobs } from './jobs.js';
 import { showToast } from './toast.js';
 import { render } from './render.js';
+import { isInserting, dropTpl } from './palette.js';
 
 let chainSortable = null;
 let showAll = false;
@@ -55,7 +56,7 @@ export function renderRail() {
 // 还没点"开始今天"时，顶部显示开始卡片
 export function renderStartCard() {
   const box = document.getElementById('startDay');
-  if (S.startedAt || editMode || !S.chain.length) { box.innerHTML = ''; return; }
+  if (S.startedAt || editMode || isInserting() || !S.chain.length) { box.innerHTML = ''; return; }
   const first = S.chain[currentIdx()];
   const step = first ? starterOf(first) : '';
   box.innerHTML = `<div class="hero start-card">
@@ -87,7 +88,7 @@ function cardHTML(task, i, ci, canUndo) {
   const locked  = !done && !skipped && !current;
 
   const isEditTarget = editMode && task.id === editTarget;
-  const hero = current && !editMode;
+  const hero = current && !editMode && !isInserting(); // 插入时都变成一行，好拖
   const cls = 'task-row' + (done?' done':skipped?' skipped':current?' current':' locked') + (hero?' hero':'') + (isEditTarget?' edit-target':'');
 
   // 右侧标记
@@ -167,7 +168,7 @@ export function renderChain() {
   const focus = currentIdx();
   const canUndo = lastDoneIdx() >= 0;
   const allDone = focus >= S.chain.length;
-  const expanded = showAll || editMode;
+  const expanded = showAll || editMode || isInserting(); // 打开插入托盘时也展开，方便拖进去
 
   // 专注视图只显示当前和下一件
   const ni = nextIdx();
@@ -197,7 +198,7 @@ export function renderChain() {
       <button class="text-link" onclick="openPalette()">${t('alldone.add')}</button>
     </div>`;
   }
-  if (!editMode) {
+  if (!editMode && !isInserting()) {
     if (!expanded && hiddenN > 0) {
       html += `<div class="chain-fold" onclick="toggleShowAll()">${t('fold.all')}</div>`;
     } else if (expanded && S.chain.length > 2) {
@@ -224,12 +225,31 @@ export function orderAfterDrag(visibleIds) {
   return ids;
 }
 
-// ── 拖拽排序：只在编辑模式里，按住每行右边的 ≡ 拖动 ──
+// ── 拖拽：编辑模式里按住 ≡ 排序；插入托盘打开时，接收从托盘拖来的事件 ──
 export function initSortable() {
   if (chainSortable) { try { chainSortable.destroy(); } catch(e){} chainSortable = null; }
-  if (!editMode) return;
   if (typeof Sortable === 'undefined') return; // CDN 未加载时（PWA 离线）跳过
   const el = document.getElementById('chainList');
+
+  if (!editMode && isInserting()) {
+    try { chainSortable = new Sortable(el, {
+      group: { name:'chain', pull:false, put:['palette'] },
+      sort: false,
+      draggable: '.task-row',
+      forceFallback: true,
+      ghostClass: 'drop-line',
+      // 放下：找到它后面的第一件任务，插在那件前面
+      onAdd(evt) {
+        const item = evt.item, tpl = item.dataset.tpl;
+        let next = item.nextElementSibling;
+        while (next && !next.classList.contains('task-row')) next = next.nextElementSibling;
+        item.remove();
+        if (tpl) dropTpl(tpl, next?.dataset.id || null);
+      },
+    }); } catch(e) { console.warn('Drop target failed', e); }
+    return;
+  }
+  if (!editMode) return;
 
   try { chainSortable = new Sortable(el, {
     animation:            220,

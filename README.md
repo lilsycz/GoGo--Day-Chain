@@ -22,7 +22,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **Focus view**: only the current task and the next one are shown; the rest stays folded until you ask
 - **Smallest first step**: every task can carry a tiny starter action, written right on the card
 - **Swap / later / skip**: change today's order without touching your daily routine
-- **Add something**: drop in a meeting, call, break, errand… right after the current task, for today only, or create your own with an icon, category and first step
+- **Add something**: a tray rises from the bottom with events grouped by category color. Tap one to add it right after the current task, or hold and drag it up into the list to drop it exactly where you want (today only). Create your own with an icon, category color and first step
 - **Checklist tasks**: e.g. *Head out* only completes once everything is packed
 - **Undo**: step back to the previous task
 
