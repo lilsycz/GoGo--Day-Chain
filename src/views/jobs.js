@@ -5,6 +5,7 @@ import { SAMPLE_JOBS } from '../models/defaults.js';
 import { getFeedUrl, setFeedUrl as saveFeedUrl } from '../store/storage.js';
 import { fetchJobFeed } from '../services/jobFeed.js';
 import { render } from './render.js';
+import { promptDialog } from './dialog.js';
 
 export function jobsHTML() {
   const url = getFeedUrl();
@@ -23,7 +24,7 @@ export function loadJobs() {
   }).catch(()=>{});
 }
 
-export function setFeedUrl() {
-  const url = prompt('输入 GitHub Action JSON URL：');
+export async function setFeedUrl() {
+  const url = await promptDialog({ title:'求职 JSON 地址', placeholder:'https://…', value:getFeedUrl() || '' });
   if (url) { saveFeedUrl(url); render(); }
 }

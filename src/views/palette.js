@@ -2,6 +2,8 @@
 // → Swift: Views/PaletteView.swift
 
 import { PAL_TEMPLATES } from '../models/defaults.js';
+import { CATEGORIES } from '../models/categories.js';
+import { glyph, glyphSVG, glyphName, GLYPH_CHOICES } from './glyphs.js';
 import {
   customTemplates, genId, insertAfterCurrent,
   addCustomTemplate, deleteCustomTemplate,
@@ -9,12 +11,13 @@ import {
 import { render } from './render.js';
 
 let drawer, back;
+let pickedGlyph = 'pin';
 let touchX0 = 0, drawerX = 0;
 
 export function renderPalette() {
   document.getElementById('paletteGrid').innerHTML = PAL_TEMPLATES.map(t =>
     `<div class="pal-tile" onclick="addFromPalette('${t.templateId}')">
-      <span class="pt-icon">${t.icon}</span>
+      <span class="pt-icon">${glyph(t, 24)}</span>
       <span class="pt-name">${t.title}</span>
     </div>`
   ).join('');
@@ -22,7 +25,7 @@ export function renderPalette() {
   document.getElementById('customGrid').innerHTML = customTemplates.map(t =>
     `<div class="pal-tile" onclick="addCustomFromPalette('${t.id}')">
       <button class="pt-del" onclick="event.stopPropagation();delCustomTemplate('${t.id}')">×</button>
-      <span class="pt-icon">${t.icon}</span>
+      <span class="pt-icon">${glyph(t, 24)}</span>
       <span class="pt-name">${t.title}</span>
     </div>`
   ).join('');
@@ -53,31 +56,44 @@ function insertTask(task) {
 export function addFromPalette(templateId) {
   const tmpl = PAL_TEMPLATES.find(t=>t.templateId===templateId);
   if (!tmpl) return;
-  insertTask({ id:templateId+'_'+genId(), icon:tmpl.icon, title:tmpl.title, hint:null, type:'palette', btnLabel:tmpl.btnLabel });
+  insertTask({ id:templateId+'_'+genId(), cat:tmpl.cat, icon:tmpl.icon, glyph:glyphName(tmpl), title:tmpl.title, hint:null, type:'palette', btnLabel:tmpl.btnLabel, once:true });
 }
 
 export function addCustomFromPalette(customId) {
   const tmpl = customTemplates.find(t=>t.id===customId);
   if (!tmpl) return;
-  insertTask({ id:'cust_'+genId(), icon:tmpl.icon, title:tmpl.title, hint:null, type:'palette', btnLabel:tmpl.btnLabel });
+  insertTask({ id:'cust_'+genId(), cat:tmpl.cat||'other', icon:tmpl.icon||'', glyph:glyphName(tmpl), title:tmpl.title, hint:null, starter:tmpl.starter||'', type:'palette', btnLabel:tmpl.btnLabel, once:true });
 }
 
 // ── 自定义事件弹窗 ──
 export function openCustomModal() {
-  document.getElementById('ci').value = '';
+  pickedGlyph = 'pin';
+  renderGlyphPicker();
   document.getElementById('ct').value = '';
   document.getElementById('cl').value = '';
+  document.getElementById('cs').value = '';
+  document.getElementById('ccat').innerHTML = Object.entries(CATEGORIES)
+    .map(([k, c]) => `<option value="${k}"${k==='other'?' selected':''}>${c.name}</option>`).join('');
   document.getElementById('customModal').classList.remove('hidden');
   setTimeout(()=>document.getElementById('ct').focus(), 100);
 }
+function renderGlyphPicker() {
+  document.getElementById('cg').innerHTML = GLYPH_CHOICES.map(name =>
+    `<button type="button" class="gp-item${name === pickedGlyph ? ' on' : ''}" onclick="pickGlyph('${name}')" aria-label="${name}">${glyphSVG(name, 22)}</button>`
+  ).join('');
+}
+
+export function pickGlyph(name) { pickedGlyph = name; renderGlyphPicker(); }
+
 export function closeCustomModal() { document.getElementById('customModal').classList.add('hidden'); }
 
 export function saveCustomTemplate() {
-  const icon  = document.getElementById('ci').value.trim() || '📌';
   const title = document.getElementById('ct').value.trim();
   const label = document.getElementById('cl').value.trim() || '完成了';
+  const starter = document.getElementById('cs').value.trim();
+  const cat   = document.getElementById('ccat').value || 'other';
   if (!title) { document.getElementById('ct').focus(); return; }
-  addCustomTemplate({ icon, title, btnLabel:label });
+  addCustomTemplate({ glyph:pickedGlyph, title, btnLabel:label, starter, cat });
   closeCustomModal(); renderPalette();
 }
 

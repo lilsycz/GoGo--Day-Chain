@@ -2,27 +2,57 @@
 // （ES module 里的函数默认不是全局的）
 
 import { render } from './views/render.js';
-import { completeTask, undoLast, toggleCheck, delTask } from './views/chain.js';
+import {
+  toggleShowAll, startDay, completeTask, undoLast, toggleCheck, unskipTask,
+  removeTask, addToDaily, editStarter,
+} from './views/chain.js';
+import { chooseReminder, snoozeRest, startNext, checkReminder } from './views/rest.js';
+import { initSwap, openSwap, closeSwap, chooseNext, laterCurrent, skipCurrent } from './views/swap.js';
+import { openHistory, closeHistory, showDay, backToDays } from './views/history.js';
+import { openCalendar, closeCalendar, shiftMonth, openDayFromCalendar } from './views/calendar.js';
+import { rollOverIfNewDay } from './store/store.js';
 import {
   initPalette, openPalette, closePalette, addFromPalette, addCustomFromPalette,
-  openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate,
+  openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
 } from './views/palette.js';
 import { initBedtime, openBedtime, closeBedtime, toggleNight, saveBedtime } from './views/bedtime.js';
 import { initEdit, toggleEditMode, setEditTarget, editField, editCheckItem } from './views/edit.js';
 import { setFeedUrl } from './views/jobs.js';
-import { initTopbar, toggleTheme, resetDay } from './views/topbar.js';
+import { initTopbar, updateDateLabel, toggleTheme, resetDay, openMenu, menuAction } from './views/topbar.js';
+import { initDialog } from './views/dialog.js';
 
 Object.assign(window, {
-  completeTask, undoLast, toggleCheck, delTask,
+  toggleShowAll, startDay, completeTask, undoLast, toggleCheck, unskipTask,
+  removeTask, addToDaily, editStarter,
+  chooseReminder, snoozeRest, startNext,
+  openSwap, closeSwap, chooseNext, laterCurrent, skipCurrent,
+  openHistory, closeHistory, showDay, backToDays,
+  openCalendar, closeCalendar, shiftMonth, openDayFromCalendar,
   openPalette, closePalette, addFromPalette, addCustomFromPalette,
-  openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate,
+  openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
   openBedtime, closeBedtime, toggleNight, saveBedtime,
   toggleEditMode, setEditTarget, editField, editCheckItem,
-  setFeedUrl, toggleTheme, resetDay,
+  setFeedUrl, toggleTheme, resetDay, openMenu, menuAction,
 });
 
 initTopbar();
 initPalette();
 initBedtime();
 initEdit();
+initSwap();
+initDialog();
 render();
+
+// app 一直开着跨过凌晨 4 点，或者第二天从后台切回来时，换成新的一天
+function checkNewDay() {
+  if (rollOverIfNewDay()) render();
+  updateDateLabel(); // 问候语跟着时段变
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { checkNewDay(); checkReminder(); }
+});
+setInterval(checkNewDay, 60_000);
+
+// 休息提醒：每 10 秒看一次到没到时间
+setInterval(checkReminder, 10_000);
+checkReminder();

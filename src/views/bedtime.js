@@ -3,6 +3,7 @@
 
 import { S, nightItems, toggleCheck, setFirstThings, updateNightItemLabel } from '../store/store.js';
 import { I } from './icons.js';
+import { stripEmoji } from './glyphs.js';
 import { startInlineEdit } from './edit.js';
 import { render } from './render.js';
 
@@ -17,7 +18,7 @@ function renderNightChecklist() {
   document.getElementById('nightChecklist').innerHTML = nightItems.map(item => {
     const chk=!!S.checks[item.id];
     return `<div class="night-row${chk?' checked':''}" data-item-id="${item.id}" onclick="toggleNight('${item.id}',this)">
-      <div class="cbox">${chk?I.check:''}</div><div class="clabel">${item.label}</div>
+      <div class="cbox">${chk?I.check:''}</div><div class="clabel">${stripEmoji(item.label)}</div>
     </div>`;
   }).join('');
 }

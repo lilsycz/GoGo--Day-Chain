@@ -2,22 +2,24 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Daily Chain</title>
 
   <!-- PWA: iOS 添加到主屏幕支持 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Daily Chain" />
-  <meta name="theme-color" content="#04071a" />
-  <!-- 图标：深蓝底 + 🌟 -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%2304071a'/%3E%3Ctext x='90' y='118' font-size='88' text-anchor='middle'%3E🌟%3C/text%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#ebe6dc" />
+  <!-- 图标：米色底 + 朱红圆 -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23ebe6dc'/%3E%3Ccircle cx='90' cy='90' r='58' fill='%23e8452c'/%3E%3Ccircle cx='112' cy='112' r='20' fill='%23151515'/%3E%3C/svg%3E" />
   <!-- PWA Manifest (inline) -->
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Daily+Chain%22%2C%22short_name%22%3A%22Daily+Chain%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2304071a%22%2C%22theme_color%22%3A%22%2304071a%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg+xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'+viewBox%3D'0+0+512+512'%253E%253Crect+width%3D'512'+height%3D'512'+rx%3D'80'+fill%3D'%252304071a'%2F%253E%253Ctext+x%3D'256'+y%3D'340'+font-size%3D'300'+text-anchor%3D'middle'%253E%25F0%259F%258C%259F%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Daily+Chain%22%2C%22short_name%22%3A%22Daily+Chain%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ebe6dc%22%2C%22theme_color%22%3A%22%23ebe6dc%22%2C%22start_url%22%3A%22.%22%7D" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
   <!-- 提前设置主题，避免闪烁 -->
-  <script>(function(){const t=localStorage.getItem('dc_theme')||'dark';document.documentElement.dataset.theme=t;})();</script>
+  <script>(function(){var t='light';try{t=localStorage.getItem('dc_theme2')||'light';}catch(e){}document.documentElement.dataset.theme=t;})();</script>
   <link rel="stylesheet" href="src/styles/main.css" />
 </head>
 <body>
@@ -27,19 +29,14 @@
 
 <!-- ════ PALETTE DRAWER ════ -->
 <div id="palDrawer">
-  <div class="pal-head">
-    <span class="pal-head-title">事件调板</span>
-    <div class="icon-btn" onclick="closePalette()">
-      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-        <line x1="1" y1="1" x2="10" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        <line x1="10" y1="1" x2="1" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-    </div>
+  <div class="sheet-head">
+    <div class="sheet-title">插入一件事</div>
+    <button class="icon-btn" onclick="closePalette()" aria-label="关闭" data-icon="close"></button>
   </div>
   <div class="pal-body">
-    <div class="pal-sec">点击加入日程</div>
+    <div class="pal-sec">只加在今天，接在当前这件后面</div>
     <div id="paletteGrid" class="pal-grid"></div>
-    <div class="pal-sec" style="margin-top:18px;">自定义</div>
+    <div class="pal-sec">自定义</div>
     <div id="customGrid" class="pal-grid"></div>
     <button class="pal-add-btn" onclick="openCustomModal()">＋ 新建事件</button>
   </div>
@@ -47,78 +44,121 @@
 
 <!-- ════ MAIN VIEW ════ -->
 <div class="main-view">
-  <div class="topbar">
-    <div class="icon-btn" onclick="openPalette()">
-      <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor">
-        <rect width="14" height="1.5" rx="0.75"/>
-        <rect y="4.25" width="10" height="1.5" rx="0.75"/>
-        <rect y="8.5" width="14" height="1.5" rx="0.75"/>
-      </svg>
+  <header class="topbar">
+    <button class="date-badge" id="dateBadge" onclick="openCalendar()" aria-label="日历"></button>
+    <div class="top-actions">
+      <button class="icon-btn" onclick="openHistory()" aria-label="记录" data-icon="calendar"></button>
+      <button class="icon-btn" onclick="openMenu()" aria-label="菜单" data-icon="more"></button>
     </div>
-    <div class="topbar-date" id="dateLabel"></div>
-    <div style="display:flex;gap:6px">
-      <div class="icon-btn" id="editBtn" onclick="toggleEditMode()" title="编辑模式" style="font-size:14px">✏️</div>
-      <div class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="切换主题" style="font-size:14px">☀️</div>
-      <div class="icon-btn" onclick="openBedtime()">💤</div>
-      <div class="icon-btn" onclick="resetDay()" title="重置">
-        <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
-          <path d="M11.5 6.5A5 5 0 1 1 6.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <polyline points="6.5,0 6.5,3.5 10,3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-      </div>
-    </div>
-  </div>
+  </header>
+  <h1 class="greeting" id="greeting"></h1>
   <div class="progress-rail" id="progressRail"></div>
+  <div id="startDay"></div>
   <div id="chainList"></div>
+</div>
+
+<!-- ════ EDIT MODE BAR ════ -->
+<div id="editBar">
+  <span>编辑中 · 点文字直接改</span>
+  <button onclick="toggleEditMode()">完成</button>
+</div>
+
+<!-- ════ MENU ════ -->
+<div id="menuModal" class="modal-overlay hidden">
+  <div class="modal-box menu-box">
+    <button class="menu-item" onclick="menuAction('insert')"><span class="mi-icon">＋</span>插入一件事</button>
+    <button class="menu-item" onclick="menuAction('edit')"><span class="mi-icon">✎</span>编辑任务</button>
+    <button class="menu-item" onclick="menuAction('bedtime')"><span class="mi-icon">☾</span>睡前清单</button>
+    <button class="menu-item" onclick="menuAction('theme')"><span class="mi-icon">◐</span><span id="themeLabel">深色模式</span></button>
+    <button class="menu-item danger" onclick="menuAction('reset')"><span class="mi-icon">↺</span>重置今天</button>
+  </div>
+</div>
+
+<!-- ════ DIALOG (confirm / prompt) ════ -->
+<div id="dialogModal" class="modal-overlay hidden">
+  <div class="modal-box" id="dialogBox"></div>
 </div>
 
 <!-- ════ CUSTOM EVENT MODAL ════ -->
 <div id="customModal" class="modal-overlay hidden">
   <div class="modal-box">
-    <div class="modal-title">新建自定义事件</div>
+    <div class="modal-title">新建事件</div>
     <div class="modal-field">
-      <label>图标（填一个 emoji）</label>
-      <input id="ci" type="text" maxlength="2" placeholder="📌">
+      <label>图标</label>
+      <div class="glyph-picker" id="cg"></div>
     </div>
     <div class="modal-field">
       <label>名称</label>
       <input id="ct" type="text" placeholder="事件名称">
     </div>
     <div class="modal-field">
+      <label>第一步（可选）</label>
+      <input id="cs" type="text" placeholder="比如：把琴拿出来">
+    </div>
+    <div class="modal-field">
+      <label>类别（决定颜色）</label>
+      <select id="ccat"></select>
+    </div>
+    <div class="modal-field">
       <label>完成后的按钮文字</label>
       <input id="cl" type="text" placeholder="完成了">
     </div>
-    <div style="font-size:11px;color:var(--t2);margin-top:-6px;margin-bottom:4px;line-height:1.6">
-      💾 自动保存在本设备，无需登录。跨设备同步需要后端服务。
-    </div>
+    <div class="modal-note">自动保存在本设备，无需登录。</div>
     <div class="modal-actions">
-      <button class="modal-save" onclick="saveCustomTemplate()">保存到调板</button>
-      <button class="modal-cancel" onclick="closeCustomModal()">取消</button>
+      <button class="btn-primary" onclick="saveCustomTemplate()">保存到调板</button>
+      <button class="btn-ghost" onclick="closeCustomModal()">取消</button>
     </div>
   </div>
 </div>
 
 <!-- ════ BEDTIME OVERLAY ════ -->
-<div id="bedtimeView">
-  <div class="bt-head">
-    <div style="font-size:11px;color:var(--t2);letter-spacing:0.1em;text-transform:uppercase">睡前清单</div>
-    <div class="icon-btn" onclick="closeBedtime()">✕</div>
+<div id="bedtimeView" class="page-overlay">
+  <div class="page-head">
+    <div class="page-kicker">睡前清单</div>
+    <button class="icon-btn" onclick="closeBedtime()" aria-label="关闭" data-icon="close"></button>
   </div>
-  <div class="bt-title">💤 准备明天</div>
-  <div class="bt-sub">整理好，明天醒来直接出发</div>
+  <div class="page-title">准备明天</div>
+  <div class="page-sub">整理好，明天醒来直接出发</div>
   <div class="sec-label">背包确认</div>
   <div id="nightChecklist"></div>
   <div class="sec-label">明天的第一件事</div>
   <div class="input-group">
-    <div class="input-label">📚 学习</div>
+    <div class="input-label"><span data-glyph="book"></span>学习</div>
     <textarea class="ni" id="studyFirst" rows="2" placeholder="打开 xx 课程，继续第 x 课…"></textarea>
   </div>
   <div class="input-group">
-    <div class="input-label">🖥 工作</div>
+    <div class="input-label"><span data-glyph="laptop"></span>工作</div>
     <textarea class="ni" id="workFirst" rows="2" placeholder="打开 xx，继续做 xx…"></textarea>
   </div>
-  <button class="save-btn" onclick="saveBedtime()">保存 · 明天见</button>
-  <button class="back-btn" onclick="closeBedtime()">← 返回今日</button>
+  <button class="btn-primary wide" onclick="saveBedtime()">保存 · 明天见</button>
+  <button class="btn-ghost wide" onclick="closeBedtime()">← 返回今日</button>
+</div>
+
+<!-- ════ REST SHEET ════ -->
+<div id="restSheet"></div>
+
+<!-- ════ SWAP MODAL ════ -->
+<div id="swapModal" class="modal-overlay hidden"><div class="modal-box"></div></div>
+
+<!-- ════ TOAST ════ -->
+<div id="toast"></div>
+
+<!-- ════ CALENDAR OVERLAY ════ -->
+<div id="calendarView" class="page-overlay">
+  <div class="page-head">
+    <div class="page-kicker">日历</div>
+    <button class="icon-btn" onclick="closeCalendar()" aria-label="关闭" data-icon="close"></button>
+  </div>
+  <div id="calendarBody"></div>
+</div>
+
+<!-- ════ HISTORY OVERLAY ════ -->
+<div id="historyView" class="page-overlay">
+  <div class="page-head">
+    <div class="page-kicker">记录</div>
+    <button class="icon-btn" onclick="closeHistory()" aria-label="关闭" data-icon="close"></button>
+  </div>
+  <div id="historyBody"></div>
 </div>
 
 <script type="module" src="src/main.js"></script>

@@ -3,6 +3,13 @@
 
 import { S, currentIdx, commitEdits, updateTaskField, updateCheckItemLabel } from '../store/store.js';
 import { render } from './render.js';
+import { esc } from './format.js';
+
+// 可以清空的字段，清空后显示的占位文字
+const PLACEHOLDERS = {
+  hint:    '<em class="edit-ph">点击添加描述…</em>',
+  starter: '<em class="edit-ph">点击写下最小的第一步…</em>',
+};
 
 export let editMode = false;
 export let editTarget = null;
@@ -10,7 +17,6 @@ export let editTarget = null;
 export function toggleEditMode() {
   editMode = !editMode;
   document.body.classList.toggle('edit-mode', editMode);
-  document.getElementById('editBtn').classList.toggle('edit-active', editMode);
   if (editMode) {
     // 默认展开当前任务卡片
     editTarget = S.chain[currentIdx()]?.id || S.chain[0]?.id || null;
@@ -36,10 +42,11 @@ export function editField(e, taskId, field) {
   if (!task) return;
   const el = e.currentTarget;
   if (el.dataset.editing) return;
-  startInlineEdit(el, task[field] || '', (val, inputEl) => {
+  const placeholder = PLACEHOLDERS[field];
+  startInlineEdit(el, task[field] || '', val => {
     updateTaskField(taskId, field, val);
-    inputEl.parentElement && (inputEl.parentElement.textContent = val);
-  });
+    el.innerHTML = val ? esc(val) : placeholder;
+  }, { allowEmpty: !!placeholder });
 }
 
 export function editCheckItem(e, taskId, itemId) {
@@ -56,14 +63,16 @@ export function editCheckItem(e, taskId, itemId) {
   });
 }
 
-// 把元素换成输入框；回车保存，Esc 取消
-export function startInlineEdit(el, value, onSave) {
+// 把元素换成输入框；回车保存，Esc 取消。allowEmpty: 允许清空
+export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeholder = '' } = {}) {
   if (el.dataset.editing) return;
   el.dataset.editing = '1';
+  const prevHTML = el.innerHTML;
   el.textContent = '';
   const input = document.createElement('input');
   input.className = 'inline-edit';
   input.value = value;
+  input.placeholder = placeholder;
   el.appendChild(input);
   input.focus(); input.select();
 
@@ -76,8 +85,8 @@ export function startInlineEdit(el, value, onSave) {
     if (done) return; done = true;
     delete el.dataset.editing;
     const val = input.value.trim();
-    if (!cancelled && val) onSave(val, input);
-    else el.textContent = value;
+    if (!cancelled && (val || allowEmpty) && val !== value) onSave(val, input);
+    else el.innerHTML = prevHTML;
   });
 }
 
@@ -86,7 +95,7 @@ export function startInlineEdit(el, value, onSave) {
 export function initEdit() {
   document.getElementById('chainList').addEventListener('click', e => {
     if (!editMode) return;
-    if (e.target.closest('.row-title,.row-hint,.clabel,.row-del,.complete-btn,.undo-btn')) return;
+    if (e.target.closest('.row-title,.row-hint,.ft-text,.clabel,.row-del,.circle-btn,.act,.text-link,.chain-fold')) return;
     const row = e.target.closest('[data-id]');
     if (!row || row.dataset.id === editTarget) return;
     setEditTarget(row.dataset.id);
