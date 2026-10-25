@@ -577,3 +577,11 @@ body.resting .task-row.hero.current { animation:none; }
 .cal-day.future { color:var(--ink3); }
 .cal-day.today span { color:var(--accent); font-weight:800; }
 .cal-legend { margin-top:26px; }
+
+/* 编辑模式的拖动把手 */
+.drag-handle {
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  color:var(--ink2); cursor:grab; touch-action:none; border-radius:50%;
+}
+.drag-handle:hover { background:var(--surf2); color:var(--ink); }
+.task-row.sortable-chosen .drag-handle { cursor:grabbing; }

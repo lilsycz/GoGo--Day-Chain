@@ -21,7 +21,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **Checklist tasks** — e.g. "Leave the house" only completes once every item is packed
 - **Undo** — Step back to the previous task; removing a task can be undone for a few seconds
 - **Block library** — Insert extra blocks (meeting, call, break, errand, reading…) right after the current task for today only, or create your own with a first step and category
-- **Long-press to reorder** — Drag tasks into a new order
+- **Reorder in edit mode** — Drag the ≡ handle on each row to change the order
 - **Today vs. every day** — Inserting, swapping and skipping only change today. Editing text, reordering and removing (in edit mode) change your daily chain; a one-off task can be pinned to the daily chain
 - **Edit mode** — Rename tasks, hints, first steps and checklist items in place
 - **Bedtime checklist** — Pack-your-bag review with a "tomorrow's first thing" field for study and work

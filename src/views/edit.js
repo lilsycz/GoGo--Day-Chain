@@ -95,7 +95,7 @@ export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeho
 export function initEdit() {
   document.getElementById('chainList').addEventListener('click', e => {
     if (!editMode) return;
-    if (e.target.closest('.row-title,.row-hint,.ft-text,.clabel,.row-del,.circle-btn,.act,.text-link,.chain-fold')) return;
+    if (e.target.closest('.row-title,.row-hint,.ft-text,.clabel,.row-del,.drag-handle,.circle-btn,.act,.text-link,.chain-fold')) return;
     const row = e.target.closest('[data-id]');
     if (!row || row.dataset.id === editTarget) return;
     setEditTarget(row.dataset.id);

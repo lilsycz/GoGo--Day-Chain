@@ -11,5 +11,6 @@ export const I = {
   plus:     svg(14, 14, `<line x1="7" y1="1.5" x2="7" y2="12.5"/><line x1="1.5" y1="7" x2="12.5" y2="7"/>`),
   calendar: svg(18, 18, `<rect x="1.5" y="3" width="15" height="13.5" rx="3"/><line x1="1.5" y1="7.5" x2="16.5" y2="7.5"/><line x1="5.5" y1="1" x2="5.5" y2="4.5"/><line x1="12.5" y1="1" x2="12.5" y2="4.5"/>`),
   more:     `<svg width="18" height="4" viewBox="0 0 18 4" fill="currentColor"><circle cx="2" cy="2" r="2"/><circle cx="9" cy="2" r="2"/><circle cx="16" cy="2" r="2"/></svg>`,
+  grip:     svg(16, 12, `<line x1="1" y1="1.5" x2="15" y2="1.5"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="1" y1="10.5" x2="15" y2="10.5"/>`),
   close:    svg(12, 12, `<line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>`, 1.7),
 };

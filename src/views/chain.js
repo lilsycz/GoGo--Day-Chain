@@ -98,7 +98,9 @@ function cardHTML(task, i, ci, canUndo) {
     if (locked)  badge = `<span class="row-lock">${I.lock}</span>`;
     if (current) badge = `<span class="row-now">NOW</span>`;
   }
-  const del = editMode ? `<button class="row-del" onclick="removeTask('${task.id}')" title="移除">×</button>` : '';
+  const del = editMode
+    ? `<button class="row-del" onclick="removeTask('${task.id}')" title="移除">×</button><span class="drag-handle" aria-label="拖动排序" onclick="event.stopPropagation()">${I.grip}</span>`
+    : '';
 
   // 卡片内容
   let body = '', foot = '';
@@ -210,10 +212,21 @@ export function renderChain() {
   }
 }
 
-// ── 拖拽排序（手机上长按）：只在显示全部时可用 ──
+// 拖拽后的新顺序：只重排页面上看得见的那几件，折叠起来的任务原地不动
+// visibleIds = 拖完后页面上卡片的顺序
+export function orderAfterDrag(visibleIds) {
+  const seen = new Set(visibleIds);
+  const slots = [];
+  S.chain.forEach((t, i) => { if (seen.has(t.id)) slots.push(i); });
+  const ids = S.chain.map(t => t.id);
+  slots.forEach((slot, k) => { ids[slot] = visibleIds[k]; });
+  return ids;
+}
+
+// ── 拖拽排序：只在编辑模式里，按住每行右边的 ≡ 拖动 ──
 export function initSortable() {
   if (chainSortable) { try { chainSortable.destroy(); } catch(e){} chainSortable = null; }
-  if (editMode || !showAll) return; // 编辑模式下禁用拖拽，避免 touch 事件冲突
+  if (!editMode) return;
   if (typeof Sortable === 'undefined') return; // CDN 未加载时（PWA 离线）跳过
   const el = document.getElementById('chainList');
 
@@ -223,21 +236,17 @@ export function initSortable() {
     ghostClass:           'sortable-ghost',
     chosenClass:          'sortable-chosen',
     dragClass:            'sortable-drag',
-    delay:                400,
-    delayOnTouchOnly:     true,
-    touchStartThreshold:  6,
-    filter:               '.circle-btn,.act,.row-del,.cbox,.check-row,.feed-link,.all-done,.ft-note,.ft-ghost,.row-restore,.chain-fold',
-    preventOnFilter:      false,
+    handle:               '.drag-handle',
 
     onChoose(evt) {
       evt.item.classList.add('pressing');
-      setTimeout(() => evt.item.classList.remove('pressing'), 420);
+      setTimeout(() => evt.item.classList.remove('pressing'), 320);
       if (navigator.vibrate) navigator.vibrate(40);
     },
     onEnd(evt) {
       if (evt.oldIndex === evt.newIndex) return;
-      const ids = Array.from(el.querySelectorAll('[data-id]')).map(e=>e.dataset.id);
-      reorder(ids);
+      const visible = Array.from(el.querySelectorAll('.task-row[data-id]')).map(e => e.dataset.id);
+      reorder(orderAfterDrag(visible));
       setTimeout(render, 0);
     }
   }); } catch(e) { console.warn('Sortable init failed', e); }
