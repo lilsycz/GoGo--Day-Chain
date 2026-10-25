@@ -4,11 +4,12 @@
 import { S, currentIdx, commitEdits, updateTaskField, updateCheckItemLabel } from '../store/store.js';
 import { render } from './render.js';
 import { esc } from './format.js';
+import { t, tt, loc } from '../i18n/index.js';
 
 // 可以清空的字段，清空后显示的占位文字
 const PLACEHOLDERS = {
-  hint:    '<em class="edit-ph">点击添加描述…</em>',
-  starter: '<em class="edit-ph">点击写下最小的第一步…</em>',
+  hint:    () => `<em class="edit-ph">${t('hint.edit.ph')}</em>`,
+  starter: () => `<em class="edit-ph">${t('step.edit.ph')}</em>`,
 };
 
 export let editMode = false;
@@ -42,8 +43,8 @@ export function editField(e, taskId, field) {
   if (!task) return;
   const el = e.currentTarget;
   if (el.dataset.editing) return;
-  const placeholder = PLACEHOLDERS[field];
-  startInlineEdit(el, task[field] || '', val => {
+  const placeholder = PLACEHOLDERS[field]?.();
+  startInlineEdit(el, tt(task, field) || '', val => {
     updateTaskField(taskId, field, val);
     el.innerHTML = val ? esc(val) : placeholder;
   }, { allowEmpty: !!placeholder });
@@ -57,7 +58,7 @@ export function editCheckItem(e, taskId, itemId) {
   if (!item) return;
   const el = e.currentTarget;
   if (el.dataset.editing) return;
-  startInlineEdit(el, item.label, (val, inputEl) => {
+  startInlineEdit(el, loc(item.id, 'label', item.label), (val, inputEl) => {
     updateCheckItemLabel(taskId, itemId, val);
     inputEl.parentElement && (inputEl.parentElement.textContent = val);
   });

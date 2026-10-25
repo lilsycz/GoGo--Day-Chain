@@ -16,6 +16,7 @@ import { categoryOf, catVars } from '../models/categories.js';
 import { I } from './icons.js';
 import { esc, fmtTime } from './format.js';
 import { glyph, glyphSVG, stripEmoji } from './glyphs.js';
+import { t, tt, loc } from '../i18n/index.js';
 import { editMode, editTarget, startInlineEdit } from './edit.js';
 import { jobsHTML, loadJobs } from './jobs.js';
 import { showToast } from './toast.js';
@@ -24,15 +25,15 @@ import { render } from './render.js';
 let chainSortable = null;
 let showAll = false;
 
-const STEP_PH = '<em class="edit-ph">点击写下最小的第一步…</em>';
-const HINT_PH = '<em class="edit-ph">点击添加描述…</em>';
+const STEP_PH = () => `<em class="edit-ph">${t('step.edit.ph')}</em>`;
+const HINT_PH = () => `<em class="edit-ph">${t('hint.edit.ph')}</em>`;
 
 // 大圆形主按钮
 function circleBtn(label, onclick, disabled=false) {
   const long = String(label).length > 5 ? ' long' : '';
   return `<button class="circle-btn${long}" onclick="${onclick}" ${disabled?'disabled':''}><span>${label}</span>${I.arrow}</button>`;
 }
-function stepBox(inner, label='第一步') {
+function stepBox(inner, label=t('step')) {
   return `<div class="ft-note"><div class="ft-label">${label}</div>${inner}</div>`;
 }
 
@@ -58,12 +59,12 @@ export function renderStartCard() {
   const first = S.chain[currentIdx()];
   const step = first ? starterOf(first) : '';
   box.innerHTML = `<div class="hero start-card">
-    <div class="hero-kicker">新的一天</div>
-    <div class="hero-title">直接成为直接做，<br>GOGO</div>
-    ${first ? stepBox(`<div class="ft-text with-glyph">${glyph(first, 22)} ${esc(first.title)}${step ? ` — ${esc(step)}` : ''}</div>`, '先做') : ''}
+    <div class="hero-kicker">${t('start.kicker')}</div>
+    <div class="hero-title">${t('start.title')}</div>
+    ${first ? stepBox(`<div class="ft-text with-glyph">${glyph(first, 22)} ${esc(tt(first, 'title'))}${step ? ` — ${esc(step)}` : ''}</div>`, t('start.first')) : ''}
     <div class="hero-foot">
-      ${circleBtn('开始今天', 'startDay()')}
-      <div class="hero-actions"><button class="act" onclick="openPalette()">${I.plus}<span>先插入一件</span></button></div>
+      ${circleBtn(t('start.btn'), 'startDay()')}
+      <div class="hero-actions"><button class="act" onclick="openPalette()">${I.plus}<span>${t('start.insert')}</span></button></div>
     </div>
   </div>`;
 }
@@ -71,12 +72,12 @@ export function renderStartCard() {
 // 当前卡片里的"第一步"：没写过就显示一行可以直接点的提示
 function currentStepHTML(task) {
   if (task.type==='first-thing' && S[task.ftKey]) {
-    return stepBox(`<div class="ft-text">${esc(S[task.ftKey])}</div>`, '第一步 · 睡前写的');
+    return stepBox(`<div class="ft-text">${esc(S[task.ftKey])}</div>`, t('step.bedtime'));
   }
   if (task.starter) {
     return stepBox(`<div class="ft-text editable" onclick="editStarter(event,'${task.id}')">${esc(task.starter)}</div>`);
   }
-  return `<div class="ft-ghost" onclick="editStarter(event,'${task.id}')">${glyphSVG('pen', 16)} 写下最小的第一步</div>`;
+  return `<div class="ft-ghost" onclick="editStarter(event,'${task.id}')">${glyphSVG('pen', 16)} ${t('step.ghost')}</div>`;
 }
 
 function cardHTML(task, i, ci, canUndo) {
@@ -94,18 +95,18 @@ function cardHTML(task, i, ci, canUndo) {
   if (!editMode) {
     const tm = S.times[task.id];
     if (done)    badge = (tm?.start && tm?.end ? `<span class="row-time">${fmtTime(tm.start)}–${fmtTime(tm.end)}</span>` : '') + `<span class="row-check">${I.check}</span>`;
-    if (skipped) badge = `<span class="row-skip">已跳过</span><button class="row-restore" onclick="unskipTask('${task.id}')">恢复</button>`;
+    if (skipped) badge = `<span class="row-skip">${t('skipped')}</span><button class="row-restore" onclick="unskipTask('${task.id}')">${t('restore')}</button>`;
     if (locked)  badge = `<span class="row-lock">${I.lock}</span>`;
     if (current) badge = `<span class="row-now">NOW</span>`;
   }
   const del = editMode
-    ? `<button class="row-del" onclick="removeTask('${task.id}')" title="移除">×</button><span class="drag-handle" aria-label="拖动排序" onclick="event.stopPropagation()">${I.grip}</span>`
+    ? `<button class="row-del" onclick="removeTask('${task.id}')" title="${t('remove')}">×</button><span class="drag-handle" aria-label="${t('drag')}" onclick="event.stopPropagation()">${I.grip}</span>`
     : '';
 
   // 卡片内容
   let body = '', foot = '';
   if (hero) {
-    if (task.hint) body += `<div class="row-hint">${task.hint}</div>`;
+    if (task.hint) body += `<div class="row-hint">${esc(tt(task, 'hint'))}</div>`;
     body += currentStepHTML(task);
 
     if (task.type==='checklist') {
@@ -113,7 +114,7 @@ function cardHTML(task, i, ci, canUndo) {
         const chk = !!S.checks[it.id];
         return `<div class="check-row${chk?' checked':''}" data-item-id="${it.id}" onclick="toggleCheck('${it.id}')">
           <div class="cbox">${chk?I.check:''}</div>
-          <div class="clabel">${stripEmoji(it.label)}</div>
+          <div class="clabel">${esc(stripEmoji(loc(it.id, 'label', it.label)))}</div>
         </div>`;
       }).join('') + `</div>`;
     } else if (task.type==='jobs') {
@@ -121,27 +122,27 @@ function cardHTML(task, i, ci, canUndo) {
     }
 
     foot = `<div class="hero-foot">
-      ${circleBtn(task.btnLabel||'完成', 'completeTask()', task.type==='checklist' && !isChecklistReady(task))}
+      ${circleBtn(tt(task, 'btnLabel')||t('done.default'), 'completeTask()', task.type==='checklist' && !isChecklistReady(task))}
       <div class="hero-actions">
-        <button class="act" onclick="openSwap()">${I.swap}<span>换一个</span></button>
-        <button class="act" onclick="openPalette()">${I.plus}<span>插入一件</span></button>
-        ${canUndo ? `<button class="act" onclick="undoLast()">${I.undo}<span>退回上一步</span></button>` : ''}
+        <button class="act" onclick="openSwap()">${I.swap}<span>${t('act.swap')}</span></button>
+        <button class="act" onclick="openPalette()">${I.plus}<span>${t('act.insert')}</span></button>
+        ${canUndo ? `<button class="act" onclick="undoLast()">${I.undo}<span>${t('act.undo')}</span></button>` : ''}
       </div>
     </div>`;
   } else if (isEditTarget) {
     // 编辑模式展开体：描述、第一步、打勾事项都可以点了改
-    body += `<div class="row-hint" onclick="editField(event,'${task.id}','hint')">${task.hint || HINT_PH}</div>`;
-    body += stepBox(`<div class="ft-text" onclick="editField(event,'${task.id}','starter')">${task.starter ? esc(task.starter) : STEP_PH}</div>`);
+    body += `<div class="row-hint" onclick="editField(event,'${task.id}','hint')">${task.hint ? esc(tt(task, 'hint')) : HINT_PH()}</div>`;
+    body += stepBox(`<div class="ft-text" onclick="editField(event,'${task.id}','starter')">${task.starter ? esc(task.starter) : STEP_PH()}</div>`);
     if (task.type==='checklist') {
       body += '<div class="row-checks">' + (task.items||[]).map(it =>
         `<div class="check-row" data-item-id="${it.id}">
           <div class="cbox"></div>
-          <div class="clabel" onclick="editCheckItem(event,'${task.id}','${it.id}')">${stripEmoji(it.label)}</div>
+          <div class="clabel" onclick="editCheckItem(event,'${task.id}','${it.id}')">${esc(stripEmoji(loc(it.id, 'label', it.label)))}</div>
         </div>`
       ).join('') + '</div>';
     }
     if (task.once) {
-      body += `<div class="once-note">只在今天 · <button class="text-link inline" onclick="addToDaily('${task.id}')">加入每日任务</button></div>`;
+      body += `<div class="once-note">${t('once')} · <button class="text-link inline" onclick="addToDaily('${task.id}')">${t('once.add')}</button></div>`;
     }
   }
 
@@ -152,7 +153,7 @@ function cardHTML(task, i, ci, canUndo) {
     <div class="row-top">
       ${hero ? '' : '<span class="dot"></span>'}
       <span class="row-icon">${glyph(task, hero ? 30 : 20)}</span>
-      <span class="row-title" ${titleClick}>${task.title}</span>
+      <span class="row-title" ${titleClick}>${esc(tt(task, 'title'))}</span>
       <span class="row-right">${badge}${del}</span>
     </div>
     ${body?`<div class="row-body">${body}</div>`:''}
@@ -181,26 +182,26 @@ export function renderChain() {
 
   let html = '';
   if (!expanded && doneN + skipN > 0) {
-    html += `<div class="chain-fold" onclick="toggleShowAll()">✓ 已完成 ${doneN} 件${skipN ? ` · 跳过 ${skipN} 件` : ''}</div>`;
+    html += `<div class="chain-fold" onclick="toggleShowAll()">${t('fold.done', {n:doneN})}${skipN ? t('fold.skip', {n:skipN}) : ''}</div>`;
   }
   html += visible.map(i => {
-    const label = !expanded && i === ni ? '<div class="section-label">接下来</div>' : '';
+    const label = !expanded && i === ni ? `<div class="section-label">${t('next')}</div>` : '';
     return label + cardHTML(S.chain[i], i, ci, canUndo);
   }).join('');
 
   if (allDone && started) {
     html += `<div class="all-done">
       <div class="done-art"><span class="c1"></span><span class="c2"></span></div>
-      <h2>今天完成了。</h2>
-      <button class="text-link" onclick="openHistory()">看看今天的记录 →</button>
-      <button class="text-link" onclick="openPalette()">＋ 再加一件</button>
+      <h2>${t('alldone')}</h2>
+      <button class="text-link" onclick="openToday()">${t('alldone.log')}</button>
+      <button class="text-link" onclick="openPalette()">${t('alldone.add')}</button>
     </div>`;
   }
   if (!editMode) {
     if (!expanded && hiddenN > 0) {
-      html += `<div class="chain-fold" onclick="toggleShowAll()">显示全部 ▾</div>`;
+      html += `<div class="chain-fold" onclick="toggleShowAll()">${t('fold.all')}</div>`;
     } else if (expanded && S.chain.length > 2) {
-      html += `<div class="chain-fold" onclick="toggleShowAll()">收起 ▴</div>`;
+      html += `<div class="chain-fold" onclick="toggleShowAll()">${t('fold.less')}</div>`;
     }
   }
 
@@ -282,14 +283,15 @@ export function removeTask(id) {
   const undo = removeTaskAction(id);
   render();
   if (!undo) return;
-  const msg = undo.task.once ? `已移除「${esc(undo.task.title)}」` : `已从每日任务移除「${esc(undo.task.title)}」`;
-  showToast(msg, '撤销', () => { restoreTask(undo); render(); });
+  const title = esc(tt(undo.task, 'title'));
+  const msg = t(undo.task.once ? 'toast.removed' : 'toast.removedDaily', { t:title });
+  showToast(msg, t('undo'), () => { restoreTask(undo); render(); });
 }
 
 export function addToDaily(id) {
   addToDailyAction(id);
   render();
-  showToast('以后每天都会有这件事');
+  showToast(t('toast.daily'));
 }
 
 // 不用进编辑模式，直接在当前卡片上写第一步
@@ -301,5 +303,5 @@ export function editStarter(e, taskId) {
   startInlineEdit(el, task.starter || '', val => {
     updateTaskField(taskId, 'starter', val);
     setTimeout(render, 0);
-  }, { allowEmpty: true, placeholder: '比如：把锅放到灶上' });
+  }, { allowEmpty: true, placeholder: t('step.ph') });
 }

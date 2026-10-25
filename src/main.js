@@ -8,8 +8,8 @@ import {
 } from './views/chain.js';
 import { chooseReminder, snoozeRest, startNext, checkReminder } from './views/rest.js';
 import { initSwap, openSwap, closeSwap, chooseNext, laterCurrent, skipCurrent } from './views/swap.js';
-import { openHistory, closeHistory, showDay, backToDays } from './views/history.js';
-import { openCalendar, closeCalendar, shiftMonth, openDayFromCalendar } from './views/calendar.js';
+import { openToday, closeHistory } from './views/history.js';
+import { openCalendar, closeCalendar, shiftMonth, openDayFromCalendar, backToCalendar } from './views/calendar.js';
 import { rollOverIfNewDay } from './store/store.js';
 import {
   initPalette, openPalette, closePalette, addFromPalette, addCustomFromPalette,
@@ -26,8 +26,8 @@ Object.assign(window, {
   removeTask, addToDaily, editStarter,
   chooseReminder, snoozeRest, startNext,
   openSwap, closeSwap, chooseNext, laterCurrent, skipCurrent,
-  openHistory, closeHistory, showDay, backToDays,
-  openCalendar, closeCalendar, shiftMonth, openDayFromCalendar,
+  openToday, closeHistory,
+  openCalendar, closeCalendar, shiftMonth, openDayFromCalendar, backToCalendar,
   openPalette, closePalette, addFromPalette, addCustomFromPalette,
   openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
   openBedtime, closeBedtime, toggleNight, saveBedtime,

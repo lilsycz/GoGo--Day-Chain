@@ -9,23 +9,34 @@ import { toggleEditMode } from './edit.js';
 import { openBedtime } from './bedtime.js';
 import { render } from './render.js';
 import { renderBadge } from './calendar.js';
+import { t, lang, setLang, applyStatic } from '../i18n/index.js';
 
 // 日期显示的是"逻辑上的今天"（凌晨 4 点前还算前一天）
 export function updateDateLabel() {
   renderBadge();
 
   const h = new Date().getHours();
-  const part = h < 4 ? '夜晚' : h < 11 ? '早晨' : h < 13 ? '中午' : h < 18 ? '下午' : '晚上';
-  document.getElementById('greeting').textContent = `你的${part}`;
+  const part = h < 4 ? 'night' : h < 11 ? 'morning' : h < 13 ? 'noon' : h < 18 ? 'afternoon' : 'evening';
+  document.getElementById('greeting').textContent = t('greet', { part:t('part.' + part) });
 }
 
 function syncThemeLabel() {
   const dark = document.documentElement.dataset.theme === 'dark';
-  document.getElementById('themeLabel').textContent = dark ? '浅色模式' : '深色模式';
+  document.getElementById('themeLabel').textContent = t(dark ? 'menu.light' : 'menu.dark');
   document.querySelector('meta[name="theme-color"]').content = dark ? '#121212' : '#ebe6dc';
 }
 
+// 中 / 英切换：固定文字、日期问候、整页都重画
+export function toggleLang() {
+  setLang(lang === 'zh' ? 'en' : 'zh');
+  applyStatic();
+  syncThemeLabel();
+  updateDateLabel();
+  render();
+}
+
 export function initTopbar() {
+  applyStatic();
   // 按钮里的线条图标
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = I[el.dataset.icon] || ''; });
   document.querySelectorAll('[data-glyph]').forEach(el => { el.innerHTML = glyphSVG(el.dataset.glyph, 16); });
@@ -44,9 +55,9 @@ export function toggleTheme() {
 
 export async function resetDay() {
   const ok = await confirmDialog({
-    title: '重置今天？',
-    body: '今天的进度、临时插入的事件和今天的记录都会清除。',
-    ok: '重置', danger: true,
+    title: t('reset.title'),
+    body: t('reset.body'),
+    ok: t('reset.ok'), danger: true,
   });
   if (!ok) return;
   resetDayAction();
@@ -63,5 +74,6 @@ export function menuAction(what) {
   if (what === 'edit')    toggleEditMode();
   if (what === 'bedtime') openBedtime();
   if (what === 'theme')   toggleTheme();
+  if (what === 'lang')    toggleLang();
   if (what === 'reset')   resetDay();
 }

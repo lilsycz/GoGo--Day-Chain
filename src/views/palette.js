@@ -9,24 +9,26 @@ import {
   addCustomTemplate, deleteCustomTemplate,
 } from '../store/store.js';
 import { render } from './render.js';
+import { t, loc } from '../i18n/index.js';
+import { esc } from './format.js';
 
 let drawer, back;
 let pickedGlyph = 'pin';
 let touchX0 = 0, drawerX = 0;
 
 export function renderPalette() {
-  document.getElementById('paletteGrid').innerHTML = PAL_TEMPLATES.map(t =>
-    `<div class="pal-tile" onclick="addFromPalette('${t.templateId}')">
-      <span class="pt-icon">${glyph(t, 24)}</span>
-      <span class="pt-name">${t.title}</span>
+  document.getElementById('paletteGrid').innerHTML = PAL_TEMPLATES.map(tp =>
+    `<div class="pal-tile" onclick="addFromPalette('${tp.templateId}')">
+      <span class="pt-icon">${glyph(tp, 24)}</span>
+      <span class="pt-name">${esc(loc(tp.templateId, 'title', tp.title))}</span>
     </div>`
   ).join('');
 
-  document.getElementById('customGrid').innerHTML = customTemplates.map(t =>
-    `<div class="pal-tile" onclick="addCustomFromPalette('${t.id}')">
-      <button class="pt-del" onclick="event.stopPropagation();delCustomTemplate('${t.id}')">×</button>
-      <span class="pt-icon">${glyph(t, 24)}</span>
-      <span class="pt-name">${t.title}</span>
+  document.getElementById('customGrid').innerHTML = customTemplates.map(tp =>
+    `<div class="pal-tile" onclick="addCustomFromPalette('${tp.id}')">
+      <button class="pt-del" onclick="event.stopPropagation();delCustomTemplate('${tp.id}')">×</button>
+      <span class="pt-icon">${glyph(tp, 24)}</span>
+      <span class="pt-name">${esc(tp.title)}</span>
     </div>`
   ).join('');
 }
@@ -73,7 +75,7 @@ export function openCustomModal() {
   document.getElementById('cl').value = '';
   document.getElementById('cs').value = '';
   document.getElementById('ccat').innerHTML = Object.entries(CATEGORIES)
-    .map(([k, c]) => `<option value="${k}"${k==='other'?' selected':''}>${c.name}</option>`).join('');
+    .map(([k, c]) => `<option value="${k}"${k==='other'?' selected':''}>${t('cat.' + k)}</option>`).join('');
   document.getElementById('customModal').classList.remove('hidden');
   setTimeout(()=>document.getElementById('ct').focus(), 100);
 }
@@ -89,7 +91,7 @@ export function closeCustomModal() { document.getElementById('customModal').clas
 
 export function saveCustomTemplate() {
   const title = document.getElementById('ct').value.trim();
-  const label = document.getElementById('cl').value.trim() || '完成了';
+  const label = document.getElementById('cl').value.trim(); // 空着就显示「完成 / Done」
   const starter = document.getElementById('cs').value.trim();
   const cat   = document.getElementById('ccat').value || 'other';
   if (!title) { document.getElementById('ct').focus(); return; }

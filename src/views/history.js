@@ -5,22 +5,20 @@ import { S, buildRecord, getHistory, todayKey } from '../store/store.js';
 import { CATEGORIES, catColor } from '../models/categories.js';
 import { esc, fmtTime, fmtDur, fmtDateKey } from './format.js';
 import { glyph, glyphSVG } from './glyphs.js';
+import { t, tt } from '../i18n/index.js';
 
-let viewing = null; // 正在看的日期；null = 列表
+let viewing = null; // 正在看的日期
 
-export function openHistory() {
-  viewing = null;
-  renderHistory();
-  document.getElementById('historyView').classList.add('active');
-}
-export function closeHistory() { document.getElementById('historyView').classList.remove('active'); }
-
-export function showDay(key) {
+// 打开某一天的时间轴（日历点进来的，或左上角日期 = 今天）
+export function openDay(key) {
   viewing = key;
   renderHistory();
-  document.getElementById('historyView').scrollTop = 0;
+  const view = document.getElementById('historyView');
+  view.classList.add('active');
+  view.scrollTop = 0;
 }
-export function backToDays() { viewing = null; renderHistory(); }
+export function openToday() { openDay(S.date); }
+export function closeHistory() { document.getElementById('historyView').classList.remove('active'); }
 
 // 今天（进行中）+ 往日记录
 export function allRecords() {
@@ -52,12 +50,12 @@ const doneCount = r => r.blocks.filter(b => b.end).length;
 function range(r) {
   const ends = entries(r).map(e => e.end).filter(Boolean);
   const finished = r.blocks.length && r.blocks.every(b => b.end);
-  const endTxt = isToday(r) && !finished ? '进行中' : (ends.length ? fmtTime(Math.max(...ends)) : '—');
+  const endTxt = isToday(r) && !finished ? t('log.ongoing') : (ends.length ? fmtTime(Math.max(...ends)) : '—');
   return `${fmtTime(r.startedAt)} – ${endTxt}`;
 }
 
 function bigCount(r) {
-  return `<div class="big-num">${doneCount(r)}<small>件</small></div>`;
+  return `<div class="big-num">${doneCount(r)}<small>${t('log.count')}</small></div>`;
 }
 
 // 横条：一天的整体样子
@@ -74,72 +72,62 @@ function dayStrip(r) {
   return `<div class="day-strip">${segs}</div>`;
 }
 
-function dayItem(r) {
-  return `<div class="hist-day" onclick="showDay('${r.date}')">
-    <div class="hd-top">
-      <div>
-        <div class="hd-date">${fmtDateKey(r.date)}${isToday(r) ? ' · 今天' : ''}</div>
-        <div class="hd-meta">${range(r)}</div>
-      </div>
-      ${bigCount(r)}
-    </div>
-    ${dayStrip(r)}
-  </div>`;
-}
-
 function timelineRow(e, r) {
-  const endTxt = e.end ? fmtTime(e.end) : (isToday(r) ? '进行中' : '未完成');
+  const endTxt = e.end ? fmtTime(e.end) : (isToday(r) ? t('log.ongoing') : t('log.unfinished'));
   const dur = e.end ? fmtDur(e.end - e.start) : '';
   if (e.kind === 'rest') {
     return `<div class="tl-row tl-rest">
       <div class="tl-time">${fmtTime(e.start)}<span>${endTxt}</span></div>
       <div class="tl-bar"></div>
-      <div class="tl-main"><div class="tl-title">休息</div><div class="tl-dur">${dur}</div></div>
+      <div class="tl-main"><div class="tl-title">${t('log.rest')}</div><div class="tl-dur">${dur}</div></div>
     </div>`;
   }
   return `<div class="tl-row" style="--c:${catColor(e.cat)}">
     <div class="tl-time">${fmtTime(e.start)}<span>${endTxt}</span></div>
     <div class="tl-bar"></div>
-    <div class="tl-main"><div class="tl-title">${glyph(e, 18)}${esc(e.title)}</div><div class="tl-dur">${dur}</div></div>
+    <div class="tl-main"><div class="tl-title">${glyph(e, 18)}${esc(tt(e, 'title'))}</div><div class="tl-dur">${dur}</div></div>
   </div>`;
 }
 
 function legend(r) {
   const used = [...new Set(r.blocks.map(b => b.cat))];
   const items = Object.entries(CATEGORIES).filter(([k]) => used.includes(k))
-    .map(([k, c]) => `<span class="lg-item"><i style="background:${catColor(k)}"></i>${c.name}</span>`);
-  if ((r.rests || []).length) items.push(`<span class="lg-item"><i class="lg-rest"></i>休息</span>`);
+    .map(([k, c]) => `<span class="lg-item"><i style="background:${catColor(k)}"></i>${t('cat.' + k)}</span>`);
+  if ((r.rests || []).length) items.push(`<span class="lg-item"><i class="lg-rest"></i>${t('log.rest')}</span>`);
   return items.length ? `<div class="legend">${items.join('')}</div>` : '';
 }
 
 function dayDetail(r) {
   return `<div class="hist-detail">
-    <button class="text-link back-link" onclick="backToDays()">← 全部记录</button>
+    <button class="text-link back-link" onclick="backToCalendar()">${t('log.back')}</button>
     <div class="hd-top">
       <div>
         <div class="page-title">${fmtDateKey(r.date)}</div>
-        <div class="page-sub">${isToday(r) ? '今天 · ' : ''}${range(r)}</div>
+        <div class="page-sub">${isToday(r) ? t('log.today') : ''}${range(r)}</div>
       </div>
       ${bigCount(r)}
     </div>
     ${dayStrip(r)}
     ${legend(r)}
     <div class="timeline">
-      <div class="tl-mark">${glyphSVG('sun', 16)} ${fmtTime(r.startedAt)} 开始今天</div>
+      <div class="tl-mark">${glyphSVG('sun', 16)} ${t('log.started', {time:fmtTime(r.startedAt)})}</div>
       ${entries(r).map(e => timelineRow(e, r)).join('')}
     </div>
   </div>`;
 }
 
+function emptyDay(key) {
+  const today = key === todayKey();
+  return `<div class="hist-detail">
+    <button class="text-link back-link" onclick="backToCalendar()">${t('log.back')}</button>
+    <div class="page-title">${fmtDateKey(key)}</div>
+    <div class="hist-empty">${today
+      ? t('log.notStarted')
+      : t('log.empty')}</div>
+  </div>`;
+}
+
 function renderHistory() {
-  const body = document.getElementById('historyBody');
-  const recs = allRecords();
-  if (viewing) {
-    const r = recs.find(x => x.date === viewing);
-    if (r) { body.innerHTML = dayDetail(r); return; }
-    viewing = null;
-  }
-  body.innerHTML = recs.length
-    ? `<div class="page-title">每天的样子</div>` + recs.map(dayItem).join('')
-    : `<div class="page-title">每天的样子</div><div class="hist-empty">还没有记录。<br>点"开始今天"之后，这里会自动记下每件事几点到几点。</div>`;
+  const r = allRecords().find(x => x.date === viewing);
+  document.getElementById('historyBody').innerHTML = r ? dayDetail(r) : emptyDay(viewing);
 }

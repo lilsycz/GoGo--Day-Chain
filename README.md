@@ -15,8 +15,8 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **Start today** — The day begins when you tap "Start today", not at a fixed hour. No timers while you work
 - **Smallest first step** — Each task can carry a tiny starter action ("put the pan on the stove"); write it right on the card
 - **Automatic day log** — Start and end times are recorded in the background; finished cards show their time range
-- **Calendar** — Tap the date in the top-left corner for a month view; each day is a circle with a thin ring split into the colors of what you did, in order and by time spent. The date badge itself shows today's ring
-- **Records page** — Look back at any day as a timeline (what ran from when to when, plus rests), color-coded by category to match the cards
+- **Calendar** — Tap the date (top left, which also shows today's ring) for a month view; each day is a circle with a thin ring split into the colors of what you did, in order and by time spent. Tap a day to see its timeline
+- **Today's timeline** — The calendar icon (top right) shows what ran from when to when today, plus rests, color-coded by category
 - **New day at 4 AM** — Yesterday is archived automatically; staying up past midnight still counts as today
 - **Checklist tasks** — e.g. "Leave the house" only completes once every item is packed
 - **Undo** — Step back to the previous task; removing a task can be undone for a few seconds
@@ -25,6 +25,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **Today vs. every day** — Inserting, swapping and skipping only change today. Editing text, reordering and removing (in edit mode) change your daily chain; a one-off task can be pinned to the daily chain
 - **Edit mode** — Rename tasks, hints, first steps and checklist items in place
 - **Bedtime checklist** — Pack-your-bag review with a "tomorrow's first thing" field for study and work
+- **English / 中文** — Switch in the menu. Built-in task names follow the language; anything you renamed stays as you wrote it
 - **PWA support** — Add to the iPhone home screen and use it like an app
 - **Swiss-inspired design** — Warm stone background, vermilion / cobalt / amber / ink category colors, big bold type and round shapes. The current task is a full-color block; light and dark versions of the same style
 
@@ -62,7 +63,8 @@ The layout mirrors a planned SwiftUI version, so each part maps over one-to-one.
 | `src/store/store.js` | App state and every data action (no DOM) | `Store/ChainStore.swift` |
 | `src/store/storage.js` | localStorage reads and writes | SwiftData |
 | `src/views/` | UI for the chain, sidebar, bedtime, records, edit mode, jobs | `Views/` |
-| `src/services/` | Network requests (job feed) | `Services/` |
+| `src/services/` | Network requests, reminders | `Services/` |
+| `src/i18n/` | Chinese / English text | `Localizable.xcstrings` |
 | `src/styles/` | CSS | `Assets.xcassets` colors |
 
 ---
@@ -75,7 +77,7 @@ The layout mirrors a planned SwiftUI version, so each part maps over one-to-one.
 - [x] Automatic time log and records page
 - [x] Rest between tasks: pick when to be reminded, then "start now / later"
 - [x] Focus view, swap / later / skip, today-only vs daily edits
-- [ ] English / Chinese UI
+- [x] English / Chinese UI
 - [x] Unified visual style, top bar cleanup, in-app dialogs, readable sizes and 44pt tap targets
 - [ ] Bedtime page: review today + write tomorrow's first steps
 - [ ] First-run onboarding, job card as an optional module

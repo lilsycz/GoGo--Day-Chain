@@ -2,6 +2,7 @@
 // → Swift: .confirmationDialog / .alert
 
 import { esc } from './format.js';
+import { t } from '../i18n/index.js';
 
 const modal = () => document.getElementById('dialogModal');
 let resolveFn = null;
@@ -20,7 +21,7 @@ function close(value) {
 }
 
 // 返回 Promise<boolean>
-export function confirmDialog({ title, body = '', ok = '确定', cancel = '取消', danger = false }) {
+export function confirmDialog({ title, body = '', ok = t('ok'), cancel = t('cancel'), danger = false }) {
   return open(`
     <div class="modal-title">${esc(title)}</div>
     ${body ? `<div class="modal-note">${esc(body)}</div>` : ''}
@@ -33,13 +34,13 @@ export function confirmDialog({ title, body = '', ok = '确定', cancel = '取�
 }
 
 // 返回 Promise<string|null>
-export function promptDialog({ title, placeholder = '', value = '', ok = '保存' }) {
+export function promptDialog({ title, placeholder = '', value = '', ok = t('save') }) {
   return open(`
     <div class="modal-title">${esc(title)}</div>
     <div class="modal-field"><input id="dialogInput" type="text" placeholder="${esc(placeholder)}" value="${esc(value)}"></div>
     <div class="modal-actions">
       <button class="btn-primary" data-v="1">${esc(ok)}</button>
-      <button class="btn-ghost" data-v="0">取消</button>
+      <button class="btn-ghost" data-v="0">${esc(t('cancel'))}</button>
     </div>`, () => {
     const input = document.getElementById('dialogInput');
     const submit = () => close(input.value.trim() || null);

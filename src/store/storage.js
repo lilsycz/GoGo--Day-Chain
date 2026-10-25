@@ -40,6 +40,12 @@ export function saveHistory(list) { localStorage.setItem(HISTORY_KEY, JSON.strin
 // 主题（index.html 头部也直接读这个 key，避免闪烁）
 export function setTheme(t) { localStorage.setItem(THEME_KEY, t); }
 
+// 界面语言（'zh' / 'en'，没设过是 null）
+// 用过旧版（只有中文）的人：已经有当天数据
+export function hasSavedDay() { try { return !!localStorage.getItem(DAY_KEY); } catch { return false; } }
+export function getLang() { try { return localStorage.getItem('dc_lang'); } catch { return null; } }
+export function setLang(l) { try { localStorage.setItem('dc_lang', l); } catch {} }
+
 // 求职 JSON 地址
 export function getFeedUrl()     { return localStorage.getItem(FEED_KEY); }
 export function setFeedUrl(url)  { localStorage.setItem(FEED_KEY, url); }

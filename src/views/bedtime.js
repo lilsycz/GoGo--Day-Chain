@@ -4,6 +4,8 @@
 import { S, nightItems, toggleCheck, setFirstThings, updateNightItemLabel } from '../store/store.js';
 import { I } from './icons.js';
 import { stripEmoji } from './glyphs.js';
+import { loc } from '../i18n/index.js';
+import { esc } from './format.js';
 import { startInlineEdit } from './edit.js';
 import { render } from './render.js';
 
@@ -18,7 +20,7 @@ function renderNightChecklist() {
   document.getElementById('nightChecklist').innerHTML = nightItems.map(item => {
     const chk=!!S.checks[item.id];
     return `<div class="night-row${chk?' checked':''}" data-item-id="${item.id}" onclick="toggleNight('${item.id}',this)">
-      <div class="cbox">${chk?I.check:''}</div><div class="clabel">${stripEmoji(item.label)}</div>
+      <div class="cbox">${chk?I.check:''}</div><div class="clabel">${esc(stripEmoji(loc(item.id, 'label', item.label)))}</div>
     </div>`;
   }).join('');
 }
@@ -48,7 +50,7 @@ export function initBedtime() {
     if (!nightRow) return;
     const item = nightItems.find(it => it.id === nightRow.dataset.itemId);
     if (!item) return;
-    startInlineEdit(clabelEl, item.label, val => {
+    startInlineEdit(clabelEl, loc(item.id, 'label', item.label), val => {
       updateNightItemLabel(item.id, val); renderNightChecklist();
     });
   });

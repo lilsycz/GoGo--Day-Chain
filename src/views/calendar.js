@@ -4,7 +4,8 @@
 
 import { S, todayKey, buildRecord } from '../store/store.js';
 import { CATEGORIES, catColor } from '../models/categories.js';
-import { allRecords, openHistory, showDay } from './history.js';
+import { allRecords, openDay, closeHistory } from './history.js';
+import { t } from '../i18n/index.js';
 
 let ym = null; // 正在看的 [年, 月(0-11)]
 
@@ -36,12 +37,11 @@ export function dayRing(rec, size = 44, stroke = 2.5) {
     </g></svg>`;
 }
 
-const WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
 
 // 左上角的日期圆：今天的圆环 + 星期 + 日
 export function renderBadge() {
   const [y, m, d] = S.date.split('-').map(Number);
-  const wd = WEEKDAYS[new Date(y, m-1, d).getDay()];
+  const wd = t('weekdays').split(',')[new Date(y, m-1, d).getDay()];
   document.getElementById('dateBadge').innerHTML =
     dayRing(buildRecord(S), 60, 2.5) + `<span class="db-wd">${wd}</span><span class="db-d">${d}</span>`;
 }
@@ -61,10 +61,13 @@ export function shiftMonth(delta) {
   renderCalendar();
 }
 
-// 从日历点进某一天：打开记录页的那天（关掉记录页会回到日历）
-export function openDayFromCalendar(key) {
-  openHistory();
-  showDay(key);
+// 从日历点进某一天：打开那天的时间轴（盖在日历上面，关掉会回到日历）
+export function openDayFromCalendar(key) { openDay(key); }
+
+// 时间轴页的"← 日历"：没开着日历就先打开，再关掉时间轴
+export function backToCalendar() {
+  if (!document.getElementById('calendarView').classList.contains('active')) openCalendar();
+  closeHistory();
 }
 
 const pad = n => String(n).padStart(2, '0');
@@ -82,20 +85,20 @@ function renderCalendar() {
     const rec = recs.get(key);
     const cls = 'cal-day' + (key === tk ? ' today' : '') + (key > tk ? ' future' : '') + (rec ? ' has' : '');
     cells += rec
-      ? `<button class="${cls}" onclick="openDayFromCalendar('${key}')" aria-label="${m+1}月${d}日">${dayRing(rec)}<span>${d}</span></button>`
+      ? `<button class="${cls}" onclick="openDayFromCalendar('${key}')" aria-label="${key}">${dayRing(rec)}<span>${d}</span></button>`
       : `<div class="${cls}">${key > tk ? '' : dayRing(null)}<span>${d}</span></div>`;
   }
 
   const legend = Object.entries(CATEGORIES)
-    .map(([k, c]) => `<span class="lg-item"><i style="background:${catColor(k)}"></i>${c.name}</span>`).join('');
+    .map(([k, c]) => `<span class="lg-item"><i style="background:${catColor(k)}"></i>${t('cat.' + k)}</span>`).join('');
 
   document.getElementById('calendarBody').innerHTML = `
     <div class="cal-head">
-      <button class="icon-btn" onclick="shiftMonth(-1)" aria-label="上个月">‹</button>
-      <div class="cal-month"><div class="page-title">${m + 1}月</div><small>${y}</small></div>
-      <button class="icon-btn" onclick="shiftMonth(1)" aria-label="下个月">›</button>
+      <button class="icon-btn" onclick="shiftMonth(-1)" aria-label="${t('cal.prev')}">‹</button>
+      <div class="cal-month"><div class="page-title">${t('cal.month', {m:m + 1, name:new Date(y, m, 1).toLocaleDateString('en-US', {month:'long'})})}</div><small>${y}</small></div>
+      <button class="icon-btn" onclick="shiftMonth(1)" aria-label="${t('cal.next')}">›</button>
     </div>
-    <div class="cal-week">${['一','二','三','四','五','六','日'].map(w => `<span>${w}</span>`).join('')}</div>
+    <div class="cal-week">${t('cal.week').split(',').map(w => `<span>${w}</span>`).join('')}</div>
     <div class="cal-grid">${cells}</div>
     <div class="legend cal-legend">${legend}</div>`;
 }
