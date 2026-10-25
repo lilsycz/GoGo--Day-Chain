@@ -5,7 +5,7 @@ const svg = (w, h, inner, sw = 1.6) =>
 export const I = {
   check:    svg(12, 9, `<polyline points="1,4.5 4.5,8 11,1"/>`, 1.8),
   lock:     svg(10, 12, `<rect x=".75" y="5.25" width="8.5" height="6" rx="1.5"/><path d="M2.2 5.2V3.5C2.2 2.1 3.46 1 5 1C6.54 1 7.8 2.1 7.8 3.5V5.2"/>`, 1.3),
-  arrow:    svg(18, 10, `<line x1="1" y1="5" x2="16" y2="5"/><polyline points="12,1 16.5,5 12,9"/>`),
+  arrow:    `<svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor" aria-hidden="true"><path d="M1 1.2v7.6a.8.8 0 0 0 1.2.7l6-3.8a.8.8 0 0 0 0-1.4l-6-3.8A.8.8 0 0 0 1 1.2z"/></svg>`,
   undo:     svg(14, 14, `<path d="M3 5.5h6.5a3.5 3.5 0 0 1 0 7H6"/><polyline points="5.5,2.5 2.5,5.5 5.5,8.5"/>`),
   swap:     svg(16, 14, `<polyline points="11,1 14.5,4 11,7"/><line x1="14" y1="4" x2="2" y2="4"/><polyline points="5,7 1.5,10 5,13"/><line x1="2" y1="10" x2="14" y2="10"/>`),
   plus:     svg(14, 14, `<line x1="7" y1="1.5" x2="7" y2="12.5"/><line x1="1.5" y1="7" x2="12.5" y2="7"/>`),
