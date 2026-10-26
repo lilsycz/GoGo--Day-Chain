@@ -21,6 +21,8 @@ import { setFeedUrl } from './views/jobs.js';
 import { initTopbar, updateDateLabel, toggleTheme, resetDay, openMenu, menuAction } from './views/topbar.js';
 import { initDialog } from './views/dialog.js';
 import { initBackup } from './views/backup.js';
+import { initStepInputs } from './views/stepInput.js';
+import { switchTemplate, saveAsTemplate, removeTemplate } from './views/templates.js';
 
 Object.assign(window, {
   toggleShowAll, startDay, completeTask, undoLast, toggleCheck, unskipTask,
@@ -34,6 +36,7 @@ Object.assign(window, {
   openBedtime, closeBedtime, toggleNight, saveBedtime,
   toggleEditMode, setEditTarget, editField, editCheckItem,
   setFeedUrl, toggleTheme, resetDay, openMenu, menuAction,
+  switchTemplate, saveAsTemplate, removeTemplate,
 });
 
 initTopbar();
@@ -43,6 +46,7 @@ initEdit();
 initSwap();
 initDialog();
 initBackup();
+initStepInputs();
 render();
 
 // app 一直开着跨过凌晨 4 点，或者第二天从后台切回来时，换成新的一天

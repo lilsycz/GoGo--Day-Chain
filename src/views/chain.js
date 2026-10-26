@@ -22,6 +22,7 @@ import { jobsHTML, loadJobs } from './jobs.js';
 import { showToast } from './toast.js';
 import { render } from './render.js';
 import { dropTpl } from './palette.js';
+import { stepInputHTML } from './stepInput.js';
 
 let chainSortable = null;
 let showAll = false;
@@ -62,7 +63,7 @@ export function renderStartCard() {
   box.innerHTML = `<div class="hero start-card">
     <div class="hero-kicker">${t('start.kicker')}</div>
     <div class="hero-title">${t('start.title')}</div>
-    ${first ? stepBox(`<div class="ft-text with-glyph">${glyph(first, 22)} ${esc(tt(first, 'title'))}${step ? ` — ${esc(step)}` : ''}</div>`, t('start.first')) : ''}
+    ${first ? stepBox(`<div class="ft-text with-glyph">${glyph(first, 22)} ${esc(tt(first, 'title'))}${step ? ` — ${esc(step)}` : ''}</div>${step ? '' : stepInputHTML(first)}`, t('start.first')) : ''}
     <div class="hero-foot">
       ${circleBtn(t('start.btn'), 'startDay()')}
       <div class="hero-actions"><button class="act" onclick="openPalette()">${I.plus}<span>${t('start.insert')}</span></button></div>
@@ -70,15 +71,13 @@ export function renderStartCard() {
   </div>`;
 }
 
-// 当前卡片里的"第一步"：没写过就显示一行可以直接点的提示
+// 当前卡片里的"第一步"：只显示（在休息时或编辑模式里写）；没写就不显示
 function currentStepHTML(task) {
   if (task.type==='first-thing' && S[task.ftKey]) {
     return stepBox(`<div class="ft-text">${esc(S[task.ftKey])}</div>`, t('step.bedtime'));
   }
-  if (task.starter) {
-    return stepBox(`<div class="ft-text editable" onclick="editStarter(event,'${task.id}')">${esc(task.starter)}</div>`);
-  }
-  return `<div class="ft-ghost" onclick="editStarter(event,'${task.id}')">${glyphSVG('pen', 16)} ${t('step.ghost')}</div>`;
+  if (task.starter) return stepBox(`<div class="ft-text">${esc(task.starter)}</div>`);
+  return '';
 }
 
 function cardHTML(task, i, ci, canUndo) {

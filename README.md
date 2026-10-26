@@ -10,7 +10,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 
 1. **Start today.** The day begins when you tap *Start today*, not at a fixed hour.
 2. **Do the one thing in front of you.** The current task is a big full-color card showing its *first step* ("put the pan on the stove"). Tap the round button when it's done.
-3. **Rest as long as you like.** The page greys out. There's no countdown: pick when to be nudged, or not at all. The nudge shows the next task's first step with *Start now* / *Later*.
+3. **Rest as long as you like.** The page greys out. There's no countdown: pick when to be nudged, or not at all. While you rest, write the next task's smallest first step (each task suggests an example). The nudge shows it with *Start now* / *Later*.
 4. **Repeat.** Not feeling the next task? *Swap* it, push it to the end, or skip it for today.
 5. **Look back.** Start and end times are logged in the background, so you can see what your day actually looked like.
 
@@ -20,7 +20,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 
 **Doing**
 - **Focus view**: only the current task and the next one are shown; the rest stays folded until you ask
-- **Smallest first step**: every task can carry a tiny starter action, written right on the card
+- **Smallest first step**: written while you rest before a task (or on the start card for the first one), with a grey example tailored to the task; the task card then just shows it
 - **Swap / later / skip**: change today's order without touching your daily routine
 - **Checklist tasks**: e.g. *Head out* only completes once everything is packed
 - **Undo**: step back to the previous task
@@ -35,8 +35,9 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **New day at 4 AM**: yesterday is archived automatically; staying up past midnight still counts as today
 
 **Editing** (✎ in the top right)
+- **Templates**: switch the whole routine in one tap (e.g. *Weekday*, *Sunday*). Done tasks stay, the rest is replaced. When today feels right, *Save as template* and give it a name. New users start from *Basic*; people coming from the old version get their routine saved as *Personal*
 - Rename tasks, notes, first steps and checklist items in place; hold the ≡ handle to reorder; remove with a few seconds to undo
-- **Add something**: a tray sits at the bottom of edit mode, with events grouped by category color. Swipe it up to see more; tap an event to add it after the current task, or hold and drag it into the list to drop it exactly where you want. The new row flashes and a message tells you where it went (with undo). Create your own events with an icon, category color and first step
+- **Add something**: a tray sits at the bottom of edit mode, with events grouped by category color (meals, focus, health, life, other; 23 to start with). Swipe it up to see more; tap an event to add it after the current task, or hold and drag it into the list to drop it exactly where you want. The new row flashes and a message tells you where it went (with undo). Create your own events with an icon, category color and first step
 
 **Settings** (the ··· menu)
 - **Today vs. every day**: adding, swapping and skipping only change today. Editing, reordering and removing in edit mode change your daily routine; a one-off task can be pinned to it
@@ -107,6 +108,7 @@ The layout mirrors a planned SwiftUI version, so each part maps over one-to-one.
 - [x] Focus view, swap / later / skip, today-only vs daily edits
 - [x] Swiss-style redesign, line icons, calendar with day rings
 - [x] English / Chinese UI
+- [x] Templates and a basic starter routine for new users
 - [ ] Change a task's category and icon in edit mode
 - [ ] Bedtime page: review today + write tomorrow's first steps
 - [x] Export / import data

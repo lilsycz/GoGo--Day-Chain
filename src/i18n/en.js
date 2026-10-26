@@ -16,6 +16,12 @@ export default {
   'menu.export': 'Export data', 'menu.import': 'Import data',
   'export.done': 'Backup exported', 'import.title': 'Import backup?', 'import.body': 'Your tasks, log and settings on this device will be replaced with the ones in the backup.', 'import.ok': 'Import', 'import.bad': 'This file isn’t a GoGo backup',
   'toast.insertedAfter': '“{t}” added after “{after}”', 'toast.insertedFirst': '“{t}” added at the top',
+  'tpl.label': 'Templates', 'tpl.generic': 'Basic', 'tpl.personal': 'Personal', 'tpl.save': '＋ Save as template',
+  'tpl.saveTitle': 'Save as template', 'tpl.namePh': 'e.g. Weekday, Sunday', 'tpl.saved': 'Saved template “{n}”',
+  'tpl.switchTitle': 'Switch to “{n}”?', 'tpl.switchBody': 'What you’ve done today stays; the rest is replaced with this template. Every day will start from it.',
+  'tpl.switchOk': 'Switch', 'tpl.switched': 'Switched to “{n}”',
+  'tpl.delTitle': 'Delete template “{n}”?', 'tpl.delBody': 'Only the template is deleted; today’s tasks stay as they are.', 'tpl.delOk': 'Delete',
+  'step.example': 'e.g. Get out what you need', 'rest.writeStep': 'Write the smallest first step',
   'edit.bar': 'Editing · tap text to change, drag ≡ to reorder', 'edit.done': 'Done',
 
   // Palette / new event

@@ -6,6 +6,8 @@ const CUSTOM_KEY   = 'dc_custom_v1';
 const DEFAULTS_KEY = 'dc_defaults_v1';
 const NIGHT_KEY    = 'dc_night_v1';
 const HISTORY_KEY  = 'dc_history_v1';
+const TEMPLATES_KEY = 'dc_templates_v1';
+const ACTIVE_TPL_KEY = 'dc_active_tpl';
 const THEME_KEY    = 'dc_theme2'; // 新风格从浅色开始
 const FEED_KEY     = 'job_feed_url';
 
@@ -46,8 +48,17 @@ export function hasSavedDay() { try { return !!localStorage.getItem(DAY_KEY); } 
 export function getLang() { try { return localStorage.getItem('dc_lang'); } catch { return null; } }
 export function setLang(l) { try { localStorage.setItem('dc_lang', l); } catch {} }
 
+// 存下来的模版 [{ id, name, chain }]；null = 还没迁移过
+export function loadTemplates() {
+  try { const d = localStorage.getItem(TEMPLATES_KEY); return d ? JSON.parse(d) : null; } catch { return null; }
+}
+export function saveTemplates(list) { localStorage.setItem(TEMPLATES_KEY, JSON.stringify(list)); }
+export function getActiveTemplate()   { return localStorage.getItem(ACTIVE_TPL_KEY); }
+export function setActiveTemplate(id) { if (id) localStorage.setItem(ACTIVE_TPL_KEY, id); else localStorage.removeItem(ACTIVE_TPL_KEY); }
+export function hasNightItems() { return localStorage.getItem(NIGHT_KEY) != null; }
+
 // ── 备份：把所有数据打包成一个对象 / 从备份恢复 ──
-const BACKUP_KEYS = [DAY_KEY, CUSTOM_KEY, DEFAULTS_KEY, NIGHT_KEY, HISTORY_KEY, THEME_KEY, 'dc_lang', FEED_KEY];
+const BACKUP_KEYS = [DAY_KEY, CUSTOM_KEY, DEFAULTS_KEY, NIGHT_KEY, HISTORY_KEY, TEMPLATES_KEY, ACTIVE_TPL_KEY, THEME_KEY, 'dc_lang', FEED_KEY];
 
 export function exportAll() {
   const data = {};

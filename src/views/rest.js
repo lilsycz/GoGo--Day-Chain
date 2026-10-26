@@ -14,6 +14,7 @@ import { askPermission, remind } from '../services/notify.js';
 import { esc, fmtTime } from './format.js';
 import { I } from './icons.js';
 import { glyph } from './glyphs.js';
+import { stepInputHTML } from './stepInput.js';
 import { t, tt, lang } from '../i18n/index.js';
 import { categoryOf, catVars } from '../models/categories.js';
 import { render } from './render.js';
@@ -25,7 +26,7 @@ function nextPreview(task) {
   return `<div class="next-row" style="${catVars(categoryOf(task))}">
     <div class="section-label">${t('next')}</div>
     <div class="next-title"><span class="dot"></span>${glyph(task, 22)}${esc(tt(task, 'title'))}</div>
-    ${step ? `<div class="next-step">${t('rest.firstStep', {s:esc(step)})}</div>` : ''}
+    ${step ? `<div class="next-step">${t('rest.firstStep', {s:esc(step)})}</div>` : stepInputHTML(task)}
   </div>`;
 }
 

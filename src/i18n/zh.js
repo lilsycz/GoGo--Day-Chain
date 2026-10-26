@@ -16,6 +16,12 @@ export default {
   'menu.export': '导出数据', 'menu.import': '导入数据',
   'export.done': '已导出备份', 'import.title': '导入备份？', 'import.body': '会用备份里的任务、记录和设置，替换这台设备上现在的数据。', 'import.ok': '导入', 'import.bad': '这个文件不是 GoGo 的备份',
   'toast.insertedAfter': '「{t}」已插到「{after}」后面', 'toast.insertedFirst': '「{t}」已放在最前面',
+  'tpl.label': '模版', 'tpl.generic': '通用', 'tpl.personal': '个人', 'tpl.save': '＋ 存为模版',
+  'tpl.saveTitle': '存为模版', 'tpl.namePh': '比如：周中、周日', 'tpl.saved': '已保存模版「{n}」',
+  'tpl.switchTitle': '切换到「{n}」？', 'tpl.switchBody': '今天做完的会保留，还没做的换成这个模版里的。以后每天也按它开始。',
+  'tpl.switchOk': '切换', 'tpl.switched': '已切换到「{n}」',
+  'tpl.delTitle': '删除模版「{n}」？', 'tpl.delBody': '只删除这个模版，今天的任务不受影响。', 'tpl.delOk': '删除',
+  'step.example': '比如：把要用的东西拿出来', 'rest.writeStep': '写下最小的第一步',
   'edit.bar': '编辑中 · 点文字改，拖 ≡ 排序', 'edit.done': '完成',
 
   // 插入调板 / 新建事件

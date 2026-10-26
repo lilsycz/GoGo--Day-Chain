@@ -6,7 +6,7 @@
 //   每日任务模板   存在 storage 里，新的一天从它复制。编辑文字、拖拽排序、移除会同时改模板。
 //   从调板插入的任务带 once:true，只属于今天，不进模板。
 
-import { DEFAULT_TASKS, NIGHT_ITEMS } from '../models/defaults.js';
+import { DEFAULT_TASKS, PERSONAL_TASKS, NIGHT_ITEMS, PERSONAL_NIGHT } from '../models/defaults.js';
 import { categoryOf } from '../models/categories.js';
 import * as storage from './storage.js';
 
@@ -56,6 +56,68 @@ function loadDay() {
 // ── 每日任务模板 ──
 function loadDaily() { return storage.loadDefaultChain() || clone(DEFAULT_TASKS); }
 function editDaily(fn) { const d = loadDaily(); fn(d); storage.saveDefaultChain(d); }
+
+// ── 模版（一键切换的几套每日任务）──
+// 「通用」是内置的，不存；其他存在 storage 里。
+// 第一次运行新版本时：用过旧版的人，把他们现在的每日任务存成「个人」模版并设为当前，什么都不会变；
+// 新用户从「通用」开始。
+function migrateTemplates() {
+  if (storage.loadTemplates()) return;
+  const isOldUser = storage.hasSavedDay() || storage.loadDefaultChain();
+  if (isOldUser) {
+    const chain = storage.loadDefaultChain() || clone(PERSONAL_TASKS);
+    storage.saveDefaultChain(chain);
+    if (!storage.hasNightItems()) storage.saveNightItems(clone(PERSONAL_NIGHT));
+    storage.saveTemplates([{ id:'personal', name:'个人', chain:clone(chain) }]);
+    storage.setActiveTemplate('personal');
+  } else {
+    storage.saveTemplates([]);
+    storage.setActiveTemplate('generic');
+  }
+}
+migrateTemplates();
+
+// 模版里存的任务：去掉"只在今天"的标记
+const toTemplateChain = chain => clone(chain).map(t => { delete t.once; return t; });
+
+export function getTemplates() {
+  return [{ id:'generic', builtin:true, name:'', chain:DEFAULT_TASKS }, ...(storage.loadTemplates() || [])];
+}
+export function activeTemplateId() { return storage.getActiveTemplate(); }
+
+// 存为模版：同名的覆盖，不同名的新建；存完它就是当前模版，以后每天按它开始
+export function saveTemplate(name) {
+  const list = storage.loadTemplates() || [];
+  const chain = toTemplateChain(S.chain);
+  let tpl = list.find(x => x.name === name);
+  if (tpl) tpl.chain = chain;
+  else { tpl = { id:'tpl_' + Date.now(), name, chain }; list.push(tpl); }
+  storage.saveTemplates(list);
+  storage.setActiveTemplate(tpl.id);
+  storage.saveDefaultChain(clone(chain));
+  S.chain.forEach(t => { delete t.once; }); // 今天插入的也变成每日任务了
+  persist();
+  return tpl;
+}
+
+// 切换模版：做完 / 跳过的保留，其余换成模版里的；以后每天也按它开始
+export function applyTemplate(id) {
+  const tpl = getTemplates().find(x => x.id === id);
+  if (!tpl) return;
+  const chain = clone(tpl.chain);
+  storage.saveDefaultChain(clone(chain));
+  storage.setActiveTemplate(id);
+  const kept = S.chain.filter(t => isResolved(t.id));
+  const keptIds = new Set(kept.map(t => t.id));
+  S.chain = [...kept, ...chain.filter(t => !keptIds.has(t.id))];
+  afterChainChange();
+  persist();
+}
+
+export function deleteTemplate(id) {
+  storage.saveTemplates((storage.loadTemplates() || []).filter(x => x.id !== id));
+  if (storage.getActiveTemplate() === id) storage.setActiveTemplate(null);
+}
 
 // ── 状态（其他模块拿到的是实时绑定，只能在这里重新赋值） ──
 export let S = loadDay();

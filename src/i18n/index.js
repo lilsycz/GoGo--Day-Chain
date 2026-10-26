@@ -36,7 +36,14 @@ export function loc(id, field, value) {
   const base = String(id).replace(/_\d+$/, '');
   const entry = DEFAULT_TEXT[base]?.[field];
   if (!entry) return value;
-  return value === entry.zh || value === entry.en ? entry[lang] : value;
+  const hit = (Array.isArray(entry) ? entry : [entry]).find(v => value === v.zh || value === v.en);
+  return hit ? hit[lang] : value;
+}
+
+// 休息时"写下第一步"的灰色例子：内置任务有自己的例子，其他用通用的
+export function exampleFor(task) {
+  const base = String(task.id).replace(/_\d+$/, '');
+  return DEFAULT_TEXT[base]?.example?.[lang] || t('step.example');
 }
 
 export const tt = (task, field) => loc(task.id, field, task[field]);

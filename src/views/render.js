@@ -3,6 +3,7 @@ import { renderRail, renderStartCard, renderChain, initSortable } from './chain.
 import { renderPalette } from './palette.js';
 import { renderRest } from './rest.js';
 import { renderBadge } from './calendar.js';
+import { renderTemplateBar } from './templates.js';
 
 export function render() {
   renderRail();
@@ -11,5 +12,6 @@ export function render() {
   renderPalette();
   renderRest();
   renderBadge(); // 左上角日期的圆环跟着今天的进度变
+  renderTemplateBar();
   initSortable();
 }
