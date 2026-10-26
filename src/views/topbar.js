@@ -4,8 +4,7 @@ import { setTheme } from '../store/storage.js';
 import { I } from './icons.js';
 import { glyphSVG } from './glyphs.js';
 import { confirmDialog } from './dialog.js';
-import { openPalette } from './palette.js';
-import { toggleEditMode } from './edit.js';
+import { exportData, importData } from './backup.js';
 import { openBedtime } from './bedtime.js';
 import { render } from './render.js';
 import { renderBadge } from './calendar.js';
@@ -70,8 +69,8 @@ export function closeMenu() { document.getElementById('menuModal').classList.add
 
 export function menuAction(what) {
   closeMenu();
-  if (what === 'insert')  openPalette();
-  if (what === 'edit')    toggleEditMode();
+  if (what === 'export')  exportData();
+  if (what === 'import')  importData();
   if (what === 'bedtime') openBedtime();
   if (what === 'theme')   toggleTheme();
   if (what === 'lang')    toggleLang();

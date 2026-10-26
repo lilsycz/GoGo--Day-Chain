@@ -1,25 +1,36 @@
-// 插入托盘（底部升起）+ 新建事件弹窗
+// 插入托盘（编辑模式底部）+ 新建事件弹窗
+// 托盘三种高度：peek（只露标题）/ half / full，上滑展开、下滑收起、点标题切换
 // 点一下：加在当前任务后面；按住拖到上面的任务链里：插在放下的位置
+// 插入后留在编辑页：新的一行闪一下、滚到它，底部提示插在了哪，可以撤销
 // → Swift: Views/InsertTray.swift（拖拽用 .draggable / .dropDestination）
 
 import { PAL_TEMPLATES } from '../models/defaults.js';
 import { CATEGORIES, catColor } from '../models/categories.js';
 import { glyph, glyphSVG, glyphName, GLYPH_CHOICES } from './glyphs.js';
 import {
-  customTemplates, genId, insertAfterCurrent, insertBefore,
-  addCustomTemplate, deleteCustomTemplate,
+  S, customTemplates, genId, insertAfterCurrent, insertBefore,
+  addCustomTemplate, deleteCustomTemplate, removeTask, restoreTask,
 } from '../store/store.js';
 import { render } from './render.js';
-import { t, loc } from '../i18n/index.js';
+import { t, tt, loc } from '../i18n/index.js';
 import { esc } from './format.js';
+import { editMode, toggleEditMode } from './edit.js';
+import { showToast } from './toast.js';
 
 let tray;
-let open = false;
+let state = 'closed';        // closed / peek / half / full
+let beforeDrag = 'half';
 let pickedGlyph = 'pin';
 let pickedCat = 'other';
 let traySortables = [];
 
-export const isInserting = () => open;
+export const trayOpen = () => state !== 'closed';
+
+export function setTray(next) {
+  state = next;
+  tray.dataset.state = next;
+  document.body.dataset.tray = next;
+}
 
 // ── 模板 → 任务 ──
 // tpl: 't:meeting'（自带模板） / 'c:ct_123'（自定义）
@@ -66,7 +77,7 @@ export function renderPalette() {
 function initTraySortables() {
   traySortables.forEach(s => { try { s.destroy(); } catch {} });
   traySortables = [];
-  if (!open || typeof Sortable === 'undefined') return;
+  if (!trayOpen() || typeof Sortable === 'undefined') return;
   document.querySelectorAll('#palSections .pal-grid').forEach(grid => {
     try {
       traySortables.push(new Sortable(grid, {
@@ -75,51 +86,70 @@ function initTraySortables() {
         forceFallback: true, fallbackOnBody: true,
         delay: 120, delayOnTouchOnly: true, // 手机上让托盘还能上下滑
         filter: '.pt-del', preventOnFilter: false,
-        onStart() { document.body.classList.add('dragging-tile'); },
-        onEnd()   { document.body.classList.remove('dragging-tile'); },
+        // 拖起来时托盘缩到最小，把上面的列表让出来
+        onStart() { beforeDrag = state; setTray('peek'); document.body.classList.add('dragging-tile'); },
+        onEnd(evt) {
+          document.body.classList.remove('dragging-tile');
+          if (evt.to === evt.from) setTray(beforeDrag); // 没放进列表：恢复原来的高度
+        },
       }));
     } catch (e) { console.warn('Tray sortable failed', e); }
   });
 }
 
-// ── 托盘开关：打开时上面的任务链会展开，方便拖进去 ──
+// ── 托盘开关 ──
+// 从主页的"插入一件"等按钮进来：先进编辑模式，再把托盘拉到半屏
 export function openPalette() {
-  open = true;
-  document.body.classList.add('inserting');
-  tray.classList.add('open');
-  render();
+  if (!editMode) toggleEditMode();
+  setTray('half');
+  renderPalette();
 }
-export function closePalette() {
-  if (!open) return;
-  open = false;
-  document.body.classList.remove('inserting');
-  tray.classList.remove('open');
-  render();
+export function closePalette() { setTray('peek'); }
+
+// 进 / 出编辑模式时由 edit.js 调用
+export function onEditMode(on) {
+  setTray(on ? 'peek' : 'closed');
 }
 
-function scrollToRow(at) {
-  setTimeout(() => {
-    const rows = document.querySelectorAll('#chainList .task-row');
-    if (rows[at]) rows[at].scrollIntoView({ behavior:'smooth', block:'center' });
-  }, 100);
+const ORDER = ['peek', 'half', 'full'];
+function stepTray(dir) {
+  const i = ORDER.indexOf(state);
+  setTray(ORDER[Math.max(0, Math.min(ORDER.length - 1, i + dir))]);
+}
+
+// 插入之后：滚到新的一行、闪一下，提示插在哪，可以撤销
+function afterInsert(task, at) {
+  document.body.classList.remove('dragging-tile');
+  setTray('peek');
+  render();
+  const row = document.querySelector(`#chainList .task-row[data-id="${task.id}"]`);
+  if (row) {
+    row.classList.add('just-added');
+    row.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  const prev = S.chain[at - 1];
+  const title = esc(tt(task, 'title'));
+  const msg = prev
+    ? t('toast.insertedAfter', { t:title, after:esc(tt(prev, 'title')) })
+    : t('toast.insertedFirst', { t:title });
+  showToast(msg, t('undo'), () => {
+    const undo = removeTask(task.id);
+    if (undo) render();
+  });
 }
 
 // 点一下：加在当前任务后面
 export function addTpl(tpl) {
   const task = taskFromTpl(tpl);
   if (!task) return;
-  const at = insertAfterCurrent(task);
-  closePalette();
-  scrollToRow(at);
+  afterInsert(task, insertAfterCurrent(task));
 }
 
 // 拖进任务链：插在 beforeId 前面（chain.js 收到放下事件时调用）
 export function dropTpl(tpl, beforeId) {
   const task = taskFromTpl(tpl);
   if (!task) return;
-  const at = insertBefore(task, beforeId);
-  closePalette();
-  scrollToRow(at);
+  afterInsert(task, insertBefore(task, beforeId));
 }
 
 // ── 新建事件弹窗 ──
@@ -168,6 +198,26 @@ export function delCustomTemplate(id) {
 
 export function initPalette() {
   tray = document.getElementById('palDrawer');
+
+  // 标题栏：点一下在收起 / 半屏之间切换；上滑展开、下滑收起
+  const head = document.getElementById('trayHead');
+  let y0 = null, moved = false;
+  head.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; moved = false; }, { passive:true });
+  head.addEventListener('touchmove', e => {
+    if (y0 == null) return;
+    const dy = e.touches[0].clientY - y0;
+    if (Math.abs(dy) > 30) { stepTray(dy < 0 ? 1 : -1); y0 = null; moved = true; }
+  }, { passive:true });
+  head.addEventListener('touchend', () => { y0 = null; });
+  head.addEventListener('click', () => {
+    if (moved) { moved = false; return; }
+    setTray(state === 'peek' ? 'half' : 'peek');
+  });
+  // 托盘内容区往上滑到顶时也展开成大半屏
+  tray.querySelector('.pal-body').addEventListener('scroll', e => {
+    if (state === 'half' && e.target.scrollTop > 40) setTray('full');
+  }, { passive:true });
+
   const modal = document.getElementById('customModal');
   modal.addEventListener('click', e => {
     if (e.target === modal) closeCustomModal();

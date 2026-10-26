@@ -12,10 +12,14 @@ export default {
   'menu.insert': '插入一件事', 'menu.edit': '编辑任务', 'menu.bedtime': '睡前清单',
   'menu.dark': '深色模式', 'menu.light': '浅色模式', 'menu.lang': 'English', 'menu.reset': '重置今天',
   'reset.title': '重置今天？', 'reset.body': '今天的进度、临时插入的事件和今天的记录都会清除。', 'reset.ok': '重置',
+  'aria.edit': '编辑任务', 'edit.title': '编辑', 'edit.hint': '点文字改名 · 按住 ≡ 排序 · 从下面拖入新事件',
+  'menu.export': '导出数据', 'menu.import': '导入数据',
+  'export.done': '已导出备份', 'import.title': '导入备份？', 'import.body': '会用备份里的任务、记录和设置，替换这台设备上现在的数据。', 'import.ok': '导入', 'import.bad': '这个文件不是 GoGo 的备份',
+  'toast.insertedAfter': '「{t}」已插到「{after}」后面', 'toast.insertedFirst': '「{t}」已放在最前面',
   'edit.bar': '编辑中 · 点文字改，拖 ≡ 排序', 'edit.done': '完成',
 
   // 插入调板 / 新建事件
-  'pal.title': '插入一件事', 'pal.hint': '点一下：加在当前这件后面 · 按住拖到上面：放在哪就插在哪（只在今天）', 'pal.custom': '自定义', 'pal.new': '＋ 新建事件',
+  'pal.title': '插入一件事', 'pal.hint': '点一下加在当前这件后面，或按住拖到上面任意位置 · 只加在今天', 'pal.custom': '自定义', 'pal.new': '＋ 新建事件',
   'cm.title': '新建事件', 'cm.icon': '图标', 'cm.name': '名称', 'cm.name.ph': '事件名称',
   'cm.step': '第一步（可选）', 'cm.step.ph': '比如：把琴拿出来',
   'cm.cat': '类别（决定颜色）', 'cm.btn': '完成后的按钮文字', 'cm.btn.ph': '完成了',

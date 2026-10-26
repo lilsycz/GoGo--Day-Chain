@@ -12,10 +12,14 @@ export default {
   'menu.insert': 'Add something', 'menu.edit': 'Edit tasks', 'menu.bedtime': 'Bedtime',
   'menu.dark': 'Dark mode', 'menu.light': 'Light mode', 'menu.lang': '中文', 'menu.reset': 'Reset today',
   'reset.title': 'Reset today?', 'reset.body': "Today's progress, anything you added for today, and today's log will be cleared.", 'reset.ok': 'Reset',
+  'aria.edit': 'Edit tasks', 'edit.title': 'Edit', 'edit.hint': 'Tap text to rename · hold ≡ to reorder · drag new events in from below',
+  'menu.export': 'Export data', 'menu.import': 'Import data',
+  'export.done': 'Backup exported', 'import.title': 'Import backup?', 'import.body': 'Your tasks, log and settings on this device will be replaced with the ones in the backup.', 'import.ok': 'Import', 'import.bad': 'This file isn’t a GoGo backup',
+  'toast.insertedAfter': '“{t}” added after “{after}”', 'toast.insertedFirst': '“{t}” added at the top',
   'edit.bar': 'Editing · tap text to change, drag ≡ to reorder', 'edit.done': 'Done',
 
   // Palette / new event
-  'pal.title': 'Add something', 'pal.hint': 'Tap: add right after the current task · Hold and drag up: drop it anywhere (today only)', 'pal.custom': 'Your own', 'pal.new': '＋ New event',
+  'pal.title': 'Add something', 'pal.hint': 'Tap to add after the current task, or hold and drag it anywhere above · today only', 'pal.custom': 'Your own', 'pal.new': '＋ New event',
   'cm.title': 'New event', 'cm.icon': 'Icon', 'cm.name': 'Name', 'cm.name.ph': 'Event name',
   'cm.step': 'First step (optional)', 'cm.step.ph': 'e.g. Take the guitar out',
   'cm.cat': 'Category (sets the color)', 'cm.btn': 'Button text when done', 'cm.btn.ph': 'Done',

@@ -5,6 +5,7 @@ import { S, currentIdx, commitEdits, updateTaskField, updateCheckItemLabel } fro
 import { render } from './render.js';
 import { esc } from './format.js';
 import { t, tt, loc } from '../i18n/index.js';
+import { onEditMode } from './palette.js';
 
 // 可以清空的字段，清空后显示的占位文字
 const PLACEHOLDERS = {
@@ -18,6 +19,8 @@ export let editTarget = null;
 export function toggleEditMode() {
   editMode = !editMode;
   document.body.classList.toggle('edit-mode', editMode);
+  onEditMode(editMode); // 插入托盘跟着编辑模式出现 / 收起
+  window.scrollTo({ top:0 });
   if (editMode) {
     // 默认展开当前任务卡片
     editTarget = S.chain[currentIdx()]?.id || S.chain[0]?.id || null;

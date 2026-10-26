@@ -46,6 +46,23 @@ export function hasSavedDay() { try { return !!localStorage.getItem(DAY_KEY); } 
 export function getLang() { try { return localStorage.getItem('dc_lang'); } catch { return null; } }
 export function setLang(l) { try { localStorage.setItem('dc_lang', l); } catch {} }
 
+// ── 备份：把所有数据打包成一个对象 / 从备份恢复 ──
+const BACKUP_KEYS = [DAY_KEY, CUSTOM_KEY, DEFAULTS_KEY, NIGHT_KEY, HISTORY_KEY, THEME_KEY, 'dc_lang', FEED_KEY];
+
+export function exportAll() {
+  const data = {};
+  for (const k of BACKUP_KEYS) { const v = localStorage.getItem(k); if (v != null) data[k] = v; }
+  return { app:'gogo-day-chain', version:1, exportedAt:new Date().toISOString(), data };
+}
+
+// 返回 false 表示文件不对
+export function importAll(backup) {
+  if (!backup || backup.app !== 'gogo-day-chain' || typeof backup.data !== 'object') return false;
+  for (const k of BACKUP_KEYS) localStorage.removeItem(k);
+  for (const [k, v] of Object.entries(backup.data)) if (BACKUP_KEYS.includes(k)) localStorage.setItem(k, v);
+  return true;
+}
+
 // 求职 JSON 地址
 export function getFeedUrl()     { return localStorage.getItem(FEED_KEY); }
 export function setFeedUrl(url)  { localStorage.setItem(FEED_KEY, url); }

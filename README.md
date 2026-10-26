@@ -22,7 +22,6 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **Focus view**: only the current task and the next one are shown; the rest stays folded until you ask
 - **Smallest first step**: every task can carry a tiny starter action, written right on the card
 - **Swap / later / skip**: change today's order without touching your daily routine
-- **Add something**: a tray rises from the bottom with events grouped by category color. Tap one to add it right after the current task, or hold and drag it up into the list to drop it exactly where you want (today only). Create your own with an icon, category color and first step
 - **Checklist tasks**: e.g. *Head out* only completes once everything is packed
 - **Undo**: step back to the previous task
 
@@ -35,11 +34,15 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **Today's timeline** (calendar icon, top right): what ran from when to when, plus rests, color-coded by category
 - **New day at 4 AM**: yesterday is archived automatically; staying up past midnight still counts as today
 
-**Setting up** (the ··· menu)
-- **Edit tasks**: rename tasks, notes, first steps and checklist items in place; drag the ≡ handle to reorder; remove with a few seconds to undo
+**Editing** (✎ in the top right)
+- Rename tasks, notes, first steps and checklist items in place; hold the ≡ handle to reorder; remove with a few seconds to undo
+- **Add something**: a tray sits at the bottom of edit mode, with events grouped by category color. Swipe it up to see more; tap an event to add it after the current task, or hold and drag it into the list to drop it exactly where you want. The new row flashes and a message tells you where it went (with undo). Create your own events with an icon, category color and first step
+
+**Settings** (the ··· menu)
 - **Today vs. every day**: adding, swapping and skipping only change today. Editing, reordering and removing in edit mode change your daily routine; a one-off task can be pinned to it
 - **Bedtime checklist**: pack your bag and write tomorrow's first thing for study and work
 - **Light / dark mode** and **English / 中文**: built-in task names follow the language; anything you renamed stays as you wrote it
+- **Export / import**: save a backup file (on iPhone, via the share sheet to Files or iCloud Drive) and restore it on any device
 - **Reset today**
 
 **Design**
@@ -52,7 +55,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 ## Known limitations (web version)
 
 - **Reminders only fire while the page is open.** On a locked iPhone they usually won't arrive; when you come back, the app shows *Time to start* if the reminder is due. Lock-screen notifications are planned for the native app.
-- **Data lives in this browser only** (localStorage). Clearing site data removes it; there's no sync or export yet.
+- **Data lives in this browser only** (localStorage). Clearing site data removes it, and on iPhone Safari may clear it after 7 days without a visit (home-screen apps are exempt). Use *Export data* now and then as a backup; there's no automatic sync yet.
 - **Needs a connection on first load** for the drag-and-drop library and the font (falls back to the system font offline).
 
 ---
@@ -106,6 +109,7 @@ The layout mirrors a planned SwiftUI version, so each part maps over one-to-one.
 - [x] English / Chinese UI
 - [ ] Change a task's category and icon in edit mode
 - [ ] Bedtime page: review today + write tomorrow's first steps
-- [ ] Export / import data
+- [x] Export / import data
+- [x] Edit mode in the top bar with a drag-in insert tray
 - [ ] First-run onboarding; job card as an optional module
 - [ ] Native SwiftUI app for the App Store

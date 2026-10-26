@@ -19,5 +19,9 @@ export const I = {
   themeFill: `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.4a7.6 7.6 0 0 0 0 15.2z" fill="currentColor"/></svg>`,
   langFill:  `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="4.5" fill="currentColor"/><path d="M6.6 14.2L10 5.8l3.4 8.4M7.9 11.2h4.2" fill="none" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   moonFill:  `<svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M16.8 12.6A7.4 7.4 0 0 1 7.4 3.2a7.4 7.4 0 1 0 9.4 9.4z"/></svg>`,
+  chevUp:    svg(14, 9, `<polyline points="1.5,7.5 7,2 12.5,7.5"/>`, 2.2),
+  // 导出：托盘 + 向上箭头；导入：托盘 + 向下箭头（实心风格）
+  exportFill: `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 11.5v4a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M10 2.2l4.3 4.6h-2.7v5.4H8.4V6.8H5.7z" fill="currentColor"/></svg>`,
+  importFill: `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 11.5v4a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M10 13.8L5.7 9.2h2.7V3.8h3.2v5.4h2.7z" fill="currentColor"/></svg>`,
   close:    svg(12, 12, `<line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>`, 1.7),
 };
