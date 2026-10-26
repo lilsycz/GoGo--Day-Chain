@@ -8,7 +8,7 @@ import {
   S, currentIdx, nextIdx, lastDoneIdx, isChecklistReady, starterOf,
   startDay as startDayAction, completeCurrent, undoLast as undoLastAction,
   toggleCheck as toggleCheckAction, unskipTask as unskipAction,
-  removeTask as removeTaskAction, restoreTask, addToDaily as addToDailyAction,
+  removeTask as removeTaskAction, restoreTask,
   updateTaskField, reorder,
 } from '../store/store.js';
 import { getFeedUrl } from '../store/storage.js';
@@ -73,9 +73,6 @@ export function renderStartCard() {
 
 // 当前卡片里的"第一步"：只显示（在休息时或编辑模式里写）；没写就不显示
 function currentStepHTML(task) {
-  if (task.type==='first-thing' && S[task.ftKey]) {
-    return stepBox(`<div class="ft-text">${esc(S[task.ftKey])}</div>`, t('step.bedtime'));
-  }
   if (task.starter) return stepBox(`<div class="ft-text">${esc(task.starter)}</div>`);
   return '';
 }
@@ -130,9 +127,13 @@ function cardHTML(task, i, ci, canUndo) {
       </div>
     </div>`;
   } else if (isEditTarget) {
-    // 编辑模式展开体：描述、第一步、打勾事项都可以点了改
-    body += `<div class="row-hint" onclick="editField(event,'${task.id}','hint')">${task.hint ? esc(tt(task, 'hint')) : HINT_PH()}</div>`;
-    body += stepBox(`<div class="ft-text" onclick="editField(event,'${task.id}','starter')">${task.starter ? esc(task.starter) : STEP_PH()}</div>`);
+    // 编辑模式展开体：有内容的字段点了就改；没有的只显示一个小 ＋ 按钮
+    if (task.hint) body += `<div class="row-hint" onclick="editField(event,'${task.id}','hint')">${esc(tt(task, 'hint'))}</div>`;
+    if (task.starter) body += stepBox(`<div class="ft-text" onclick="editField(event,'${task.id}','starter')">${esc(task.starter)}</div>`);
+    const adds = [!task.hint && 'hint', !task.starter && 'starter'].filter(Boolean);
+    if (adds.length) body += `<div class="add-chips">${adds.map(f =>
+      `<button class="add-chip" onclick="addField(event,'${task.id}','${f}')">${I.plus}<span>${t(f === 'hint' ? 'field.hint' : 'field.step')}</span></button>`
+    ).join('')}</div>`;
     if (task.type==='checklist') {
       body += '<div class="row-checks">' + (task.items||[]).map(it =>
         `<div class="check-row" data-item-id="${it.id}">
@@ -141,9 +142,6 @@ function cardHTML(task, i, ci, canUndo) {
         </div>`
       ).join('') + '</div>';
     }
-    if (task.once) {
-      body += `<div class="once-note">${t('once')} · <button class="text-link inline" onclick="addToDaily('${task.id}')">${t('once.add')}</button></div>`;
-    }
   }
 
   const titleClick = editMode ? `onclick="editField(event,'${task.id}','title')"` : '';
@@ -151,8 +149,9 @@ function cardHTML(task, i, ci, canUndo) {
   const cat = categoryOf(task);
   return `<div class="${cls}" data-id="${task.id}" data-type="${task.type}" data-cat="${cat}" style="${catVars(cat)}" ${cardClick}>
     <div class="row-top">
-      ${hero ? '' : '<span class="dot"></span>'}
-      <span class="row-icon">${glyph(task, hero ? 30 : 20)}</span>
+      ${editMode
+        ? `<button class="style-btn" onclick="event.stopPropagation();openStylePicker('${task.id}')" aria-label="${t('aria.style')}"><span class="dot"></span><span class="row-icon">${glyph(task, 20)}</span></button>`
+        : `${hero ? '' : '<span class="dot"></span>'}<span class="row-icon">${glyph(task, hero ? 30 : 20)}</span>`}
       <span class="row-title" ${titleClick}>${esc(tt(task, 'title'))}</span>
       <span class="row-right">${badge}${del}</span>
     </div>
@@ -295,15 +294,10 @@ export function removeTask(id) {
   render();
   if (!undo) return;
   const title = esc(tt(undo.task, 'title'));
-  const msg = t(undo.task.once ? 'toast.removed' : 'toast.removedDaily', { t:title });
+  const msg = t('toast.removed', { t:title });
   showToast(msg, t('undo'), () => { restoreTask(undo); render(); });
 }
 
-export function addToDaily(id) {
-  addToDailyAction(id);
-  render();
-  showToast(t('toast.daily'));
-}
 
 // 不用进编辑模式，直接在当前卡片上写第一步
 export function editStarter(e, taskId) {

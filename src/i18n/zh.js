@@ -16,6 +16,8 @@ export default {
   'menu.export': '导出数据', 'menu.import': '导入数据',
   'export.done': '已导出备份', 'import.title': '导入备份？', 'import.body': '会用备份里的任务、记录和设置，替换这台设备上现在的数据。', 'import.ok': '导入', 'import.bad': '这个文件不是 GoGo 的备份',
   'toast.insertedAfter': '「{t}」已插到「{after}」后面', 'toast.insertedFirst': '「{t}」已放在最前面',
+  'field.hint': '描述', 'field.step': '第一步', 'aria.style': '颜色和图标',
+  'edit.today': '今天', 'tpl.saveAs': '存为模版', 'tpl.switch': '换模版', 'tpl.newPh': '新模版名字', 'tpl.overwrote': '已存进「{n}」',
   'tpl.label': '模版', 'tpl.generic': '通用', 'tpl.personal': '个人', 'tpl.save': '＋ 存为模版',
   'tpl.saveTitle': '存为模版', 'tpl.namePh': '比如：周中、周日', 'tpl.saved': '已保存模版「{n}」',
   'tpl.switchTitle': '切换到「{n}」？', 'tpl.switchBody': '今天做完的会保留，还没做的换成这个模版里的。以后每天也按它开始。',
@@ -35,7 +37,7 @@ export default {
   'bed.kicker': '睡前清单', 'bed.title': '准备明天', 'bed.sub': '整理好，明天醒来直接出发',
   'bed.bag': '背包确认', 'bed.first': '明天的第一件事', 'bed.study': '学习', 'bed.work': '工作',
   'bed.study.ph': '打开 xx 课程，继续第 x 课…', 'bed.work.ph': '打开 xx，继续做 xx…',
-  'bed.save': '保存 · 明天见', 'bed.back': '← 返回今日',
+  'bed.save': '明天见', 'bed.today': '今天', 'bed.tomorrow': '明天', 'bed.night': '睡前', 'bed.firstUp': '第一件', 'bed.back': '← 返回今日',
 
   // 任务链
   'step': '第一步', 'step.bedtime': '第一步 · 睡前写的', 'step.ghost': '写下最小的第一步',
@@ -53,7 +55,7 @@ export default {
   // 休息
   'min': '{n} 分钟', 'hour1': '1 小时',
   'rest.done': '做完了。', 'rest.again': '好，再休息一会儿',
-  'rest.ask': '休息一下。多久后提醒你开始下一件？', 'rest.askAgain': '多久后再提醒你？',
+  'rest.ask': '多久后提醒你？', 'rest.askAgain': '多久后再提醒？',
   'rest.noRemind': '不用提醒', 'rest.skip': '不休息，直接开始下一件',
   'rest.willRemind': '会在 {time} 提醒你', 'rest.change': '改', 'rest.wontRemind': '不会提醒你', 'rest.setRemind': '设个提醒',
   'rest.title': '休息中', 'rest.sub': '不用急，休息到想继续为止', 'rest.ready': '我准备好了，开始',
@@ -63,14 +65,14 @@ export default {
   'notify.title': '可以开始了', 'notify.step': '现在可以：{s}', 'notify.task': '现在可以开始「{t}」了',
 
   // 换一个
-  'swap.title': '换一个', 'swap.sub': '现在不想做「{t}」也没关系', 'swap.pick': '先做这个',
+  'swap.title': '换一个', 'swap.sub': '现在不想「{t}」也没关系', 'swap.pick': '先做这个',
   'swap.later': '放到最后，等会儿再做', 'swap.skip': '今天跳过「{t}」', 'swap.cancel': '算了',
 
   // 记录 / 日历
   'cal.kicker': '日历', 'log.kicker': '记录',
   'log.ongoing': '进行中', 'log.unfinished': '未完成', 'log.count': '件', 'log.rest': '休息',
   'log.back': '← 日历', 'log.today': '今天 · ', 'log.started': '{time} 开始今天',
-  'log.notStarted': '还没开始今天。<br>点"开始今天"之后，这里会自动记下每件事几点到几点。',
+  'log.notStarted': '还没开始今天。<br>点"开始今天"之后，这里会自动记下每件事。',
   'log.empty': '这天没有记录。',
   'cal.prev': '上个月', 'cal.next': '下个月', 'cal.week': '一,二,三,四,五,六,日', 'cal.month': '{m}月',
 

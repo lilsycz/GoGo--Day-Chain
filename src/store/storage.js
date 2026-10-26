@@ -57,6 +57,10 @@ export function getActiveTemplate()   { return localStorage.getItem(ACTIVE_TPL_K
 export function setActiveTemplate(id) { if (id) localStorage.setItem(ACTIVE_TPL_KEY, id); else localStorage.removeItem(ACTIVE_TPL_KEY); }
 export function hasNightItems() { return localStorage.getItem(NIGHT_KEY) != null; }
 
+// 一次性的小标记（比如新手动作提示看过没有）
+export function seen(key)    { try { return localStorage.getItem('dc_seen_' + key) === '1'; } catch { return true; } }
+export function markSeen(key){ try { localStorage.setItem('dc_seen_' + key, '1'); } catch {} }
+
 // ── 备份：把所有数据打包成一个对象 / 从备份恢复 ──
 const BACKUP_KEYS = [DAY_KEY, CUSTOM_KEY, DEFAULTS_KEY, NIGHT_KEY, HISTORY_KEY, TEMPLATES_KEY, ACTIVE_TPL_KEY, THEME_KEY, 'dc_lang', FEED_KEY];
 

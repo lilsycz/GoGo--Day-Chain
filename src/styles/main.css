@@ -654,20 +654,78 @@ body.edit-mode #greeting, body.edit-mode .progress-rail { display:none; }
 .hero .step-input::placeholder { color:color-mix(in srgb, var(--fg) 55%, transparent); }
 .hero .step-input:focus { border-color:var(--fg); }
 
-/* ════ 模版条（编辑模式顶部） ════ */
-.tpl-bar { margin:-4px 0 18px; }
-.tpl-label { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink2); margin-bottom:8px; }
-.tpl-chips { display:flex; flex-wrap:wrap; gap:8px; }
-.tpl-chip {
-  display:inline-flex; align-items:center; border-radius:99px;
-  border:1.5px solid var(--line); background:transparent; overflow:hidden;
+/* ════ 模版：编辑页底部按钮 + 面板 ════ */
+#editFooter { display:none; gap:8px; margin-top:22px; }
+body.edit-mode #editFooter { display:flex; }
+#editFooter > button { flex:1; min-height:50px; font-size:14px; }
+#editFooter svg { flex-shrink:0; }
+
+.tpl-list { display:flex; flex-direction:column; margin-bottom:6px; }
+.tpl-row { display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); }
+.tpl-pick {
+  flex:1; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:7px;
+  background:none; border:none; text-align:left; padding:14px 2px; cursor:pointer;
 }
-.tpl-chip.on { background:var(--ink); border-color:var(--ink); color:var(--bg); }
-.tpl-name { background:none; border:none; color:inherit; font-size:14px; font-weight:600; min-height:40px; padding:0 14px; cursor:pointer; }
-.tpl-del { background:none; border:none; color:inherit; opacity:0.55; font-size:16px; padding:0 12px 0 0; min-height:40px; cursor:pointer; }
-.tpl-del:hover { opacity:1; }
-.tpl-save {
-  min-height:40px; padding:0 14px; border-radius:99px; cursor:pointer;
-  border:1.5px dashed var(--line); background:transparent; color:var(--ink); font-size:14px; font-weight:600;
+.tpl-row-name { font-size:17px; font-weight:600; }
+.tpl-row.on .tpl-row-name { font-weight:800; }
+.tpl-dots { display:flex; flex-wrap:wrap; gap:4px; }
+.tpl-dots i { width:9px; height:9px; border-radius:50%; display:block; }
+.tpl-check {
+  width:28px; height:28px; border-radius:50%; background:var(--ink); color:var(--bg);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.tpl-save:hover { border-style:solid; border-color:var(--ink); }
+.tpl-del { background:none; border:none; color:var(--ink2); font-size:20px; width:36px; height:36px; cursor:pointer; flex-shrink:0; }
+.tpl-del:hover { color:var(--accent); }
+.tpl-new { display:flex; gap:8px; margin-top:14px; }
+.tpl-new input {
+  flex:1; min-height:50px; padding:0 16px; border-radius:99px; border:1.5px solid var(--line);
+  background:var(--surf); color:var(--ink); font:inherit; font-size:16px; outline:none;
+}
+.tpl-new input:focus { border-color:var(--ink); }
+.tpl-new .btn-primary { width:50px; min-height:50px; padding:0; }
+.tpl-new .btn-primary:disabled { opacity:0.3; }
+body.edit-mode .edit-head .greeting { margin-bottom:22px; }
+#palDrawer[data-state="peek"] .pal-body { visibility:hidden; }
+
+/* ════ 睡前页 ════ */
+.bed-today { display:flex; align-items:center; gap:18px; }
+.bed-ring { width:72px; height:72px; flex-shrink:0; }
+.bed-first { margin-top:16px; padding:14px 16px; background:var(--surf); border-radius:var(--r-md); }
+.bed-first .next-title { font-size:18px; }
+.bed-first .next-step { margin-left:0; margin-top:6px; }
+#bedtimeView .bed-done { margin-top:28px; }
+#bedtimeView .tpl-chips { display:flex; flex-wrap:wrap; gap:8px; }
+
+/* ════ 编辑卡片：小 ＋ 按钮、色点图标按钮 ════ */
+.add-chips { display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 4px; }
+.add-chip {
+  display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 14px;
+  border-radius:99px; border:1.5px dashed var(--line); background:transparent; color:var(--ink2);
+  font-size:13px; font-weight:600; cursor:pointer;
+}
+.add-chip:hover { border-style:solid; border-color:var(--ink); color:var(--ink); }
+.style-btn {
+  display:inline-flex; align-items:center; gap:10px; padding:6px 10px 6px 8px; margin-left:-8px;
+  border:none; border-radius:99px; background:var(--surf2); color:var(--ink); cursor:pointer;
+}
+.task-row.edit-target .style-btn { background:var(--bg); }
+
+/* ════ 颜色和图标选择 ════ */
+.style-head { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.style-preview {
+  width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  box-shadow:inset 0 0 0 2.5px var(--c); flex-shrink:0;
+}
+.style-title { font-size:22px; font-weight:800; letter-spacing:-0.02em; }
+.color-row { display:flex; gap:12px; margin-bottom:18px; }
+.color-dot {
+  width:44px; height:44px; border-radius:50%; border:none; background:var(--c); cursor:pointer;
+  box-shadow:0 0 0 0 var(--bg); transition:box-shadow 0.15s;
+}
+.color-dot.on { box-shadow:0 0 0 3px var(--bg), 0 0 0 5.5px var(--ink); }
+
+/* ════ 第一次使用的动作提示（不靠文字） ════ */
+@keyframes nudgeY { 0%,100% { transform:translateY(0); } 25% { transform:translateY(-4px); } 75% { transform:translateY(4px); } }
+body.hint-drag .drag-handle { animation:nudgeY 0.55s ease-in-out 3; color:var(--ink); background:var(--surf2); }
+@keyframes trayBounce { 0%,100% { transform:translateY(0); } 30% { transform:translateY(-26px); } 55% { transform:translateY(0); } 75% { transform:translateY(-9px); } }
+#palDrawer.hint-bounce { animation:trayBounce 1.3s ease-out 1; }

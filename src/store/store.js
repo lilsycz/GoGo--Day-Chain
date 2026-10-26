@@ -85,25 +85,38 @@ export function getTemplates() {
 }
 export function activeTemplateId() { return storage.getActiveTemplate(); }
 
-// 存为模版：同名的覆盖，不同名的新建；存完它就是当前模版，以后每天按它开始
-export function saveTemplate(name) {
-  const list = storage.loadTemplates() || [];
+// 存 / 换模版前的快照，用来撤销
+function tplSnapshot() {
+  return { list:clone(storage.loadTemplates() || []), active:storage.getActiveTemplate(), daily:storage.loadDefaultChain(), day:clone(S) };
+}
+export function restoreTplSnapshot(snap) {
+  storage.saveTemplates(snap.list);
+  storage.setActiveTemplate(snap.active);
+  if (snap.daily) storage.saveDefaultChain(snap.daily);
+  S = snap.day;
+  persist();
+}
+
+// 存为模版：给 id 就覆盖那个模版，否则用 name 新建。存完它就是当前模版，明天按它开始。
+// 返回 { tpl, undo }
+export function saveTemplate({ id, name }) {
+  const undo = tplSnapshot();
+  const list = clone(undo.list);
   const chain = toTemplateChain(S.chain);
-  let tpl = list.find(x => x.name === name);
+  let tpl = id ? list.find(x => x.id === id) : null;
   if (tpl) tpl.chain = chain;
   else { tpl = { id:'tpl_' + Date.now(), name, chain }; list.push(tpl); }
   storage.saveTemplates(list);
   storage.setActiveTemplate(tpl.id);
   storage.saveDefaultChain(clone(chain));
-  S.chain.forEach(t => { delete t.once; }); // 今天插入的也变成每日任务了
-  persist();
-  return tpl;
+  return { tpl, undo };
 }
 
-// 切换模版：做完 / 跳过的保留，其余换成模版里的；以后每天也按它开始
+// 换模版：做完 / 跳过的保留，其余换成模版里的；明天也按它开始。返回撤销快照
 export function applyTemplate(id) {
   const tpl = getTemplates().find(x => x.id === id);
-  if (!tpl) return;
+  if (!tpl) return null;
+  const undo = tplSnapshot();
   const chain = clone(tpl.chain);
   storage.saveDefaultChain(clone(chain));
   storage.setActiveTemplate(id);
@@ -112,11 +125,31 @@ export function applyTemplate(id) {
   S.chain = [...kept, ...chain.filter(t => !keptIds.has(t.id))];
   afterChainChange();
   persist();
+  return undo;
 }
+
+// 睡前页：明天用哪个模版（不动今天）、明天的任务链、给明天的事写第一步
+export function setTomorrowTemplate(id) {
+  const tpl = getTemplates().find(x => x.id === id);
+  if (!tpl) return;
+  storage.saveDefaultChain(clone(tpl.chain));
+  storage.setActiveTemplate(id);
+}
+export function tomorrowChain() { return loadDaily(); }
+export function setTomorrowStarter(taskId, val) { rememberStarter(taskId, val); }
 
 export function deleteTemplate(id) {
   storage.saveTemplates((storage.loadTemplates() || []).filter(x => x.id !== id));
   if (storage.getActiveTemplate() === id) storage.setActiveTemplate(null);
+}
+
+// 第一步写一次长期有效：同时记进明天的任务链和当前模版
+function rememberStarter(taskId, val) {
+  editDaily(d => { const t = d.find(x => x.id === taskId); if (t) t.starter = val; });
+  const list = storage.loadTemplates() || [];
+  const tpl = list.find(x => x.id === storage.getActiveTemplate());
+  const t = tpl?.chain.find(x => x.id === taskId);
+  if (t) { t.starter = val; storage.saveTemplates(list); }
 }
 
 // ── 状态（其他模块拿到的是实时绑定，只能在这里重新赋值） ──
@@ -152,7 +185,7 @@ export function genId() { S.uid=(S.uid||0)+1; return S.uid; }
 
 // 卡片上显示的"第一步"：学习/工作优先用睡前写的，其次用卡片上长期保存的
 export function starterOf(task) {
-  return (task.type==='first-thing' && S[task.ftKey]) || task.starter || '';
+  return task.starter || '';
 }
 
 // ── 时间记录 ──
@@ -342,12 +375,12 @@ export function resetDay() {
   persist();
 }
 
-// ── 同时改今天和每日模板的操作 ──
+// ── 编辑：只改今天（想长期保留就"存为模版"）。第一步例外，会一直记住 ──
 export function updateTaskField(taskId, field, val) {
   const task = S.chain.find(t => t.id === taskId);
   if (!task) return;
   task[field] = val;
-  editDaily(d => { const t = d.find(x => x.id === taskId); if (t) t[field] = val; });
+  if (field === 'starter') rememberStarter(taskId, val);
   persist();
 }
 
@@ -356,36 +389,24 @@ export function updateCheckItemLabel(taskId, itemId, val) {
   const item = task && (task.items||[]).find(it => it.id === itemId);
   if (!item) return;
   item.label = val;
-  editDaily(d => {
-    const it = (d.find(x => x.id === taskId)?.items || []).find(x => x.id === itemId);
-    if (it) it.label = val;
-  });
   persist();
 }
 
-// 拖拽排序：今天和模板都按新顺序排
 export function reorder(newIds) {
   const map={}; S.chain.forEach(t=>map[t.id]=t);
   S.chain = newIds.map(id=>map[id]).filter(Boolean);
-  const rank = id => { const i = newIds.indexOf(id); return i < 0 ? Infinity : i; };
-  editDaily(d => d.sort((a, b) => rank(a.id) - rank(b.id)));
   afterChainChange(); persist();
 }
 
-// 移除任务（今天 + 模板）；返回可以用来撤销的信息
+// 从今天移除；返回可以用来撤销的信息
 export function removeTask(id) {
   const idx = S.chain.findIndex(t => t.id === id);
   if (idx < 0) return null;
-  const undo = {
-    idx, task:S.chain[idx],
-    completed:S.completed[id], skipped:S.skipped[id], time:S.times[id],
-    daily:loadDaily(),
-  };
+  const undo = { idx, task:S.chain[idx], completed:S.completed[id], skipped:S.skipped[id], time:S.times[id] };
   S.chain.splice(idx, 1);
   delete S.completed[id];
   delete S.skipped[id];
   if (S.times[id] && !S.times[id].end) delete S.times[id];
-  editDaily(d => { const i = d.findIndex(t => t.id === id); if (i >= 0) d.splice(i, 1); });
   afterChainChange(); persist();
   return undo;
 }
@@ -397,23 +418,7 @@ export function restoreTask(undo) {
   if (undo.completed) S.completed[id] = true;
   if (undo.skipped) S.skipped[id] = true;
   if (undo.time) S.times[id] = undo.time;
-  storage.saveDefaultChain(undo.daily);
   afterChainChange(); persist();
-}
-
-// 把今天临时插入的任务加进每日模板（放在它前面那件每日任务后面）
-export function addToDaily(id) {
-  const task = S.chain.find(t => t.id === id);
-  if (!task) return;
-  delete task.once;
-  const before = S.chain.slice(0, S.chain.indexOf(task)).filter(t => !t.once).map(t => t.id);
-  editDaily(d => {
-    if (d.some(x => x.id === id)) return;
-    let pos = 0;
-    d.forEach((x, i) => { if (before.includes(x.id)) pos = i + 1; });
-    d.splice(pos, 0, clone(task));
-  });
-  persist();
 }
 
 export function commitEdits() { persist(); }

@@ -34,14 +34,13 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 - **Today's timeline** (calendar icon, top right): what ran from when to when, plus rests, color-coded by category
 - **New day at 4 AM**: yesterday is archived automatically; staying up past midnight still counts as today
 
-**Editing** (✎ in the top right)
-- **Templates**: switch the whole routine in one tap (e.g. *Weekday*, *Sunday*). Done tasks stay, the rest is replaced. When today feels right, *Save as template* and give it a name. New users start from *Basic*; people coming from the old version get their routine saved as *Personal*
-- Rename tasks, notes, first steps and checklist items in place; hold the ≡ handle to reorder; remove with a few seconds to undo
+**Editing** (✎ in the top right): edits change **today only**, so you can rearrange freely. To keep a setup, save it as a template
+- Tap a task's color dot and icon to change its category color and icon; tap ＋ to add a note or first step; rename tasks and checklist items in place; hold the ≡ handle to reorder; remove with a few seconds to undo
 - **Add something**: a tray sits at the bottom of edit mode, with events grouped by category color (meals, focus, health, life, other; 23 to start with). Swipe it up to see more; tap an event to add it after the current task, or hold and drag it into the list to drop it exactly where you want. The new row flashes and a message tells you where it went (with undo). Create your own events with an icon, category color and first step
 
 **Settings** (the ··· menu)
-- **Today vs. every day**: adding, swapping and skipping only change today. Editing, reordering and removing in edit mode change your daily routine; a one-off task can be pinned to it
-- **Bedtime checklist**: pack your bag and write tomorrow's first thing for study and work
+- **Templates** (buttons at the bottom of edit mode): *Save as template* overwrites one of yours or creates a new one by name; *Templates* switches the whole routine in one tap (done tasks stay, undo in the toast). Each template shows a row of category-color dots as a preview. New users start from *Basic*; people coming from the old version get their routine saved as *Personal*. First steps you write are remembered in the current template
+- **Bedtime**: today's ring, which template tomorrow uses, the first step for tomorrow's first task, and a short checklist
 - **Light / dark mode** and **English / 中文**: built-in task names follow the language; anything you renamed stays as you wrote it
 - **Export / import**: save a backup file (on iPhone, via the share sheet to Files or iCloud Drive) and restore it on any device
 - **Reset today**
@@ -49,7 +48,8 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 **Design**
 - Swiss-inspired: warm stone background, vermilion / cobalt / amber / ink category colors, big bold type, circles and hairlines
 - Line icons for every task; 44 pt tap targets; respects *reduce motion*
-- Add to the iPhone home screen and use it like an app (PWA)
+- Add to the iPhone home screen and use it like an app (PWA); works offline after the first visit
+- First-use hints are motion, not text: the ≡ handles wiggle the first time you edit, the tray bounces once
 
 ---
 
@@ -57,7 +57,7 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 
 - **Reminders only fire while the page is open.** On a locked iPhone they usually won't arrive; when you come back, the app shows *Time to start* if the reminder is due. Lock-screen notifications are planned for the native app.
 - **Data lives in this browser only** (localStorage). Clearing site data removes it, and on iPhone Safari may clear it after 7 days without a visit (home-screen apps are exempt). Use *Export data* now and then as a backup; there's no automatic sync yet.
-- **Needs a connection on first load** for the drag-and-drop library and the font (falls back to the system font offline).
+- **Needs a connection on the very first visit**; after that a service worker keeps a copy for offline use and makes sure updates arrive all at once.
 
 ---
 
@@ -89,6 +89,7 @@ The layout mirrors a planned SwiftUI version, so each part maps over one-to-one.
 | Path | What's in it | SwiftUI counterpart |
 |---|---|---|
 | `index.html` | Page skeleton | — |
+| `sw.js` | Service worker: offline copy, fresh files after each update | — |
 | `src/main.js` | Entry point | `GoGoDayChainApp.swift` |
 | `src/models/` | Default tasks, block templates, checklists, categories | `Models/` |
 | `src/store/store.js` | App state and every data action (no DOM) | `Store/ChainStore.swift` |
@@ -109,9 +110,9 @@ The layout mirrors a planned SwiftUI version, so each part maps over one-to-one.
 - [x] Swiss-style redesign, line icons, calendar with day rings
 - [x] English / Chinese UI
 - [x] Templates and a basic starter routine for new users
-- [ ] Change a task's category and icon in edit mode
-- [ ] Bedtime page: review today + write tomorrow's first steps
+- [x] Change a task's category and icon in edit mode
+- [x] Bedtime page: review today + choose tomorrow's template and first step
 - [x] Export / import data
 - [x] Edit mode in the top bar with a drag-in insert tray
-- [ ] First-run onboarding; job card as an optional module
+- [ ] Job card as an optional module (for now: open the app with `?jobfeed=<json url>` to enable it)
 - [ ] Native SwiftUI app for the App Store

@@ -6,6 +6,8 @@ import { render } from './render.js';
 import { esc } from './format.js';
 import { t, tt, loc } from '../i18n/index.js';
 import { onEditMode } from './palette.js';
+import { seen, markSeen } from '../store/storage.js';
+import { exampleFor } from '../i18n/index.js';
 
 // 可以清空的字段，清空后显示的占位文字
 const PLACEHOLDERS = {
@@ -21,6 +23,12 @@ export function toggleEditMode() {
   document.body.classList.toggle('edit-mode', editMode);
   onEditMode(editMode); // 插入托盘跟着编辑模式出现 / 收起
   window.scrollTo({ top:0 });
+  // 第一次进编辑：≡ 晃几下，提示可以拖
+  if (editMode && !seen('drag')) {
+    markSeen('drag');
+    setTimeout(() => document.body.classList.add('hint-drag'), 400);
+    setTimeout(() => document.body.classList.remove('hint-drag'), 2600);
+  }
   if (editMode) {
     // 默认展开当前任务卡片
     editTarget = S.chain[currentIdx()]?.id || S.chain[0]?.id || null;
@@ -67,6 +75,22 @@ export function editCheckItem(e, taskId, itemId) {
   });
 }
 
+// 编辑卡片里的小 ＋：原地变成输入框，写了就保存，空着就收回
+export function addField(e, taskId, field) {
+  e.stopPropagation();
+  const task = S.chain.find(t => t.id === taskId);
+  if (!task) return;
+  const holder = document.createElement('div');
+  holder.className = field === 'hint' ? 'row-hint' : 'ft-text';
+  e.currentTarget.closest('.add-chips').before(holder);
+  e.currentTarget.remove();
+  startInlineEdit(holder, '', val => updateTaskField(taskId, field, val), {
+    allowEmpty: true,
+    placeholder: field === 'starter' ? exampleFor(task) : t('hint.edit.ph'),
+  });
+  holder.querySelector('input')?.addEventListener('blur', () => setTimeout(render, 0));
+}
+
 // 把元素换成输入框；回车保存，Esc 取消。allowEmpty: 允许清空
 export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeholder = '' } = {}) {
   if (el.dataset.editing) return;
@@ -99,7 +123,7 @@ export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeho
 export function initEdit() {
   document.getElementById('chainList').addEventListener('click', e => {
     if (!editMode) return;
-    if (e.target.closest('.row-title,.row-hint,.ft-text,.clabel,.row-del,.drag-handle,.circle-btn,.act,.text-link,.chain-fold')) return;
+    if (e.target.closest('.row-title,.row-hint,.ft-text,.clabel,.row-del,.drag-handle,.circle-btn,.act,.text-link,.chain-fold,.add-chip,.style-btn')) return;
     const row = e.target.closest('[data-id]');
     if (!row || row.dataset.id === editTarget) return;
     setEditTarget(row.dataset.id);

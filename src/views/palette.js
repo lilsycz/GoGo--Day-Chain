@@ -16,6 +16,7 @@ import { t, tt, loc } from '../i18n/index.js';
 import { esc } from './format.js';
 import { editMode, toggleEditMode } from './edit.js';
 import { showToast } from './toast.js';
+import { seen, markSeen } from '../store/storage.js';
 
 let tray;
 let state = 'closed';        // closed / peek / half / full
@@ -109,6 +110,12 @@ export function closePalette() { setTray('peek'); }
 // 进 / 出编辑模式时由 edit.js 调用
 export function onEditMode(on) {
   setTray(on ? 'peek' : 'closed');
+  // 第一次出现：往上弹一下，提示可以拉上来
+  if (on && !seen('tray')) {
+    markSeen('tray');
+    setTimeout(() => tray.classList.add('hint-bounce'), 700);
+    setTimeout(() => tray.classList.remove('hint-bounce'), 2100);
+  }
 }
 
 const ORDER = ['peek', 'half', 'full'];
@@ -159,8 +166,6 @@ export function openCustomModal() {
   renderGlyphPicker();
   renderCatPicker();
   document.getElementById('ct').value = '';
-  document.getElementById('cl').value = '';
-  document.getElementById('cs').value = '';
   document.getElementById('customModal').classList.remove('hidden');
   setTimeout(()=>document.getElementById('ct').focus(), 100);
 }
@@ -184,10 +189,9 @@ export function closeCustomModal() { document.getElementById('customModal').clas
 
 export function saveCustomTemplate() {
   const title = document.getElementById('ct').value.trim();
-  const label = document.getElementById('cl').value.trim(); // 空着就显示「完成 / Done」
-  const starter = document.getElementById('cs').value.trim();
   if (!title) { document.getElementById('ct').focus(); return; }
-  addCustomTemplate({ glyph:pickedGlyph, title, btnLabel:label, starter, cat:pickedCat });
+  // 第一步休息时再写；按钮文字默认「完成」
+  addCustomTemplate({ glyph:pickedGlyph, title, btnLabel:'', starter:'', cat:pickedCat });
   closeCustomModal(); renderPalette();
 }
 

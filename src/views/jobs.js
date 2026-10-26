@@ -8,13 +8,19 @@ import { render } from './render.js';
 import { promptDialog } from './dialog.js';
 import { t } from '../i18n/index.js';
 
+// 求职卡片：只有设置过数据源才显示职位列表；没设置就当普通任务（不给所有用户看设置入口）
+// 设置方法：打开 app 网址时带上 ?jobfeed=你的JSON地址，会自动记住
 export function jobsHTML() {
-  const url = getFeedUrl();
-  let h = `<div class="job-list" id="jobList">` +
-    SAMPLE_JOBS.map((j,i)=>`<div class="job-item"><div class="job-title">${j.title}</div><div class="job-co">${t('jobs.co' + (i+1))}</div></div>`).join('') +
-    `</div>`;
-  if (!url) h += `<div class="feed-hint">${t('jobs.connect')} <span class="feed-link" onclick="setFeedUrl()">${t('jobs.set')}</span></div>`;
-  return h;
+  if (!getFeedUrl()) return '';
+  return `<div class="job-list" id="jobList"></div>`;
+}
+
+export function initJobs() {
+  const url = new URLSearchParams(location.search).get('jobfeed');
+  if (url) {
+    saveFeedUrl(url);
+    history.replaceState(null, '', location.pathname);
+  }
 }
 
 export function loadJobs() {

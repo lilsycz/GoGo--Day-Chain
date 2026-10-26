@@ -1,12 +1,20 @@
-// 编辑模式顶部的模版条：点一下切换，「＋ 存为模版」把今天调好的任务链存下来
-// → Swift: Views/TemplatePicker.swift
+// 模版：编辑页最下面两个按钮 [存为模版] [换模版]，各打开一个底部面板
+// 尽量不靠文字：当前模版带 ✓，每个模版用一串类别色小圆点预览；换了立刻生效，底部提示里可以撤销
+// → Swift: Views/TemplateSheets.swift
 
-import { getTemplates, activeTemplateId, applyTemplate, saveTemplate, deleteTemplate } from '../store/store.js';
-import { confirmDialog, promptDialog } from './dialog.js';
+import {
+  getTemplates, activeTemplateId, applyTemplate, saveTemplate, deleteTemplate, restoreTplSnapshot,
+} from '../store/store.js';
+import { categoryOf, catColor } from '../models/categories.js';
+import { confirmDialog } from './dialog.js';
 import { showToast } from './toast.js';
 import { esc } from './format.js';
+import { I } from './icons.js';
 import { t } from '../i18n/index.js';
+import { editMode } from './edit.js';
 import { render } from './render.js';
+
+const sheet = () => document.getElementById('tplModal');
 
 // 内置名字跟着语言走
 export function templateName(tpl) {
@@ -15,48 +23,100 @@ export function templateName(tpl) {
   return tpl.name;
 }
 
-export function renderTemplateBar() {
-  const box = document.getElementById('tplBar');
-  if (!box) return;
-  const active = activeTemplateId();
-  box.innerHTML = `
-    <div class="tpl-label">${t('tpl.label')}</div>
-    <div class="tpl-chips">
-      ${getTemplates().map(tpl => `
-        <span class="tpl-chip${tpl.id === active ? ' on' : ''}">
-          <button class="tpl-name" onclick="switchTemplate('${tpl.id}')">${esc(templateName(tpl))}</button>
-          ${tpl.builtin ? '' : `<button class="tpl-del" onclick="removeTemplate('${tpl.id}')" aria-label="${t('remove')}">×</button>`}
-        </span>`).join('')}
-      <button class="tpl-save" onclick="saveAsTemplate()">${t('tpl.save')}</button>
-    </div>`;
+// 一串小圆点：这套任务的颜色节奏
+function preview(tpl) {
+  return `<span class="tpl-dots">${tpl.chain.map(task => `<i style="background:${catColor(categoryOf(task))}"></i>`).join('')}</span>`;
 }
 
-export async function switchTemplate(id) {
+// 编辑页最下面的两个按钮
+export function renderEditFooter() {
+  const box = document.getElementById('editFooter');
+  if (!box) return;
+  box.innerHTML = editMode ? `
+    <button class="btn-primary" onclick="openSaveTemplate()">${I.saveFill} ${t('tpl.saveAs')}</button>
+    <button class="btn-ghost" onclick="openSwitchTemplate()">${I.swap} ${t('tpl.switch')}</button>` : '';
+}
+
+function openSheet(html) {
+  sheet().querySelector('.modal-box').innerHTML = html;
+  sheet().classList.remove('hidden');
+}
+export function closeTemplateSheet() { sheet().classList.add('hidden'); }
+
+// ── 换模版：一行一个，点了立刻换 ──
+export function openSwitchTemplate() {
+  const active = activeTemplateId();
+  openSheet(`
+    <div class="modal-title">${t('tpl.switch')}</div>
+    <div class="tpl-list">${getTemplates().map(tpl => `
+      <div class="tpl-row${tpl.id === active ? ' on' : ''}">
+        <button class="tpl-pick" onclick="switchTemplate('${tpl.id}')">
+          <span class="tpl-row-name">${esc(templateName(tpl))}</span>
+          ${preview(tpl)}
+        </button>
+        ${tpl.id === active ? `<span class="tpl-check">${I.check}</span>` : ''}
+        ${tpl.builtin ? '' : `<button class="tpl-del" onclick="removeTemplate('${tpl.id}')" aria-label="${t('remove')}">×</button>`}
+      </div>`).join('')}
+    </div>`);
+}
+
+export function switchTemplate(id) {
   const tpl = getTemplates().find(x => x.id === id);
   if (!tpl) return;
-  const name = templateName(tpl);
-  const ok = await confirmDialog({ title:t('tpl.switchTitle', { n:name }), body:t('tpl.switchBody'), ok:t('tpl.switchOk') });
-  if (!ok) return;
-  applyTemplate(id);
+  const undo = applyTemplate(id);
+  closeTemplateSheet();
   render();
-  showToast(t('tpl.switched', { n:esc(name) }));
-}
-
-export async function saveAsTemplate() {
-  const active = getTemplates().find(x => x.id === activeTemplateId());
-  const suggest = active && !active.builtin ? templateName(active) : '';
-  const name = await promptDialog({ title:t('tpl.saveTitle'), placeholder:t('tpl.namePh'), value:suggest, ok:t('save') });
-  if (!name) return;
-  saveTemplate(name);
-  render();
-  showToast(t('tpl.saved', { n:esc(name) }));
+  showToast(t('tpl.switched', { n:esc(templateName(tpl)) }), t('undo'), () => { restoreTplSnapshot(undo); render(); });
 }
 
 export async function removeTemplate(id) {
   const tpl = getTemplates().find(x => x.id === id);
   if (!tpl) return;
-  const ok = await confirmDialog({ title:t('tpl.delTitle', { n:templateName(tpl) }), body:t('tpl.delBody'), ok:t('tpl.delOk'), danger:true });
+  const ok = await confirmDialog({ title:t('tpl.delTitle', { n:templateName(tpl) }), ok:t('tpl.delOk'), danger:true });
   if (!ok) return;
   deleteTemplate(id);
-  renderTemplateBar();
+  openSwitchTemplate();
+}
+
+// ── 存为模版：点已有的就覆盖它，或者填名字新建 ──
+export function openSaveTemplate() {
+  const active = activeTemplateId();
+  const mine = getTemplates().filter(x => !x.builtin);
+  openSheet(`
+    <div class="modal-title">${t('tpl.saveAs')}</div>
+    ${mine.length ? `<div class="tpl-list">${mine.map(tpl => `
+      <div class="tpl-row${tpl.id === active ? ' on' : ''}">
+        <button class="tpl-pick" onclick="saveIntoTemplate('${tpl.id}')">
+          <span class="tpl-row-name">${esc(templateName(tpl))}</span>
+          ${preview(tpl)}
+        </button>
+        ${tpl.id === active ? `<span class="tpl-check">${I.check}</span>` : ''}
+      </div>`).join('')}</div>` : ''}
+    <form class="tpl-new" onsubmit="event.preventDefault(); saveNewTemplate()">
+      <input id="tplNewName" type="text" placeholder="${esc(t('tpl.newPh'))}" autocomplete="off" enterkeyhint="done"
+        oninput="document.getElementById('tplNewBtn').disabled = !this.value.trim()">
+      <button id="tplNewBtn" class="btn-primary" type="submit" disabled aria-label="${t('save')}">${I.plus}</button>
+    </form>`);
+}
+
+function afterSave(tpl, undo, key) {
+  closeTemplateSheet();
+  render();
+  showToast(t(key, { n:esc(templateName(tpl)) }), t('undo'), () => { restoreTplSnapshot(undo); render(); });
+}
+
+export function saveIntoTemplate(id) {
+  const { tpl, undo } = saveTemplate({ id });
+  afterSave(tpl, undo, 'tpl.overwrote');
+}
+
+export function saveNewTemplate() {
+  const name = document.getElementById('tplNewName').value.trim();
+  if (!name) return;
+  const { tpl, undo } = saveTemplate({ name });
+  afterSave(tpl, undo, 'tpl.saved');
+}
+
+export function initTemplates() {
+  sheet().addEventListener('click', e => { if (e.target === sheet()) closeTemplateSheet(); });
 }

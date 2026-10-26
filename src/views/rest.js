@@ -51,7 +51,6 @@ function restingHTML(task) {
     : `${t('rest.wontRemind')} · <button class="text-link inline" onclick="snoozeRest()">${t('rest.setRemind')}</button>`;
   return `<div class="rest-card">
     <div class="rest-title">${t('rest.title')}</div>
-    <div class="rest-sub">${t('rest.sub')}</div>
     ${nextPreview(task)}
     <div class="rest-remind">${remindLine}</div>
     <button class="btn-primary wide" onclick="startNext()">${t('rest.ready')} ${I.arrow}</button>

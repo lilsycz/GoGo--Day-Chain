@@ -16,6 +16,8 @@ export default {
   'menu.export': 'Export data', 'menu.import': 'Import data',
   'export.done': 'Backup exported', 'import.title': 'Import backup?', 'import.body': 'Your tasks, log and settings on this device will be replaced with the ones in the backup.', 'import.ok': 'Import', 'import.bad': 'This file isn’t a GoGo backup',
   'toast.insertedAfter': '“{t}” added after “{after}”', 'toast.insertedFirst': '“{t}” added at the top',
+  'field.hint': 'Note', 'field.step': 'First step', 'aria.style': 'Color and icon',
+  'edit.today': 'Today', 'tpl.saveAs': 'Save as template', 'tpl.switch': 'Templates', 'tpl.newPh': 'New template name', 'tpl.overwrote': 'Saved to “{n}”',
   'tpl.label': 'Templates', 'tpl.generic': 'Basic', 'tpl.personal': 'Personal', 'tpl.save': '＋ Save as template',
   'tpl.saveTitle': 'Save as template', 'tpl.namePh': 'e.g. Weekday, Sunday', 'tpl.saved': 'Saved template “{n}”',
   'tpl.switchTitle': 'Switch to “{n}”?', 'tpl.switchBody': 'What you’ve done today stays; the rest is replaced with this template. Every day will start from it.',
@@ -35,7 +37,7 @@ export default {
   'bed.kicker': 'Bedtime', 'bed.title': 'Get ready for tomorrow', 'bed.sub': 'Pack tonight, just head out tomorrow',
   'bed.bag': 'Bag check', 'bed.first': "Tomorrow's first thing", 'bed.study': 'Study', 'bed.work': 'Work',
   'bed.study.ph': 'Open course X, continue lesson N…', 'bed.work.ph': 'Open X, keep working on Y…',
-  'bed.save': 'Save · see you tomorrow', 'bed.back': '← Back to today',
+  'bed.save': 'See you tomorrow', 'bed.today': 'Today', 'bed.tomorrow': 'Tomorrow', 'bed.night': 'Before bed', 'bed.firstUp': 'First up', 'bed.back': '← Back to today',
 
   // Chain
   'step': 'First step', 'step.bedtime': 'First step · from last night', 'step.ghost': 'Write the smallest first step',
@@ -53,7 +55,7 @@ export default {
   // Rest
   'min': '{n} min', 'hour1': '1 hour',
   'rest.done': 'Done.', 'rest.again': 'OK, rest a bit more',
-  'rest.ask': 'Take a break. When should I nudge you about the next one?', 'rest.askAgain': 'Nudge you again in…',
+  'rest.ask': 'Remind you in…', 'rest.askAgain': 'Remind you again in…',
   'rest.noRemind': "Don't remind me", 'rest.skip': 'No break, start the next one',
   'rest.willRemind': "I'll nudge you at {time}", 'rest.change': 'Change', 'rest.wontRemind': 'No reminder set', 'rest.setRemind': 'Set one',
   'rest.title': 'Resting', 'rest.sub': 'No rush. Rest until you feel like going on.', 'rest.ready': "I'm ready, start",
@@ -63,14 +65,14 @@ export default {
   'notify.title': 'Time to start', 'notify.step': 'Now you could: {s}', 'notify.task': 'Now you could start “{t}”',
 
   // Swap
-  'swap.title': 'Swap', 'swap.sub': 'Not feeling “{t}” right now? That’s fine.', 'swap.pick': 'Do this first',
+  'swap.title': 'Swap', 'swap.sub': 'Not up for “{t}” right now? That’s okay.', 'swap.pick': 'Do this first',
   'swap.later': 'Move it to the end', 'swap.skip': 'Skip “{t}” today', 'swap.cancel': 'Never mind',
 
   // Log / calendar
   'cal.kicker': 'Calendar', 'log.kicker': 'Log',
   'log.ongoing': 'now', 'log.unfinished': 'unfinished', 'log.count': 'done', 'log.rest': 'Rest',
   'log.back': '← Calendar', 'log.today': 'Today · ', 'log.started': '{time} started the day',
-  'log.notStarted': 'You haven’t started today.<br>Once you tap “Start today”, what you do and when gets logged here.',
+  'log.notStarted': 'You haven’t started today.<br>Once you tap “Start today”, everything gets logged here.',
   'log.empty': 'Nothing logged this day.',
   'cal.prev': 'Previous month', 'cal.next': 'Next month', 'cal.week': 'M,T,W,T,F,S,S', 'cal.month': '{name}',
 

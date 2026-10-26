@@ -7,9 +7,9 @@
 export const DEFAULT_TASKS = [
   { id:'breakfast', cat:'meal',   glyph:'bowl',     title:'早餐', hint:null, type:'simple',      btnLabel:'吃完了' },
   { id:'leave',     cat:'life',   glyph:'bag',      title:'出门', hint:null, type:'simple',      btnLabel:'出门了' },
-  { id:'work',      cat:'focus',  glyph:'laptop',   title:'工作', hint:null, type:'first-thing', ftKey:'workFirst',  btnLabel:'工作完成' },
+  { id:'work',      cat:'focus',  glyph:'laptop',   title:'工作', hint:null, type:'simple',      btnLabel:'工作完成' },
   { id:'lunch',     cat:'meal',   glyph:'box',      title:'午餐', hint:null, type:'simple',      btnLabel:'吃完了' },
-  { id:'study',     cat:'focus',  glyph:'book',     title:'学习', hint:null, type:'first-thing', ftKey:'studyFirst', btnLabel:'学完了' },
+  { id:'study',     cat:'focus',  glyph:'book',     title:'学习', hint:null, type:'simple',      btnLabel:'学完了' },
   { id:'gym',       cat:'health', glyph:'dumbbell', title:'运动', hint:null, type:'simple',      btnLabel:'练完了' },
   { id:'dinner',    cat:'meal',   glyph:'plate',    title:'晚饭', hint:null, type:'simple',      btnLabel:'吃完了' },
   { id:'relax',     cat:'life',   glyph:'leaf',     title:'放松', hint:null, type:'simple',      btnLabel:'今天完成 🎉' },
