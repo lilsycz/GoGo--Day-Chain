@@ -18,6 +18,7 @@ import {
 import {
   initBedtime, openBedtime, closeBedtime, toggleNight, pickTomorrow,
   removeTomorrow, renameTomorrow, editTomorrowStep, openTomorrowAdd, addTomorrowTpl,
+  selectTomorrow, newEventForTomorrow,
 } from './views/bedtime.js';
 import { initEdit, toggleEditMode, setEditTarget, editField, editCheckItem, addField } from './views/edit.js';
 import { setFeedUrl, initJobs } from './views/jobs.js';
@@ -43,6 +44,7 @@ Object.assign(window, {
   openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
   openBedtime, closeBedtime, toggleNight, pickTomorrow,
   removeTomorrow, renameTomorrow, editTomorrowStep, openTomorrowAdd, addTomorrowTpl,
+  selectTomorrow, newEventForTomorrow,
   toggleEditMode, setEditTarget, editField, editCheckItem, addField,
   setFeedUrl, toggleTheme, resetDay, openMenu, menuAction,
   openPastLog, closePastLog, toggleLogDay,

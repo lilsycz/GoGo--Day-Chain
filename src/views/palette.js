@@ -24,6 +24,7 @@ let beforeDrag = 'half';
 let pickedGlyph = 'pin';
 let pickedCat = 'other';
 let traySortables = [];
+let afterCustom = null; // 新建事件弹窗关掉后要做的事（比如回到睡前的添加面板）
 
 export const trayOpen = () => state !== 'closed';
 
@@ -160,7 +161,8 @@ export function dropTpl(tpl, beforeId) {
 }
 
 // ── 新建事件弹窗 ──
-export function openCustomModal() {
+export function openCustomModal(onDone) {
+  afterCustom = typeof onDone === 'function' ? onDone : null;
   pickedGlyph = 'pin';
   pickedCat = 'other';
   renderGlyphPicker();
@@ -185,7 +187,11 @@ function renderCatPicker() {
 }
 export function pickCat(k) { pickedCat = k; renderCatPicker(); }
 
-export function closeCustomModal() { document.getElementById('customModal').classList.add('hidden'); }
+export function closeCustomModal() {
+  document.getElementById('customModal').classList.add('hidden');
+  const f = afterCustom; afterCustom = null;
+  f?.();
+}
 
 export function saveCustomTemplate() {
   const title = document.getElementById('ct').value.trim();

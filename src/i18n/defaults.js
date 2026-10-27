@@ -18,7 +18,7 @@ export const DEFAULT_TEXT = {
   gym:       { title:[T('健身','Workout'), T('运动','Exercise')], hint:T('运动服在包里','Gym clothes are in the bag'), btnLabel:T('练完了','Done'),
                example:T('换上运动服','Put on your workout clothes') },
   dinner:    { title:T('晚饭','Dinner'), btnLabel:T('吃完了','Ate it'), example:T('把锅放到灶上','Put the pan on the stove') },
-  relax:     { title:T('放松','Unwind'), btnLabel:T('今天完成 🎉','Day done 🎉'), example:T('把手机放远一点','Put your phone out of reach') },
+  relax:     { title:T('放松','Unwind'), btnLabel:[T('放松好了','Relaxed'), T('今天完成 🎉','Day done 🎉')], example:T('把手机放远一点','Put your phone out of reach') },
   jobs:      { title:T('今日求职','Job search'), btnLabel:T('已查阅','Checked'), example:T('打开求职网站','Open the job board') },
   supps:     { title:T('补剂','Supplements'), btnLabel:T('今天完成 🎉','Day done 🎉'), example:T('把药盒拿出来','Take out the pill box') },
 

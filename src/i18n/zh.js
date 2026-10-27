@@ -37,7 +37,7 @@ export default {
   'bed.kicker': '睡前清单', 'bed.title': '准备明天', 'bed.sub': '整理好，明天醒来直接出发',
   'bed.bag': '背包确认', 'bed.first': '明天的第一件事', 'bed.study': '学习', 'bed.work': '工作',
   'bed.study.ph': '打开 xx 课程，继续第 x 课…', 'bed.work.ph': '打开 xx，继续做 xx…',
-  'bed.save': '明天见', 'bed.today': '今天', 'bed.tomorrow': '明天', 'bed.night': '睡前', 'bed.firstUp': '第一件', 'bed.add': '＋ 加一件', 'bed.editTomorrow': '编辑明天', 'menu.title': '设置', 'menu.log': '往日记录', 'log.step': '第一步', 'log.note': '备注', 'log.none': '还没有记录。做完一件事，这里就会有。', 'aria.bedtime': '睡前', 'bed.back': '← 返回今日',
+  'bed.save': '明天见', 'bed.today': '今天', 'bed.tomorrow': '明天', 'bed.night': '睡前', 'bed.firstUp': '第一件', 'day.done': '今天完成', 'bed.add': '＋ 加一件', 'bed.addAfter': '加到「{t}」后面', 'bed.addEnd': '加到最后', 'bed.editTomorrow': '编辑明天', 'menu.title': '设置', 'menu.log': '往日记录', 'log.step': '第一步', 'log.note': '备注', 'log.none': '还没有记录。做完一件事，这里就会有。', 'aria.bedtime': '睡前', 'bed.back': '← 返回今日',
 
   // 任务链
   'step': '第一步', 'step.bedtime': '第一步 · 睡前写的', 'step.ghost': '写下最小的第一步',

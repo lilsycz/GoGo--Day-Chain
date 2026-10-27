@@ -12,7 +12,7 @@ export const DEFAULT_TASKS = [
   { id:'study',     cat:'focus',  glyph:'book',     title:'学习', hint:null, type:'simple',      btnLabel:'学完了' },
   { id:'gym',       cat:'health', glyph:'dumbbell', title:'运动', hint:null, type:'simple',      btnLabel:'练完了' },
   { id:'dinner',    cat:'meal',   glyph:'plate',    title:'晚饭', hint:null, type:'simple',      btnLabel:'吃完了' },
-  { id:'relax',     cat:'life',   glyph:'leaf',     title:'放松', hint:null, type:'simple',      btnLabel:'今天完成 🎉' },
+  { id:'relax',     cat:'life',   glyph:'leaf',     title:'放松', hint:null, type:'simple',      btnLabel:'放松好了' },
 ];
 
 // 个人版：老版本一直用的默认任务（老用户会被自动存成「个人」模版）

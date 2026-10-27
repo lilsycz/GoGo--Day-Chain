@@ -9,7 +9,7 @@ import {
   customTemplates,
 } from '../store/store.js';
 import { PAL_TEMPLATES } from '../models/defaults.js';
-import { categoryOf, catVars, catColor } from '../models/categories.js';
+import { CATEGORIES, categoryOf, catVars, catColor } from '../models/categories.js';
 import { I } from './icons.js';
 import { glyph, stripEmoji } from './glyphs.js';
 import { loc, tt, t, exampleFor } from '../i18n/index.js';
@@ -18,11 +18,13 @@ import { startInlineEdit } from './edit.js';
 import { dayRing } from './calendar.js';
 import { templateName } from './templates.js';
 import { stepInputHTML } from './stepInput.js';
-import { taskFromTpl } from './palette.js';
+import { taskFromTpl, openCustomModal } from './palette.js';
 
 let sortable = null;
+let sel = null; // 明天列表里选中的那一行：新加的事插在它后面
 
 export function openBedtime(focusTomorrow = false) {
+  sel = null;
   renderBedtime();
   const view = document.getElementById('bedtimeView');
   view.classList.add('active');
@@ -38,13 +40,13 @@ function tomorrowRow(task, i) {
     : step
       ? `<div class="tmr-step" onclick="editTomorrowStep(event,'${task.id}')">${t('rest.firstStep', { s:esc(step) })}</div>`
       : `<div class="add-chips"><button class="add-chip" onclick="editTomorrowStep(event,'${task.id}')">${I.plus}<span>${t('field.step')}</span></button></div>`;
-  return `<div class="tmr-row${i === 0 ? ' first' : ''}" data-id="${task.id}" style="${catVars(categoryOf(task))}">
+  return `<div class="tmr-row${i === 0 ? ' first' : ''}${task.id === sel ? ' sel' : ''}" data-id="${task.id}" style="${catVars(categoryOf(task))}" onclick="selectTomorrow('${task.id}')">
     <div class="row-top">
       <span class="dot"></span>
       <span class="row-icon">${glyph(task, 20)}</span>
       <span class="row-title tmr-title" onclick="renameTomorrow(event,'${task.id}')">${esc(tt(task, 'title'))}</span>
       <span class="row-right">
-        <button class="row-del" onclick="removeTomorrow('${task.id}')" aria-label="${t('remove')}">×</button>
+        <button class="row-del" onclick="event.stopPropagation();removeTomorrow('${task.id}')" aria-label="${t('remove')}">×</button>
         <span class="drag-handle" aria-label="${t('drag')}">${I.grip}</span>
       </span>
     </div>
@@ -103,13 +105,22 @@ export function pickTomorrow(id) {
   renderBedtime();
 }
 
+function setSel(id) {
+  sel = id;
+  document.querySelectorAll('#tmrList .tmr-row').forEach(r => r.classList.toggle('sel', r.dataset.id === sel));
+}
+// 点一行选中，再点一次取消
+export function selectTomorrow(id) { setSel(sel === id ? null : id); }
+
 export function removeTomorrow(id) {
+  if (sel === id) sel = null;
   removeTomorrowTask(id);
   renderBedtime();
 }
 
 export function renameTomorrow(e, id) {
   e.stopPropagation();
+  setSel(id);
   const task = tomorrowChain().find(x => x.id === id);
   if (!task) return;
   startInlineEdit(e.currentTarget, tt(task, 'title'), val => { updateTomorrowTask(id, 'title', val); renderBedtime(); });
@@ -117,6 +128,7 @@ export function renameTomorrow(e, id) {
 
 export function editTomorrowStep(e, id) {
   e.stopPropagation();
+  setSel(id);
   const task = tomorrowChain().find(x => x.id === id);
   if (!task) return;
   const holder = e.currentTarget.closest('.tmr-body');
@@ -127,28 +139,47 @@ export function editTomorrowStep(e, id) {
   holder.querySelector('input')?.addEventListener('blur', () => setTimeout(renderBedtime, 0));
 }
 
-// ＋ 加一件：一格格事件，点一下加到明天最后
+// ＋ 加一件：按类别分组的事件，点一下插在选中那行后面（没选就放最后）；也可以新建
 export function openTomorrowAdd() {
-  const tiles = [
+  const all = [
     ...PAL_TEMPLATES.map(tp => ({ tpl:'t:' + tp.templateId, tp, title:loc(tp.templateId, 'title', tp.title) })),
     ...customTemplates.map(tp => ({ tpl:'c:' + tp.id, tp, title:tp.title })),
   ];
+  const after = sel && tomorrowChain().find(x => x.id === sel);
   const modal = document.getElementById('tmrModal');
   modal.querySelector('.modal-box').innerHTML = `
-    <div class="modal-title">${t('bed.tomorrow')}</div>
-    <div class="pal-grid">${tiles.map(({ tpl, tp, title }) =>
-      `<button class="pal-tile" style="--c:${catColor(tp.cat || 'other')}" onclick="addTomorrowTpl('${tpl}')">
-        <span class="pt-icon">${glyph(tp, 24)}</span><span class="pt-name">${esc(title)}</span>
-      </button>`).join('')}</div>`;
+    <div class="modal-title">${after ? t('bed.addAfter', { t:esc(tt(after, 'title')) }) : t('bed.addEnd')}</div>
+    <div class="tmr-groups">${Object.keys(CATEGORIES).map(cat => {
+      const tiles = all.filter(x => (x.tp.cat || 'other') === cat);
+      if (!tiles.length) return '';
+      return `<div class="pal-sec"><i style="background:${catColor(cat)}"></i>${t('cat.' + cat)}</div>
+        <div class="pal-grid">${tiles.map(({ tpl, tp, title }) =>
+          `<button class="pal-tile" style="--c:${catColor(tp.cat || 'other')}" onclick="addTomorrowTpl('${tpl}')">
+            <span class="pt-icon">${glyph(tp, 24)}</span><span class="pt-name">${esc(title)}</span>
+          </button>`).join('')}</div>`;
+    }).join('')}</div>
+    <button class="pal-add-btn" onclick="newEventForTomorrow()">${t('pal.new')}</button>`;
   modal.classList.remove('hidden');
+}
+
+// 新建事件：建完回到这个面板
+export function newEventForTomorrow() {
+  document.getElementById('tmrModal').classList.add('hidden');
+  openCustomModal(() => openTomorrowAdd());
 }
 
 export function addTomorrowTpl(tpl) {
   const task = taskFromTpl(tpl);
-  if (task) addTomorrowTask(task);
+  if (!task) return;
+  addTomorrowTask(task, sel);
+  sel = task.id; // 连续加会按顺序往下排
   document.getElementById('tmrModal').classList.add('hidden');
   renderBedtime();
-  setTimeout(() => document.querySelector('#tmrList .tmr-row:last-child')?.scrollIntoView({ behavior:'smooth', block:'center' }), 60);
+  setTimeout(() => {
+    const row = document.querySelector(`#tmrList .tmr-row[data-id="${task.id}"]`);
+    row?.classList.add('just-added');
+    row?.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 60);
 }
 
 export function toggleNight(id, el) {

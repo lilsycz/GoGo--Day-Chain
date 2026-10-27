@@ -150,10 +150,14 @@ export function removeTomorrowTask(taskId) {
 export function reorderTomorrow(ids) {
   editDaily(d => d.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)));
 }
-export function addTomorrowTask(task) {
+// 加到明天：afterId 有值就插在它后面，否则放最后
+export function addTomorrowTask(task, afterId = null) {
   const tk = clone(task);
   delete tk.once;
-  editDaily(d => d.push(tk));
+  editDaily(d => {
+    const i = afterId ? d.findIndex(x => x.id === afterId) : -1;
+    if (i >= 0) d.splice(i + 1, 0, tk); else d.push(tk);
+  });
 }
 
 // 新的一天开始后，"明天"回到当前模版（睡前的临时调整不带到后天）

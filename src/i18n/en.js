@@ -37,7 +37,7 @@ export default {
   'bed.kicker': 'Bedtime', 'bed.title': 'Get ready for tomorrow', 'bed.sub': 'Pack tonight, just head out tomorrow',
   'bed.bag': 'Bag check', 'bed.first': "Tomorrow's first thing", 'bed.study': 'Study', 'bed.work': 'Work',
   'bed.study.ph': 'Open course X, continue lesson N…', 'bed.work.ph': 'Open X, keep working on Y…',
-  'bed.save': 'See you tomorrow', 'bed.today': 'Today', 'bed.tomorrow': 'Tomorrow', 'bed.night': 'Before bed', 'bed.firstUp': 'First up', 'bed.add': '＋ Add one', 'bed.editTomorrow': 'Edit tomorrow', 'menu.title': 'Settings', 'menu.log': 'Past days', 'log.step': 'First step', 'log.note': 'Note', 'log.none': 'Nothing yet. Finish a task and it shows up here.', 'aria.bedtime': 'Bedtime', 'bed.back': '← Back to today',
+  'bed.save': 'See you tomorrow', 'bed.today': 'Today', 'bed.tomorrow': 'Tomorrow', 'bed.night': 'Before bed', 'bed.firstUp': 'First up', 'day.done': 'Day done', 'bed.add': '＋ Add one', 'bed.addAfter': 'Add after “{t}”', 'bed.addEnd': 'Add at the end', 'bed.editTomorrow': 'Edit tomorrow', 'menu.title': 'Settings', 'menu.log': 'Past days', 'log.step': 'First step', 'log.note': 'Note', 'log.none': 'Nothing yet. Finish a task and it shows up here.', 'aria.bedtime': 'Bedtime', 'bed.back': '← Back to today',
 
   // Chain
   'step': 'First step', 'step.bedtime': 'First step · from last night', 'step.ghost': 'Write the smallest first step',

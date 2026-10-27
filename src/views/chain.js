@@ -31,9 +31,18 @@ const STEP_PH = () => `<em class="edit-ph">${t('step.edit.ph')}</em>`;
 const HINT_PH = () => `<em class="edit-ph">${t('hint.edit.ph')}</em>`;
 
 // 大圆形主按钮
+// 按钮文字里的 emoji 去掉（老数据里有"今天完成 🎉"）
+const noEmoji = s => String(s).replace(/\s*[\p{Extended_Pictographic}\uFE0F\u200D]+/gu, '').trim();
+
 function circleBtn(label, onclick, disabled=false) {
-  const long = String(label).length > 5 ? ' long' : '';
+  label = noEmoji(label);
+  const long = label.length > 5 ? ' long' : '';
   return `<button class="circle-btn${long}" onclick="${onclick}" ${disabled?'disabled':''}><span>${label}</span>${I.arrow}</button>`;
+}
+
+// 今天最后一件：按钮写"今天完成"，后面一个会跳的感叹号
+function lastBtn(disabled=false) {
+  return `<button class="circle-btn day-done" onclick="completeTask()" ${disabled?'disabled':''}><span>${t('day.done')}<b class="bang">!</b></span>${I.arrow}</button>`;
 }
 function stepBox(inner, label=t('step')) {
   return `<div class="ft-note"><div class="ft-label">${label}</div>${inner}</div>`;
@@ -119,7 +128,9 @@ function cardHTML(task, i, ci, canUndo) {
     }
 
     foot = `<div class="hero-foot">
-      ${circleBtn(tt(task, 'btnLabel')||t('done.default'), 'completeTask()', task.type==='checklist' && !isChecklistReady(task))}
+      ${nextIdx() < 0
+        ? lastBtn(task.type==='checklist' && !isChecklistReady(task))
+        : circleBtn(tt(task, 'btnLabel')||t('done.default'), 'completeTask()', task.type==='checklist' && !isChecklistReady(task))}
       <div class="hero-actions">
         <button class="act" onclick="openSwap()">${I.swap}<span>${t('act.swap')}</span></button>
         <button class="act" onclick="openPalette()">${I.plus}<span>${t('act.insert')}</span></button>
@@ -190,7 +201,7 @@ export function renderChain() {
 
   if (allDone && started) {
     html += `<div class="all-done">
-      <div class="done-art"><span class="c1"></span><span class="c2"></span></div>
+      <div class="done-art${justFinished ? ' pop' : ''}"><span class="c1"></span><span class="c2"></span></div>
       <h2>${t('alldone')}</h2>
       <button class="btn-primary alldone-edit" onclick="openBedtime(true)">${t('bed.editTomorrow')}</button>
       <button class="text-link" onclick="openToday()">${t('alldone.log')}</button>
@@ -206,6 +217,7 @@ export function renderChain() {
   }
 
   document.getElementById('chainList').innerHTML = html;
+  justFinished = false;
 
   const jobsIdx = S.chain.findIndex(t=>t.id==='jobs');
   if (jobsIdx >= 0 && ci === jobsIdx && getFeedUrl()) {
@@ -273,10 +285,47 @@ export function startDay() {
 }
 
 export function completeTask() {
+  const isLast = S.startedAt && nextIdx() < 0;
   if (!completeCurrent()) return;
-  if (navigator.vibrate) navigator.vibrate(30);
+  if (navigator.vibrate) navigator.vibrate(isLast ? [40, 60, 40] : 30);
+  if (isLast) justFinished = true;
   render();
-  window.scrollTo({top:0,behavior:'smooth'});
+  if (isLast) {
+    // 今天最后一件：完成画面的大圆弹出来，同时从它后面撒一圈彩色圆点
+    window.scrollTo({ top:0 });
+    requestAnimationFrame(() => {
+      const r = document.querySelector('.done-art')?.getBoundingClientRect();
+      if (r) celebrate(r.left + r.width / 2, r.top + r.height / 2);
+    });
+  } else {
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+// 撒花：一圈朱红 / 钴蓝 / 琥珀 / 黑色的小圆点从按钮弹出去
+let justFinished = false;
+function celebrate(x, y) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const layer = document.createElement('div');
+  layer.className = 'confetti';
+  layer.style.left = x + 'px';
+  layer.style.top = y + 'px';
+  const colors = ['#e8452c', '#2b3df0', '#f0a81c', '#151515'];
+  const n = 26;
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('i');
+    const a = (i / n) * Math.PI * 2 + Math.random() * 0.3;
+    const dist = 120 + Math.random() * 90;
+    const size = 8 + Math.round(Math.random() * 10);
+    d.style.setProperty('--x', Math.cos(a) * dist + 'px');
+    d.style.setProperty('--y', Math.sin(a) * dist + 'px');
+    d.style.width = d.style.height = size + 'px';
+    d.style.background = colors[i % colors.length];
+    d.style.animationDelay = (i % 4) * 0.03 + 's';
+    layer.appendChild(d);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 1400);
 }
 
 export function undoLast() {
