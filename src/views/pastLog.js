@@ -3,6 +3,7 @@
 // → Swift: Views/PastLogView.swift
 
 import { allRecords } from './history.js';
+import { countDone } from '../store/store.js';
 import { catColor } from '../models/categories.js';
 import { glyph } from './glyphs.js';
 import { esc, fmtTime, fmtDateKey, fmtDur } from './format.js';
@@ -46,7 +47,7 @@ function renderPastLog() {
         <button class="pl-head" onclick="toggleLogDay('${r.date}')" aria-expanded="${open.has(r.date)}">
           <span class="pl-tri" aria-hidden="true"></span>
           <span class="pl-date">${fmtDateKey(r.date)}</span>
-          <span class="big-num">${r.done.length}<small>${t('log.count')}</small></span>
+          <span class="big-num">${countDone(r.done)}<small>${t('log.count')}</small></span>
         </button>
         ${open.has(r.date) ? `<div class="pl-items">${r.done.map(itemHTML).join('')}</div>` : ''}
       </section>`).join('')

@@ -4,7 +4,7 @@
 
 import {
   S, nightItems, toggleCheck, updateNightItemLabel, buildRecord,
-  getTemplates, activeTemplateId, setTomorrowTemplate, tomorrowChain,
+  getTemplates, activeTemplateId, countDone, setTomorrowTemplate, tomorrowChain,
   setTomorrowStarter, updateTomorrowTask, removeTomorrowTask, reorderTomorrow, addTomorrowTask,
   customTemplates,
 } from '../store/store.js';
@@ -56,7 +56,7 @@ function tomorrowRow(task, i) {
 
 export function renderBedtime() {
   const rec = buildRecord(S);
-  const done = rec ? rec.blocks.filter(b => b.end).length : 0;
+  const done = rec ? countDone(rec.blocks) : 0;
   const active = activeTemplateId();
   const chain = tomorrowChain();
 

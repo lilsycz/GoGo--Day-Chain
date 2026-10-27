@@ -1,7 +1,7 @@
 // 记录页：每天几点到几点做了什么，颜色和卡片一致
 // → Swift: Views/HistoryView.swift, Views/DayTimelineView.swift
 
-import { S, buildRecord, getHistory, todayKey } from '../store/store.js';
+import { S, buildRecord, getHistory, todayKey, countDone } from '../store/store.js';
 import { CATEGORIES, catColor } from '../models/categories.js';
 import { esc, fmtTime, fmtDur, fmtDateKey } from './format.js';
 import { glyph, glyphSVG } from './glyphs.js';
@@ -44,7 +44,7 @@ function dayEnd(r) {
   return isToday(r) ? Math.max(last, Date.now()) : last;
 }
 
-const doneCount = r => r.blocks.filter(b => b.end).length;
+const doneCount = r => countDone(r.blocks);
 
 // 08:05 – 18:10
 function range(r) {

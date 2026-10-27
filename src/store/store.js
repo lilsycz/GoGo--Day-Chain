@@ -179,7 +179,7 @@ export function deleteTemplate(id) {
 }
 
 // 第一步写一次长期有效：同时记进明天的任务链和当前模版
-const starterKey = id => String(id).replace(/_\d+$/, '');
+const starterKey = id => String(id).replace(/([_~]\d+)+$/, '');
 
 function rememberStarter(taskId, val) {
   const map = storage.loadStarters();
@@ -298,17 +298,37 @@ export function completeCurrent() {
   return true;
 }
 
+// 退回上一步：已经记下的时间不丢
+// - 刚点完不到 1 分钟（多半是手滑）：接着原来那段继续，不留下几秒的碎片
+// - 否则：已经记下的那段原样保留（存成 id~1、id~2…），这件事从现在重新计时，做完是新的一段
+// - 正在休息的话，已经休息的那段也记上
 export function undoLast() {
   const li = lastDoneIdx();
   if (li < 0) return false;
   const id = S.chain[li].id;
-  S.rest = null; // 退回 = 上一件其实没做完，这段休息不算
+  const now = Date.now();
+  if (S.rest) {
+    if (now - S.rest.start >= 60000) S.rests.push({ start:S.rest.start, end:now });
+    S.rest = null;
+  }
   delete S.completed[id];
-  if (S.times[id]) { delete S.times[id].end; delete S.times[id].hint; delete S.times[id].starter; } // 没完成就不算记录
-  syncStarts();
+  const tm = S.times[id];
+  if (tm?.end && now - tm.end >= 60000) {
+    let k = 1;
+    while (S.times[`${id}~${k}`]) k++;
+    S.times[`${id}~${k}`] = { ...tm };
+    delete S.times[id];
+  } else if (tm) {
+    delete tm.end; delete tm.hint; delete tm.starter;
+  }
+  syncStarts(now);
   persist();
   return true;
 }
+
+// 记录里同一件事可能被拆成几段（id~1、id~2），数件数时算一件
+export const baseId = id => String(id).replace(/~\d+$/, '');
+export const countDone = blocks => new Set(blocks.filter(b => b.end).map(b => baseId(b.id))).size;
 
 // ── 休息 ──
 // minutes: 数字 = 多少分钟后提醒；null = 不提醒
