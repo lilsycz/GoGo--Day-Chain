@@ -25,5 +25,6 @@ export const I = {
   importFill: `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 11.5v4a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M10 13.8L5.7 9.2h2.7V3.8h3.2v5.4h2.7z" fill="currentColor"/></svg>`,
   // 实心存储（存为模版）
   saveFill:  `<svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M4 2.5h9.6L17.5 6.4V16a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 16V4A1.5 1.5 0 0 1 4 2.5zm2 1.8v3.8h7V4.3zm4 7a2.6 2.6 0 1 0 0 5.2 2.6 2.6 0 0 0 0-5.2z"/></svg>`,
+  listFill:  `<svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="4" cy="5" r="2"/><circle cx="4" cy="10" r="2"/><circle cx="4" cy="15" r="2"/><rect x="8" y="3.8" width="10" height="2.4" rx="1.2"/><rect x="8" y="8.8" width="10" height="2.4" rx="1.2"/><rect x="8" y="13.8" width="10" height="2.4" rx="1.2"/></svg>`,
   close:    svg(12, 12, `<line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>`, 1.7),
 };

@@ -192,6 +192,7 @@ export function renderChain() {
     html += `<div class="all-done">
       <div class="done-art"><span class="c1"></span><span class="c2"></span></div>
       <h2>${t('alldone')}</h2>
+      <button class="btn-primary alldone-edit" onclick="openBedtime(true)">${t('bed.editTomorrow')}</button>
       <button class="text-link" onclick="openToday()">${t('alldone.log')}</button>
       <button class="text-link" onclick="openPalette()">${t('alldone.add')}</button>
     </div>`;

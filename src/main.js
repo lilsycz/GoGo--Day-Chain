@@ -15,9 +15,13 @@ import {
   initPalette, openPalette, closePalette, addTpl, pickCat,
   openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
 } from './views/palette.js';
-import { initBedtime, openBedtime, closeBedtime, toggleNight, pickTomorrow } from './views/bedtime.js';
+import {
+  initBedtime, openBedtime, closeBedtime, toggleNight, pickTomorrow,
+  removeTomorrow, renameTomorrow, editTomorrowStep, openTomorrowAdd, addTomorrowTpl,
+} from './views/bedtime.js';
 import { initEdit, toggleEditMode, setEditTarget, editField, editCheckItem, addField } from './views/edit.js';
 import { setFeedUrl, initJobs } from './views/jobs.js';
+import { openPastLog, closePastLog, openDayFromLog } from './views/pastLog.js';
 import { initTopbar, updateDateLabel, toggleTheme, resetDay, openMenu, menuAction } from './views/topbar.js';
 import { initDialog } from './views/dialog.js';
 import { initBackup } from './views/backup.js';
@@ -38,8 +42,10 @@ Object.assign(window, {
   openPalette, closePalette, addTpl, pickCat,
   openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
   openBedtime, closeBedtime, toggleNight, pickTomorrow,
+  removeTomorrow, renameTomorrow, editTomorrowStep, openTomorrowAdd, addTomorrowTpl,
   toggleEditMode, setEditTarget, editField, editCheckItem, addField,
   setFeedUrl, toggleTheme, resetDay, openMenu, menuAction,
+  openPastLog, closePastLog, openDayFromLog,
   openStylePicker, closeStylePicker, pickStyle,
   openSaveTemplate, openSwitchTemplate, closeTemplateSheet,
   switchTemplate, removeTemplate, saveIntoTemplate, saveNewTemplate,

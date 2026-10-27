@@ -8,10 +8,10 @@ import { esc } from './format.js';
 import { render } from './render.js';
 
 // tomorrow: 睡前页里给明天的事写（不在今天的任务链里）
-export function stepInputHTML(task, { tomorrow = false } = {}) {
+export function stepInputHTML(task, { tomorrow = false, value = '' } = {}) {
   return `<label class="step-field">
     <span class="step-field-label">${t('rest.writeStep')}</span>
-    <input class="step-input" type="text" data-step-for="${task.id}"${tomorrow ? ' data-tomorrow="1"' : ''} placeholder="${esc(exampleFor(task))}" enterkeyhint="done" autocomplete="off">
+    <input class="step-input" type="text" data-step-for="${task.id}"${tomorrow ? ' data-tomorrow="1"' : ''} value="${esc(value)}" placeholder="${esc(exampleFor(task))}" enterkeyhint="done" autocomplete="off">
   </label>`;
 }
 
@@ -23,7 +23,7 @@ export function initStepInputs() {
     const el = e.target;
     if (!el.classList?.contains('step-input')) return;
     const val = el.value.trim();
-    if (!val) return;
+    if (!val && !el.dataset.tomorrow) return; // 明天的可以清空
     if (el.dataset.tomorrow) {
       setTomorrowStarter(el.dataset.stepFor, val);
       import('./bedtime.js').then(m => m.renderBedtime());

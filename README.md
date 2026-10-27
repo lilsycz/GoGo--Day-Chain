@@ -18,11 +18,11 @@ An anchor-based daily planning PWA built to minimize decision fatigue. Instead o
 ## Features
 
 - **Focus view**: only what's now and what's next
-- **Calendar** (date, top left): each day as a ring of what you did · **Today** (top right): timeline
+- **Calendar** (date, top left): each day as a ring of what you did; tap a day for its timeline
 - **Edit** (✎): changes today only · hold ≡ to reorder · tap the dot/icon for color & icon · insert tray at the bottom
 - **Templates**: save today as one, switch in one tap
-- **Bedtime**: review today, pick tomorrow's template and first step
-- Export / import · light / dark · English / 中文 · works offline
+- **Bedtime** (☾, top right): review today, then preview and edit tomorrow's whole chain (changes apply to tomorrow only)
+- **Settings** (···): past days (what you did, with the note and first step as they were when you finished) · light / dark · English / 中文 · export / import · works offline
 
 ---
 

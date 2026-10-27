@@ -5,6 +5,7 @@ import { I } from './icons.js';
 import { glyphSVG } from './glyphs.js';
 import { confirmDialog } from './dialog.js';
 import { exportData, importData } from './backup.js';
+import { openPastLog } from './pastLog.js';
 import { openBedtime } from './bedtime.js';
 import { render } from './render.js';
 import { renderBadge } from './calendar.js';
@@ -38,7 +39,7 @@ export function initTopbar() {
   applyStatic();
   // 按钮里的线条图标
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = I[el.dataset.icon] || ''; });
-  document.querySelectorAll('[data-glyph]').forEach(el => { el.innerHTML = glyphSVG(el.dataset.glyph, 16); });
+  document.querySelectorAll('[data-glyph]').forEach(el => { el.innerHTML = glyphSVG(el.dataset.glyph, +(el.dataset.glyphSize || 16)); });
   updateDateLabel();
   syncThemeLabel();
   const menu = document.getElementById('menuModal');
@@ -69,6 +70,7 @@ export function closeMenu() { document.getElementById('menuModal').classList.add
 
 export function menuAction(what) {
   closeMenu();
+  if (what === 'log')     openPastLog();
   if (what === 'export')  exportData();
   if (what === 'import')  importData();
   if (what === 'bedtime') openBedtime();

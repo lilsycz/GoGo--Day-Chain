@@ -729,3 +729,38 @@ body.edit-mode .edit-head .greeting { margin-bottom:22px; }
 body.hint-drag .drag-handle { animation:nudgeY 0.55s ease-in-out 3; color:var(--ink); background:var(--surf2); }
 @keyframes trayBounce { 0%,100% { transform:translateY(0); } 30% { transform:translateY(-26px); } 55% { transform:translateY(0); } 75% { transform:translateY(-9px); } }
 #palDrawer.hint-bounce { animation:trayBounce 1.3s ease-out 1; }
+
+/* ════ 睡前页：明天的任务链 ════ */
+.bed-today { display:flex; align-items:center; gap:18px; background:none; border:none; padding:0; cursor:pointer; color:inherit; text-align:left; }
+.tmr-list { margin-top:12px; }
+.tmr-row { border-bottom:1px solid var(--line); }
+.tmr-row .row-top { min-height:52px; }
+.tmr-title { cursor:text; }
+.tmr-body { padding:0 2px 12px 24px; }
+.tmr-body:empty { display:none; }
+.tmr-step { font-size:14px; color:var(--ink2); cursor:text; }
+.tmr-row.first { background:var(--surf); border-radius:var(--r-md); border-bottom-color:transparent; padding:0 12px; margin:0 -12px 6px; }
+.tmr-row.first .step-field { margin-top:0; }
+#tmrModal .pal-grid { grid-template-columns:repeat(4, 1fr); max-height:56vh; overflow-y:auto; }
+.menu-title { font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink2); padding:14px 12px 6px; }
+.alldone-edit { margin:6px auto 2px; }
+
+/* 休息中也能随时编辑：进编辑时休息卡片让开，列表恢复正常；退出编辑后休息卡片回来 */
+body.edit-mode #restSheet { display:none; }
+body.edit-mode.resting #chainList,
+body.edit-mode.resting #progressRail,
+body.edit-mode.resting #startDay { filter:none; opacity:1; pointer-events:auto; }
+
+/* ════ 往日记录 ════ */
+.pl-day { padding:14px 0 6px; border-top:1px solid var(--line); }
+.pl-head { display:flex; justify-content:space-between; align-items:flex-end; width:100%; background:none; border:none; padding:0 0 10px; cursor:pointer; color:inherit; text-align:left; }
+.pl-date { font-size:18px; font-weight:700; letter-spacing:-0.01em; }
+.pl-head .big-num { font-size:40px; }
+.pl-item { display:grid; grid-template-columns:44px 5px 1fr; gap:12px; padding:8px 0; }
+.pl-time { font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; text-align:right; line-height:1.4; }
+.pl-time span { display:block; font-weight:400; color:var(--ink2); font-size:12px; }
+.pl-bar { border-radius:99px; background:var(--c); }
+.pl-title { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:600; }
+.pl-dur { margin-left:auto; font-size:12px; font-weight:400; color:var(--ink2); font-variant-numeric:tabular-nums; }
+.pl-note { font-size:13px; color:var(--ink2); line-height:1.5; margin-top:3px; }
+.pl-note span { display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.08em; color:var(--ink3); margin-right:8px; }

@@ -117,7 +117,7 @@ export function applyTemplate(id) {
   const tpl = getTemplates().find(x => x.id === id);
   if (!tpl) return null;
   const undo = tplSnapshot();
-  const chain = clone(tpl.chain);
+  const chain = withStarters(tpl.chain);
   storage.saveDefaultChain(clone(chain));
   storage.setActiveTemplate(id);
   const kept = S.chain.filter(t => isResolved(t.id));
@@ -132,11 +132,42 @@ export function applyTemplate(id) {
 export function setTomorrowTemplate(id) {
   const tpl = getTemplates().find(x => x.id === id);
   if (!tpl) return;
-  storage.saveDefaultChain(clone(tpl.chain));
+  storage.saveDefaultChain(withStarters(tpl.chain));
   storage.setActiveTemplate(id);
 }
 export function tomorrowChain() { return loadDaily(); }
-export function setTomorrowStarter(taskId, val) { rememberStarter(taskId, val); }
+
+// 睡前对明天的调整只管明天一次（第二天会按模版重新来）
+export function setTomorrowStarter(taskId, val) {
+  editDaily(d => { const t = d.find(x => x.id === taskId); if (t) t.starter = val; });
+}
+export function updateTomorrowTask(taskId, field, val) {
+  editDaily(d => { const t = d.find(x => x.id === taskId); if (t) t[field] = val; });
+}
+export function removeTomorrowTask(taskId) {
+  editDaily(d => { const i = d.findIndex(x => x.id === taskId); if (i >= 0) d.splice(i, 1); });
+}
+export function reorderTomorrow(ids) {
+  editDaily(d => d.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)));
+}
+export function addTomorrowTask(task) {
+  const tk = clone(task);
+  delete tk.once;
+  editDaily(d => d.push(tk));
+}
+
+// 新的一天开始后，"明天"回到当前模版（睡前的临时调整不带到后天）
+function resetTomorrowToTemplate() {
+  const tpl = getTemplates().find(x => x.id === storage.getActiveTemplate());
+  if (!tpl) return;
+  storage.saveDefaultChain(withStarters(tpl.chain));
+}
+
+// 套上长期记住的第一步
+function withStarters(chain) {
+  const map = storage.loadStarters();
+  return clone(chain).map(t => { if (!t.starter && map[starterKey(t.id)]) t.starter = map[starterKey(t.id)]; return t; });
+}
 
 export function deleteTemplate(id) {
   storage.saveTemplates((storage.loadTemplates() || []).filter(x => x.id !== id));
@@ -144,7 +175,12 @@ export function deleteTemplate(id) {
 }
 
 // 第一步写一次长期有效：同时记进明天的任务链和当前模版
+const starterKey = id => String(id).replace(/_\d+$/, '');
+
 function rememberStarter(taskId, val) {
+  const map = storage.loadStarters();
+  if (val) map[starterKey(taskId)] = val; else delete map[starterKey(taskId)];
+  storage.saveStarters(map);
   editDaily(d => { const t = d.find(x => x.id === taskId); if (t) t.starter = val; });
   const list = storage.loadTemplates() || [];
   const tpl = list.find(x => x.id === storage.getActiveTemplate());
@@ -220,7 +256,7 @@ export function startDay() {
 export function buildRecord(s = S) {
   if (!s.startedAt) return null;
   const blocks = Object.entries(s.times || {})
-    .map(([id, tm]) => ({ id, icon:tm.icon, glyph:tm.glyph, title:tm.title, cat:tm.cat, start:tm.start, end:tm.end || null }))
+    .map(([id, tm]) => ({ id, icon:tm.icon, glyph:tm.glyph, title:tm.title, cat:tm.cat, start:tm.start, end:tm.end || null, hint:tm.hint || '', starter:tm.starter || '' }))
     .sort((a, b) => a.start - b.start);
   const rests = (s.rests || []).map(r => ({...r}));
   if (s.rest) rests.push({ start:s.rest.start, end:null });
@@ -237,6 +273,7 @@ export function rollOverIfNewDay() {
   if (rec) storage.saveHistory([rec, ...storage.loadHistory().filter(r => r.date !== rec.date)]);
   S = { ...fresh(), studyFirst:S.studyFirst, workFirst:S.workFirst };
   persist();
+  resetTomorrowToTemplate();
   return true;
 }
 
@@ -249,7 +286,8 @@ export function completeCurrent() {
   if (t.type==='checklist' && !isChecklistReady(t)) return false;
   const now = Date.now();
   S.completed[t.id] = true;
-  if (S.times[t.id]) Object.assign(S.times[t.id], { end:now, ...snapshot(t) });
+  // 完成的那一刻把描述和第一步也记下来；之后再改，记录里的不会跟着变
+  if (S.times[t.id]) Object.assign(S.times[t.id], { end:now, ...snapshot(t), hint:t.hint || '', starter:t.starter || '' });
   if (S.startedAt && currentIdx() < S.chain.length) S.rest = { start:now };
   syncStarts(now);
   persist();
@@ -262,7 +300,7 @@ export function undoLast() {
   const id = S.chain[li].id;
   S.rest = null; // 退回 = 上一件其实没做完，这段休息不算
   delete S.completed[id];
-  if (S.times[id]) delete S.times[id].end;
+  if (S.times[id]) { delete S.times[id].end; delete S.times[id].hint; delete S.times[id].starter; } // 没完成就不算记录
   syncStarts();
   persist();
   return true;

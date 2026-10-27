@@ -35,7 +35,7 @@ export function setTray(next) {
 
 // ── 模板 → 任务 ──
 // tpl: 't:meeting'（自带模板） / 'c:ct_123'（自定义）
-function taskFromTpl(tpl) {
+export function taskFromTpl(tpl) {
   const [kind, id] = tpl.split(':');
   if (kind === 't') {
     const tp = PAL_TEMPLATES.find(x => x.templateId === id);
