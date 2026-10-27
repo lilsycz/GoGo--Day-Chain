@@ -21,7 +21,7 @@ import {
 } from './views/bedtime.js';
 import { initEdit, toggleEditMode, setEditTarget, editField, editCheckItem, addField } from './views/edit.js';
 import { setFeedUrl, initJobs } from './views/jobs.js';
-import { openPastLog, closePastLog, openDayFromLog } from './views/pastLog.js';
+import { openPastLog, closePastLog, toggleLogDay } from './views/pastLog.js';
 import { initTopbar, updateDateLabel, toggleTheme, resetDay, openMenu, menuAction } from './views/topbar.js';
 import { initDialog } from './views/dialog.js';
 import { initBackup } from './views/backup.js';
@@ -45,7 +45,7 @@ Object.assign(window, {
   removeTomorrow, renameTomorrow, editTomorrowStep, openTomorrowAdd, addTomorrowTpl,
   toggleEditMode, setEditTarget, editField, editCheckItem, addField,
   setFeedUrl, toggleTheme, resetDay, openMenu, menuAction,
-  openPastLog, closePastLog, openDayFromLog,
+  openPastLog, closePastLog, toggleLogDay,
   openStylePicker, closeStylePicker, pickStyle,
   openSaveTemplate, openSwitchTemplate, closeTemplateSheet,
   switchTemplate, removeTemplate, saveIntoTemplate, saveNewTemplate,

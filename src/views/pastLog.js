@@ -1,14 +1,17 @@
 // 往日记录（设置里）：按天列出做了什么、几点到几点，以及完成那一刻的描述和第一步
-// 点日期打开那天的时间轴
+// 默认每天折叠成一行，点小三角展开当天的具体记录
 // → Swift: Views/PastLogView.swift
 
-import { allRecords, openDay } from './history.js';
+import { allRecords } from './history.js';
 import { catColor } from '../models/categories.js';
 import { glyph } from './glyphs.js';
 import { esc, fmtTime, fmtDateKey, fmtDur } from './format.js';
 import { t, tt, loc } from '../i18n/index.js';
 
+const open = new Set(); // 展开着的日期
+
 export function openPastLog() {
+  open.clear();
   renderPastLog();
   const view = document.getElementById('pastLogView');
   view.classList.add('active');
@@ -39,14 +42,18 @@ function renderPastLog() {
     .filter(r => r.done.length);
   document.getElementById('pastLogBody').innerHTML = days.length
     ? days.map(r => `
-      <section class="pl-day">
-        <button class="pl-head" onclick="openDayFromLog('${r.date}')">
+      <section class="pl-day${open.has(r.date) ? ' open' : ''}">
+        <button class="pl-head" onclick="toggleLogDay('${r.date}')" aria-expanded="${open.has(r.date)}">
+          <span class="pl-tri" aria-hidden="true"></span>
           <span class="pl-date">${fmtDateKey(r.date)}</span>
           <span class="big-num">${r.done.length}<small>${t('log.count')}</small></span>
         </button>
-        ${r.done.map(itemHTML).join('')}
+        ${open.has(r.date) ? `<div class="pl-items">${r.done.map(itemHTML).join('')}</div>` : ''}
       </section>`).join('')
     : `<div class="hist-empty">${t('log.none')}</div>`;
 }
 
-export function openDayFromLog(key) { openDay(key); }
+export function toggleLogDay(key) {
+  if (open.has(key)) open.delete(key); else open.add(key);
+  renderPastLog();
+}

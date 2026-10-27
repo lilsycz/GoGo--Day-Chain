@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- maximum-scale=1：iPhone 点输入框时不自动放大（双指缩放 iOS 仍然允许） -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
   <title>Go Go Day</title>
 
   <!-- PWA: iOS 添加到主屏幕支持 -->
@@ -46,7 +47,7 @@
     <button class="date-badge" id="dateBadge" onclick="openCalendar()" data-i18n-aria="aria.calendar"></button>
     <div class="top-actions">
       <button class="icon-btn edit-btn" id="editBtn" onclick="toggleEditMode()" data-i18n-aria="aria.edit"><span class="ic-edit" data-icon="editFill"></span><span class="ic-done" data-icon="check"></span></button>
-      <button class="icon-btn" onclick="openBedtime()" data-i18n-aria="aria.bedtime" data-glyph="moon" data-glyph-size="19"></button>
+      <button class="icon-btn" onclick="openBedtime()" data-i18n-aria="aria.bedtime" data-icon="moonFill"></button>
       <button class="icon-btn" onclick="openMenu()" data-i18n-aria="aria.menu" data-icon="more"></button>
     </div>
   </header>

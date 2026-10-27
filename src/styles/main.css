@@ -764,3 +764,21 @@ body.edit-mode.resting #startDay { filter:none; opacity:1; pointer-events:auto; 
 .pl-dur { margin-left:auto; font-size:12px; font-weight:400; color:var(--ink2); font-variant-numeric:tabular-nums; }
 .pl-note { font-size:13px; color:var(--ink2); line-height:1.5; margin-top:3px; }
 .pl-note span { display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.08em; color:var(--ink3); margin-right:8px; }
+
+/* iPhone：输入框文字小于 16px 会自动放大页面，所以输入时一律至少 16px */
+input, textarea, select { font-size:max(16px, 1em); }
+.inline-edit { font-size:max(16px, 1em); }
+
+/* 往日记录：折叠 / 展开 */
+.pl-head { align-items:center; gap:12px; }
+.pl-head .pl-date { flex:1; }
+.pl-head .big-num { font-size:32px; }
+.pl-tri {
+  width:0; height:0; flex-shrink:0;
+  border-left:8px solid var(--ink); border-top:6px solid transparent; border-bottom:6px solid transparent;
+  transition:transform 0.2s;
+}
+.pl-day.open .pl-tri { transform:rotate(90deg); }
+.pl-day { padding:12px 0; }
+.pl-head { padding:0; }
+.pl-items { padding-top:10px; }
