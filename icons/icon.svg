@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <!-- Go Go Day 图标：朱红底，黑色长弧止于水平，钴蓝短弧（G 的那一笔），楔形缝 -->
+  <rect width="180" height="180" rx="40" fill="#e8452c"/>
+  <path d="M108.73 43.64A50 50 0 1 0 140 90" fill="none" stroke="#151515" stroke-width="22"/>
+  <path d="M116.5 47.6A50 50 0 0 1 139.24 81.32" fill="none" stroke="#2b3df0" stroke-width="22"/>
+</svg>

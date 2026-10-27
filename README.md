@@ -1,4 +1,4 @@
-# GoGo Day Chain
+# Go Go Day
 
 An anchor-based daily planning PWA built to minimize decision fatigue. Instead of fixed clock times, tasks follow a flexible sequence triggered by the previous one. You only see the one thing to do now, start it with the smallest possible step, rest when you're done, and let the next one follow.
 

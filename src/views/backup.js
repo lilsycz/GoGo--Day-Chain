@@ -1,5 +1,5 @@
 // 导出 / 导入备份
-// 导出：生成 gogo-backup-日期.json；手机上走系统分享（可以存到"文件"或 iCloud Drive）
+// 导出：生成 gogoday-backup-日期.json；手机上走系统分享（可以存到"文件"或 iCloud Drive）
 // 导入：选一个备份文件，确认后替换这台设备上的数据，然后重新载入
 // → Swift: 以后换成 iCloud 同步，这里的文件格式可以用来从网页版迁移
 
@@ -12,7 +12,7 @@ import { t } from '../i18n/index.js';
 export async function exportData() {
   persist(); // 先把内存里最新的状态写进去
   const json = JSON.stringify(exportAll(), null, 2);
-  const name = `gogo-backup-${S.date}.json`;
+  const name = `gogoday-backup-${S.date}.json`;
   const blob = new Blob([json], { type:'application/json' });
 
   // 手机：系统分享面板

@@ -67,6 +67,7 @@ const BACKUP_KEYS = [DAY_KEY, CUSTOM_KEY, DEFAULTS_KEY, NIGHT_KEY, HISTORY_KEY, 
 export function exportAll() {
   const data = {};
   for (const k of BACKUP_KEYS) { const v = localStorage.getItem(k); if (v != null) data[k] = v; }
+  // app 标识保持 'gogo-day-chain'（改名前就在用），这样旧备份也能导入
   return { app:'gogo-day-chain', version:1, exportedAt:new Date().toISOString(), data };
 }
 
