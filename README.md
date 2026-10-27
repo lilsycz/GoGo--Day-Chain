@@ -57,4 +57,4 @@ Open http://localhost:5173. Vanilla JS modules, no build step. `src/store` = dat
 - [x] Export / import data
 - [x] Edit mode in the top bar with a drag-in insert tray
 - [ ] Job card as an optional module (for now: open the app with `?jobfeed=<json url>` to enable it)
-- [ ] Native SwiftUI app for the App Store
+- [ ] Native SwiftUI app for the App Store (free + one-time Pro, see [docs/pricing-plan.md](docs/pricing-plan.md))

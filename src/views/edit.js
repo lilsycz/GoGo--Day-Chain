@@ -92,7 +92,8 @@ export function addField(e, taskId, field) {
 }
 
 // 把元素换成输入框；回车保存，Esc 取消。allowEmpty: 允许清空
-export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeholder = '' } = {}) {
+// onInput: 每打一个字就存（不重画），切出 app 也不会丢；改回原样时存 raw（内置名字存的是原文，好跟着语言切换）
+export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeholder = '', onInput = null, raw = value } = {}) {
   if (el.dataset.editing) return;
   el.dataset.editing = '1';
   const prevHTML = el.innerHTML;
@@ -103,6 +104,10 @@ export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeho
   input.placeholder = placeholder;
   el.appendChild(input);
   input.focus(); input.select();
+  if (onInput) input.addEventListener('input', () => {
+    const v = input.value.trim();
+    if (v || allowEmpty) onInput(v === value ? raw : v);
+  });
 
   let done = false, cancelled = false;
   input.addEventListener('keydown', e => {
@@ -113,6 +118,7 @@ export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeho
     if (done) return; done = true;
     delete el.dataset.editing;
     const val = input.value.trim();
+    if (cancelled && onInput) onInput(raw); // Esc：撤回已经存下的字
     if (!cancelled && (val || allowEmpty) && val !== value) onSave(val, input);
     else el.innerHTML = prevHTML;
   });

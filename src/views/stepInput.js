@@ -19,6 +19,16 @@ export function initStepInputs() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.classList?.contains('step-input')) { e.preventDefault(); e.target.blur(); }
   });
+  // 明天的第一步：每打一个字就存，切出 app 也不会丢
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (el.classList?.contains('step-input') && el.dataset.tomorrow) setTomorrowStarter(el.dataset.stepFor, el.value.trim());
+  });
+  // 页面被切走时，正在写的输入框先存下来
+  document.addEventListener('visibilitychange', () => {
+    const el = document.activeElement;
+    if (document.hidden && el?.matches?.('input.step-input, input.inline-edit')) el.blur();
+  });
   document.addEventListener('change', e => {
     const el = e.target;
     if (!el.classList?.contains('step-input')) return;

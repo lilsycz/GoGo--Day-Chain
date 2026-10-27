@@ -123,7 +123,9 @@ export function renameTomorrow(e, id) {
   setSel(id);
   const task = tomorrowChain().find(x => x.id === id);
   if (!task) return;
-  startInlineEdit(e.currentTarget, tt(task, 'title'), val => { updateTomorrowTask(id, 'title', val); renderBedtime(); });
+  startInlineEdit(e.currentTarget, tt(task, 'title'), val => { updateTomorrowTask(id, 'title', val); renderBedtime(); }, {
+    onInput: val => updateTomorrowTask(id, 'title', val), raw: task.title,
+  });
 }
 
 export function editTomorrowStep(e, id) {
@@ -134,7 +136,7 @@ export function editTomorrowStep(e, id) {
   const holder = e.currentTarget.closest('.tmr-body');
   holder.innerHTML = '<div class="ft-text"></div>';
   startInlineEdit(holder.firstChild, task.starter || '', val => setTomorrowStarter(id, val), {
-    allowEmpty:true, placeholder:exampleFor(task),
+    allowEmpty:true, placeholder:exampleFor(task), onInput: val => setTomorrowStarter(id, val),
   });
   holder.querySelector('input')?.addEventListener('blur', () => setTimeout(renderBedtime, 0));
 }
@@ -198,7 +200,7 @@ export function initBedtime() {
     if (!item) return;
     startInlineEdit(clabelEl, loc(item.id, 'label', item.label), val => {
       updateNightItemLabel(item.id, val); renderBedtime();
-    });
+    }, { onInput: val => updateNightItemLabel(item.id, val), raw: item.label });
   });
   const modal = document.getElementById('tmrModal');
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
