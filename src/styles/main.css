@@ -789,18 +789,7 @@ input, textarea, select { font-size:max(16px, 1em); }
 .tmr-row.first.sel { margin-bottom:6px; }
 .tmr-groups { max-height:56vh; overflow-y:auto; margin-bottom:6px; }
 
-/* ════ 今天最后一件：跳动的感叹号 + 撒花 ════ */
-.circle-btn .bang {
-  display:inline-block; margin-left:2px; font-weight:900; font-size:1.25em; line-height:1;
-  transform-origin:50% 90%; animation:bang 1.4s ease-in-out infinite;
-}
-@keyframes bang {
-  0%, 55%, 100% { transform:translateY(0) rotate(0); }
-  62% { transform:translateY(-6px) rotate(-12deg); }
-  70% { transform:translateY(0) rotate(10deg); }
-  78% { transform:translateY(-3px) rotate(-6deg); }
-  86% { transform:translateY(0) rotate(0); }
-}
+/* ════ 今天最后一件：圆按钮轻轻放大缩小 + 撒花 ════ */
 .circle-btn.day-done { animation:dayDonePulse 2.8s ease-in-out infinite; }
 @keyframes dayDonePulse { 0%, 100% { transform:scale(1); } 50% { transform:scale(1.04); } }
 
@@ -819,3 +808,5 @@ input, textarea, select { font-size:max(16px, 1em); }
 @keyframes donePop { from { transform:scale(0.2); opacity:0; } to { transform:scale(1); opacity:1; } }
 .confetti { z-index:1; }
 .all-done { position:relative; z-index:2; }
+.all-done .undo-link { display:inline-flex; align-items:center; gap:6px; text-decoration:none; }
+.all-done .undo-link span { text-decoration:underline; text-underline-offset:3px; }

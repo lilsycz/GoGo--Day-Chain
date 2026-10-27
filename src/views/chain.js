@@ -40,9 +40,9 @@ function circleBtn(label, onclick, disabled=false) {
   return `<button class="circle-btn${long}" onclick="${onclick}" ${disabled?'disabled':''}><span>${label}</span>${I.arrow}</button>`;
 }
 
-// 今天最后一件：按钮写"今天完成"，后面一个会跳的感叹号
+// 今天最后一件：按钮写"今天完成"，圆按钮轻轻放大缩小
 function lastBtn(disabled=false) {
-  return `<button class="circle-btn day-done" onclick="completeTask()" ${disabled?'disabled':''}><span>${t('day.done')}<b class="bang">!</b></span>${I.arrow}</button>`;
+  return `<button class="circle-btn day-done" onclick="completeTask()" ${disabled?'disabled':''}><span>${t('day.done')}</span>${I.arrow}</button>`;
 }
 function stepBox(inner, label=t('step')) {
   return `<div class="ft-note"><div class="ft-label">${label}</div>${inner}</div>`;
@@ -206,6 +206,7 @@ export function renderChain() {
       <button class="btn-primary alldone-edit" onclick="openBedtime(true)">${t('bed.editTomorrow')}</button>
       <button class="text-link" onclick="openToday()">${t('alldone.log')}</button>
       <button class="text-link" onclick="openPalette()">${t('alldone.add')}</button>
+      ${canUndo ? `<button class="text-link undo-link" onclick="undoLast()">${I.undo}<span>${t('act.undo')}</span></button>` : ''}
     </div>`;
   }
   if (!editMode) {
