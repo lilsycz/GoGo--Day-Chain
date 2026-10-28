@@ -64,6 +64,8 @@ initBackup();
 initStepInputs();
 initTemplates();
 initStylePicker();
+// iPhone Safari 要有触摸监听，按钮的按下样式（:active）才会出现
+document.addEventListener('touchstart', () => {}, { passive:true });
 render();
 
 // app 一直开着跨过凌晨 4 点，或者第二天从后台切回来时，换成新的一天

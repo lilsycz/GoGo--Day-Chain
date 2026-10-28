@@ -8,6 +8,7 @@ import { t, tt, loc } from '../i18n/index.js';
 import { onEditMode } from './palette.js';
 import { seen, markSeen } from '../store/storage.js';
 import { exampleFor } from '../i18n/index.js';
+import * as haptic from '../services/haptics.js';
 
 // 可以清空的字段，清空后显示的占位文字
 const PLACEHOLDERS = {
@@ -20,6 +21,7 @@ export let editTarget = null;
 
 export function toggleEditMode() {
   editMode = !editMode;
+  haptic.tap();
   document.body.classList.toggle('edit-mode', editMode);
   onEditMode(editMode); // 插入托盘跟着编辑模式出现 / 收起
   window.scrollTo({ top:0 });

@@ -17,6 +17,7 @@ import { esc } from './format.js';
 import { editMode, toggleEditMode } from './edit.js';
 import { showToast } from './toast.js';
 import { seen, markSeen } from '../store/storage.js';
+import * as haptic from '../services/haptics.js';
 
 let tray;
 let state = 'closed';        // closed / peek / half / full
@@ -89,6 +90,7 @@ function initTraySortables() {
         delay: 120, delayOnTouchOnly: true, // 手机上让托盘还能上下滑
         filter: '.pt-del', preventOnFilter: false,
         // 拖起来时托盘缩到最小，把上面的列表让出来
+        onChoose() { haptic.tap(); },
         onStart() { beforeDrag = state; setTray('peek'); document.body.classList.add('dragging-tile'); },
         onEnd(evt) {
           document.body.classList.remove('dragging-tile');
@@ -150,6 +152,7 @@ function afterInsert(task, at) {
 export function addTpl(tpl) {
   const task = taskFromTpl(tpl);
   if (!task) return;
+  haptic.tap();
   afterInsert(task, insertAfterCurrent(task));
 }
 

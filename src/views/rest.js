@@ -18,6 +18,7 @@ import { stepInputHTML } from './stepInput.js';
 import { t, tt, lang } from '../i18n/index.js';
 import { categoryOf, catVars } from '../models/categories.js';
 import { render } from './render.js';
+import * as haptic from '../services/haptics.js';
 
 const CHOICES = () => [[5, t('min',{n:5})], [15, t('min',{n:15})], [30, t('min',{n:30})], [60, t('hour1')]];
 
@@ -87,17 +88,19 @@ export function renderRest() {
 export function chooseReminder(minutes) {
   if (minutes != null) askPermission();
   setReminder(minutes);
+  haptic.tap();
   render();
 }
 
 export function snoozeRest() {
   reopenReminderPicker();
+  haptic.tap();
   render();
 }
 
 export function startNext() {
   endRest();
-  if (navigator.vibrate) navigator.vibrate(30);
+  haptic.tap();
   render();
   window.scrollTo({top:0,behavior:'smooth'});
 }

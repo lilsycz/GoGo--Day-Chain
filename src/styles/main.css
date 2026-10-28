@@ -810,3 +810,12 @@ input, textarea, select { font-size:max(16px, 1em); }
 .all-done { position:relative; z-index:2; }
 .all-done .undo-link { display:inline-flex; align-items:center; gap:6px; text-decoration:none; }
 .all-done .undo-link span { text-decoration:underline; text-underline-offset:3px; }
+
+/* 按下反馈：小按钮缩一下，文字类淡一下 */
+.icon-btn, .row-del, .style-btn, .add-chip, .cat-chip, .pal-add-btn, .act,
+.text-link, .chain-fold, .menu-item, .pl-head, .night-row, .bed-today {
+  transition: transform .12s ease, opacity .12s ease, background-color .15s, color .15s, border-color .15s;
+}
+.icon-btn:active, .row-del:active, .style-btn:active, .add-chip:active, .cat-chip:active, .pal-add-btn:active { transform:scale(0.9); }
+.icon-btn:active { background:var(--surf); }
+.text-link:active, .chain-fold:active, .menu-item:active, .pl-head:active, .night-row:active, .bed-today:active, .act:active { opacity:0.5; }

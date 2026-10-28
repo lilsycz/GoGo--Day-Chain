@@ -19,6 +19,7 @@ import { dayRing } from './calendar.js';
 import { templateName } from './templates.js';
 import { stepInputHTML } from './stepInput.js';
 import { taskFromTpl, openCustomModal } from './palette.js';
+import * as haptic from '../services/haptics.js';
 
 let sortable = null;
 let sel = null; // 明天列表里选中的那一行：新加的事插在它后面
@@ -92,6 +93,7 @@ function initTomorrowSort() {
   const el = document.getElementById('tmrList');
   sortable = new Sortable(el, {
     handle:'.drag-handle', animation:200, forceFallback:true, fallbackOnBody:true,
+    onChoose() { haptic.tap(); },
     onEnd(evt) {
       if (evt.oldIndex === evt.newIndex) return;
       reorderTomorrow([...el.querySelectorAll('.tmr-row')].map(r => r.dataset.id));
@@ -102,6 +104,7 @@ function initTomorrowSort() {
 
 export function pickTomorrow(id) {
   setTomorrowTemplate(id);
+  haptic.tap();
   renderBedtime();
 }
 
@@ -115,6 +118,7 @@ export function selectTomorrow(id) { setSel(sel === id ? null : id); }
 export function removeTomorrow(id) {
   if (sel === id) sel = null;
   removeTomorrowTask(id);
+  haptic.tap();
   renderBedtime();
 }
 
@@ -174,6 +178,7 @@ export function addTomorrowTpl(tpl) {
   const task = taskFromTpl(tpl);
   if (!task) return;
   addTomorrowTask(task, sel);
+  haptic.tap();
   sel = task.id; // 连续加会按顺序往下排
   document.getElementById('tmrModal').classList.add('hidden');
   renderBedtime();
@@ -186,6 +191,7 @@ export function addTomorrowTpl(tpl) {
 
 export function toggleNight(id, el) {
   const chk = toggleCheck(id);
+  haptic.tap();
   el.className=`night-row${chk?' checked':''}`;
   el.querySelector('.cbox').innerHTML=chk?I.check:'';
 }

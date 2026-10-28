@@ -23,6 +23,7 @@ import { showToast } from './toast.js';
 import { render } from './render.js';
 import { dropTpl } from './palette.js';
 import { stepInputHTML } from './stepInput.js';
+import * as haptic from '../services/haptics.js';
 
 let chainSortable = null;
 let showAll = false;
@@ -255,7 +256,7 @@ export function initSortable() {
     chosenClass:   'sortable-chosen',
 
     onChoose(evt) {
-      if (navigator.vibrate) navigator.vibrate(30);
+      haptic.tap();
     },
     // 列表内排序
     onEnd(evt) {
@@ -271,6 +272,7 @@ export function initSortable() {
       while (next && !next.classList.contains('task-row')) next = next.nextElementSibling;
       const beforeId = next?.dataset.id || null;
       item.remove();
+      haptic.tap();
       // 等拖拽库收完尾再改数据、重画，不然它的结束回调会丢
       if (tpl) setTimeout(() => dropTpl(tpl, beforeId), 0);
     },
@@ -281,6 +283,7 @@ export function initSortable() {
 export function toggleShowAll() { showAll = !showAll; render(); }
 
 export function startDay() {
+  haptic.tap();
   startDayAction();
   render();
 }
@@ -288,7 +291,7 @@ export function startDay() {
 export function completeTask() {
   const isLast = S.startedAt && nextIdx() < 0;
   if (!completeCurrent()) return;
-  if (navigator.vibrate) navigator.vibrate(isLast ? [40, 60, 40] : 30);
+  isLast ? haptic.celebrate() : haptic.success();
   if (isLast) justFinished = true;
   render();
   if (isLast) {
@@ -331,17 +334,19 @@ function celebrate(x, y) {
 
 export function undoLast() {
   if (!undoLastAction()) return;
+  haptic.tap();
   render();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-export function toggleCheck(id) { toggleCheckAction(id); render(); }
+export function toggleCheck(id) { haptic.tap(); toggleCheckAction(id); render(); }
 
 export function unskipTask(id) { unskipAction(id); render(); }
 
 // 编辑模式里的 ×：从今天和每日任务里移除，几秒内可以撤销
 export function removeTask(id) {
   const undo = removeTaskAction(id);
+  haptic.tap();
   render();
   if (!undo) return;
   const title = esc(tt(undo.task, 'title'));

@@ -13,6 +13,7 @@ import { I } from './icons.js';
 import { t } from '../i18n/index.js';
 import { editMode } from './edit.js';
 import { render } from './render.js';
+import * as haptic from '../services/haptics.js';
 
 const sheet = () => document.getElementById('tplModal');
 
@@ -64,6 +65,7 @@ export function switchTemplate(id) {
   const tpl = getTemplates().find(x => x.id === id);
   if (!tpl) return;
   const undo = applyTemplate(id);
+  haptic.tap();
   closeTemplateSheet();
   render();
   showToast(t('tpl.switched', { n:esc(templateName(tpl)) }), t('undo'), () => { restoreTplSnapshot(undo); render(); });
