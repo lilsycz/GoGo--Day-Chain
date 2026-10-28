@@ -49,7 +49,7 @@ export default {
   'once': 'Today only', 'once.add': 'Add to every day',
   'fold.done': '✓ {n} done', 'fold.skip': ' · {n} skipped', 'next': 'Up next',
   'fold.all': 'Show all ▾', 'fold.less': 'Show less ▴',
-  'alldone': 'All done today.', 'alldone.log': "See today's log →", 'alldone.add': '＋ Add one more',
+  'alldone': 'All done today.', 'alldone.log': "See today's log", 'alldone.add': 'Add one more',
   'toast.removed': 'Removed “{t}”', 'toast.removedDaily': 'Removed “{t}” from every day', 'toast.daily': 'This will show up every day now',
 
   // Rest
@@ -77,7 +77,7 @@ export default {
   'cal.prev': 'Previous month', 'cal.next': 'Next month', 'cal.week': 'M,T,W,T,F,S,S', 'cal.month': '{name}',
 
   // Durations
-  'dur.min': '{m} min', 'dur.h': '{h} h', 'dur.hm': '{h} h {m} min',
+  'dur.min': '{m} min', 'dur.lt1': '<1 min', 'dur.h': '{h} h', 'dur.hm': '{h} h {m} min',
 
   // Categories
   'cat.meal': 'Meals', 'cat.focus': 'Focus', 'cat.health': 'Health', 'cat.life': 'Life', 'cat.other': 'Other',

@@ -50,7 +50,7 @@ export function taskFromTpl(tpl) {
 function tileHTML(tpl, tp, title, deletable) {
   return `<div class="pal-tile" data-tpl="${tpl}" style="--c:${catColor(tp.cat || 'other')}" onclick="addTpl('${tpl}')">
     ${deletable ? `<button class="pt-del" onclick="event.stopPropagation();delCustomTemplate('${tp.id}')" aria-label="${t('remove')}">×</button>` : ''}
-    <span class="pt-icon">${glyph(tp, 24)}</span>
+    <span class="pt-icon">${glyph(tp, 20)}</span>
     <span class="pt-name">${esc(title)}</span>
   </div>`;
 }

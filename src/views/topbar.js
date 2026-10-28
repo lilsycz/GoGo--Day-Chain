@@ -23,7 +23,7 @@ export function updateDateLabel() {
 function syncThemeLabel() {
   const dark = document.documentElement.dataset.theme === 'dark';
   document.getElementById('themeLabel').textContent = t(dark ? 'menu.light' : 'menu.dark');
-  document.querySelector('meta[name="theme-color"]').content = dark ? '#121212' : '#ebe6dc';
+  document.querySelector('meta[name="theme-color"]').content = dark ? '#121212' : '#f1f1ef';
 }
 
 // 中 / 英切换：固定文字、日期问候、整页都重画

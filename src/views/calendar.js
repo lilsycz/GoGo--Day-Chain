@@ -6,6 +6,7 @@ import { S, todayKey, buildRecord } from '../store/store.js';
 import { CATEGORIES, catColor } from '../models/categories.js';
 import { allRecords, openDay, closeHistory } from './history.js';
 import { t } from '../i18n/index.js';
+import { I } from './icons.js';
 
 let ym = null; // 正在看的 [年, 月(0-11)]
 
@@ -94,9 +95,9 @@ function renderCalendar() {
 
   document.getElementById('calendarBody').innerHTML = `
     <div class="cal-head">
-      <button class="icon-btn" onclick="shiftMonth(-1)" aria-label="${t('cal.prev')}">‹</button>
+      <button class="icon-btn cal-prev" onclick="shiftMonth(-1)" aria-label="${t('cal.prev')}">${I.arrow}</button>
       <div class="cal-month"><div class="page-title">${t('cal.month', {m:m + 1, name:new Date(y, m, 1).toLocaleDateString('en-US', {month:'long'})})}</div><small>${y}</small></div>
-      <button class="icon-btn" onclick="shiftMonth(1)" aria-label="${t('cal.next')}">›</button>
+      <button class="icon-btn" onclick="shiftMonth(1)" aria-label="${t('cal.next')}">${I.arrow}</button>
     </div>
     <div class="cal-week">${t('cal.week').split(',').map(w => `<span>${w}</span>`).join('')}</div>
     <div class="cal-grid">${cells}</div>

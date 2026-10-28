@@ -205,8 +205,8 @@ export function renderChain() {
       <div class="done-art${justFinished ? ' pop' : ''}"><span class="c1"></span><span class="c2"></span></div>
       <h2>${t('alldone')}</h2>
       <button class="btn-primary alldone-edit" onclick="openBedtime(true)">${t('bed.editTomorrow')}</button>
-      <button class="text-link" onclick="openToday()">${t('alldone.log')}</button>
-      <button class="text-link" onclick="openPalette()">${t('alldone.add')}</button>
+      <button class="text-link icon-link" onclick="openToday()"><span>${t('alldone.log')}</span>${I.arrow}</button>
+      <button class="text-link icon-link" onclick="openPalette()">${I.plus}<span>${t('alldone.add')}</span></button>
       ${canUndo ? `<button class="text-link undo-link" onclick="undoLast()">${I.undo}<span>${t('act.undo')}</span></button>` : ''}
     </div>`;
   }

@@ -49,7 +49,7 @@ export default {
   'once': '只在今天', 'once.add': '加入每日任务',
   'fold.done': '✓ 已完成 {n} 件', 'fold.skip': ' · 跳过 {n} 件', 'next': '接下来',
   'fold.all': '显示全部 ▾', 'fold.less': '收起 ▴',
-  'alldone': '今天完成了。', 'alldone.log': '看看今天的记录 →', 'alldone.add': '＋ 再加一件',
+  'alldone': '今天完成了。', 'alldone.log': '看看今天的记录', 'alldone.add': '再加一件',
   'toast.removed': '已移除「{t}」', 'toast.removedDaily': '已从每日任务移除「{t}」', 'toast.daily': '以后每天都会有这件事',
 
   // 休息
@@ -77,7 +77,7 @@ export default {
   'cal.prev': '上个月', 'cal.next': '下个月', 'cal.week': '一,二,三,四,五,六,日', 'cal.month': '{m}月',
 
   // 时长
-  'dur.min': '{m} 分钟', 'dur.h': '{h} 小时', 'dur.hm': '{h} 小时 {m} 分',
+  'dur.min': '{m} 分钟', 'dur.lt1': '<1 分钟', 'dur.h': '{h} 小时', 'dur.hm': '{h} 小时 {m} 分',
 
   // 类别
   'cat.meal': '餐食', 'cat.focus': '专注', 'cat.health': '健康', 'cat.life': '生活', 'cat.other': '其他',

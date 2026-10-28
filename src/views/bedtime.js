@@ -161,7 +161,7 @@ export function openTomorrowAdd() {
       return `<div class="pal-sec"><i style="background:${catColor(cat)}"></i>${t('cat.' + cat)}</div>
         <div class="pal-grid">${tiles.map(({ tpl, tp, title }) =>
           `<button class="pal-tile" style="--c:${catColor(tp.cat || 'other')}" onclick="addTomorrowTpl('${tpl}')">
-            <span class="pt-icon">${glyph(tp, 24)}</span><span class="pt-name">${esc(title)}</span>
+            <span class="pt-icon">${glyph(tp, 20)}</span><span class="pt-name">${esc(title)}</span>
           </button>`).join('')}</div>`;
     }).join('')}</div>
     <button class="pal-add-btn" onclick="newEventForTomorrow()">${t('pal.new')}</button>`;
