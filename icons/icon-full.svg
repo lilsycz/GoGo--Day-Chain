@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
   <!-- 满版方形版本：给 iPhone 主屏幕和安装用（系统会自己切圆角） -->
-  <rect width="180" height="180" fill="#dcdcd8"/>
+  <rect width="180" height="180" fill="#f5f5f3"/>
   <g transform="translate(-1 1)">
     <path d="M102.94 41.70A50 50 0 1 0 140 90" fill="none" stroke="#151515" stroke-width="26.4"/>
     <path d="M118.62 25.68A70.4 70.4 0 0 1 159.54 79.00L125.12 79.00A36.8 36.8 0 0 0 109.71 58.93Z" fill="#e8452c"/>
