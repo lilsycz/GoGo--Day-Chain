@@ -61,6 +61,12 @@
   <div id="editFooter"></div>
 </div>
 
+<!-- 编辑模式底部固定一排：插入一件事 / 完成 -->
+<div id="editBar" class="fixed-bar">
+  <button class="btn-ghost" onclick="openPalette()"><span data-icon="plus"></span><span data-i18n="pal.title"></span></button>
+  <button class="btn-primary" onclick="toggleEditMode()"><span data-icon="check"></span><span data-i18n="edit.done"></span></button>
+</div>
+
 <!-- ════ MENU ════ -->
 <div id="menuModal" class="modal-overlay hidden">
   <div class="modal-box menu-box">
@@ -109,7 +115,11 @@
   </div>
   <div class="page-title" data-i18n="bed.title"></div>
   <div id="bedBody"></div>
-  <button class="btn-primary wide bed-done" onclick="closeBedtime()" data-i18n="bed.save"></button>
+  <!-- 底部固定一排，和编辑模式一样：插入一件事 / 完成 -->
+  <div class="fixed-bar">
+    <button class="btn-ghost" onclick="openTomorrowAdd()"><span data-icon="plus"></span><span data-i18n="pal.title"></span></button>
+    <button class="btn-primary" onclick="closeBedtime()"><span data-icon="check"></span><span data-i18n="edit.done"></span></button>
+  </div>
 </div>
 
 <!-- ════ REST SHEET ════ -->

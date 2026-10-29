@@ -71,6 +71,9 @@ export function backToCalendar() {
   closeHistory();
 }
 
+// 记录变了（比如删了一天）：日历开着就重画
+export function refreshCalendar() { if (ym) renderCalendar(); }
+
 const pad = n => String(n).padStart(2, '0');
 
 function renderCalendar() {

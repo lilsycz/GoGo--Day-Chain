@@ -108,7 +108,7 @@ export function saveTemplate({ id, name }) {
   else { tpl = { id:'tpl_' + Date.now(), name, chain }; list.push(tpl); }
   storage.saveTemplates(list);
   storage.setActiveTemplate(tpl.id);
-  storage.saveDefaultChain(clone(chain));
+  storage.saveDefaultChain(withTomorrowNotes(chain));
   return { tpl, undo };
 }
 
@@ -118,7 +118,7 @@ export function applyTemplate(id) {
   if (!tpl) return null;
   const undo = tplSnapshot();
   const chain = withStarters(tpl.chain);
-  storage.saveDefaultChain(clone(chain));
+  storage.saveDefaultChain(withTomorrowNotes(chain));
   storage.setActiveTemplate(id);
   const kept = S.chain.filter(t => isResolved(t.id));
   const keptIds = new Set(kept.map(t => t.id));
@@ -132,14 +132,26 @@ export function applyTemplate(id) {
 export function setTomorrowTemplate(id) {
   const tpl = getTemplates().find(x => x.id === id);
   if (!tpl) return;
-  storage.saveDefaultChain(withStarters(tpl.chain));
+  storage.saveDefaultChain(withTomorrowNotes(withStarters(tpl.chain)));
   storage.setActiveTemplate(id);
 }
 export function tomorrowChain() { return loadDaily(); }
 
 // 睡前对明天的调整只管明天一次（第二天会按模版重新来）
+// 给明天写的第一步当天一直记着，换模版也不丢；过了这一天才清掉
 export function setTomorrowStarter(taskId, val) {
   editDaily(d => { const t = d.find(x => x.id === taskId); if (t) t.starter = val; });
+  const notes = tomorrowNotes();
+  notes[starterKey(taskId)] = val;
+  storage.saveTomorrowNotes({ date:todayKey(), notes });
+}
+function tomorrowNotes() {
+  const saved = storage.loadTomorrowNotes();
+  return saved?.date === todayKey() ? saved.notes || {} : {};
+}
+function withTomorrowNotes(chain) {
+  const notes = tomorrowNotes();
+  return clone(chain).map(t => { const k = starterKey(t.id); if (k in notes) t.starter = notes[k]; return t; });
 }
 export function updateTomorrowTask(taskId, field, val) {
   editDaily(d => { const t = d.find(x => x.id === taskId); if (t) t[field] = val; });
@@ -268,6 +280,15 @@ export function buildRecord(s = S) {
 }
 
 export function getHistory() { return storage.loadHistory(); }
+
+// 删掉某一天的记录（今天的不在这里删）；返回撤销用的旧列表
+export function deleteHistoryDay(date) {
+  const list = storage.loadHistory();
+  if (!list.some(r => r.date === date)) return null;
+  storage.saveHistory(list.filter(r => r.date !== date));
+  return list;
+}
+export function restoreHistory(list) { storage.saveHistory(list); }
 
 // 新的一天：把昨天存进记录，换一张新的任务链。睡前写的"第一件事"留到新的一天用。
 // 返回 true 表示换天了

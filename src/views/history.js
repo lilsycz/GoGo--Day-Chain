@@ -1,7 +1,10 @@
 // 记录页：每天几点到几点做了什么，颜色和卡片一致
 // → Swift: Views/HistoryView.swift, Views/DayTimelineView.swift
 
-import { S, buildRecord, getHistory, todayKey, countDone } from '../store/store.js';
+import { S, buildRecord, getHistory, todayKey, countDone, deleteHistoryDay, restoreHistory } from '../store/store.js';
+import { showToast } from './toast.js';
+import { I } from './icons.js';
+import * as haptic from '../services/haptics.js';
 import { CATEGORIES, catColor } from '../models/categories.js';
 import { esc, fmtTime, fmtDur, fmtDateKey } from './format.js';
 import { glyph, glyphSVG } from './glyphs.js';
@@ -113,6 +116,7 @@ function dayDetail(r) {
       <div class="tl-mark">${glyphSVG('sun', 16)} ${t('log.started', {time:fmtTime(r.startedAt)})}</div>
       ${entries(r).map(e => timelineRow(e, r)).join('')}
     </div>
+    ${isToday(r) ? '' : `<button class="text-link icon-link del-day" onclick="deleteDay('${r.date}')">${I.trash}<span>${t('log.delete')}</span></button>`}
   </div>`;
 }
 
@@ -130,4 +134,17 @@ function emptyDay(key) {
 function renderHistory() {
   const r = allRecords().find(x => x.date === viewing);
   document.getElementById('historyBody').innerHTML = r ? dayDetail(r) : emptyDay(viewing);
+}
+
+// 删掉这一天的记录：回到日历，底部提示里可以撤销（今天的不能删）
+export function deleteDay(key) {
+  const undo = deleteHistoryDay(key);
+  if (!undo) return;
+  haptic.tap();
+  closeHistory();
+  import('./calendar.js').then(m => m.refreshCalendar());
+  showToast(t('log.deleted'), t('undo'), () => {
+    restoreHistory(undo);
+    import('./calendar.js').then(m => m.refreshCalendar());
+  });
 }

@@ -1,5 +1,5 @@
-// 插入托盘（编辑模式底部）+ 新建事件弹窗
-// 托盘三种高度：peek（只露标题）/ half / full，上滑展开、下滑收起、点标题切换
+// 插入托盘（编辑模式底部"插入一件事"按钮拉上来）+ 新建事件弹窗
+// 托盘高度：half / full，上滑展开、下滑收起，点标题收起；拖圆的时候缩成 peek 让出列表
 // 点一下：加在当前任务后面；按住拖到上面的任务链里：插在放下的位置
 // 插入后留在编辑页：新的一行闪一下、滚到它，底部提示插在了哪，可以撤销
 // → Swift: Views/InsertTray.swift（拖拽用 .draggable / .dropDestination）
@@ -16,11 +16,10 @@ import { t, tt, loc } from '../i18n/index.js';
 import { esc } from './format.js';
 import { editMode, toggleEditMode } from './edit.js';
 import { showToast } from './toast.js';
-import { seen, markSeen } from '../store/storage.js';
 import * as haptic from '../services/haptics.js';
 
 let tray;
-let state = 'closed';        // closed / peek / half / full
+let state = 'closed';        // closed / peek（只在拖的时候）/ half / full
 let beforeDrag = 'half';
 let pickedGlyph = 'pin';
 let pickedCat = 'other';
@@ -108,20 +107,12 @@ export function openPalette() {
   setTray('half');
   renderPalette();
 }
-export function closePalette() { setTray('peek'); }
+export function closePalette() { setTray('closed'); }
 
-// 进 / 出编辑模式时由 edit.js 调用
-export function onEditMode(on) {
-  setTray(on ? 'peek' : 'closed');
-  // 第一次出现：往上弹一下，提示可以拉上来
-  if (on && !seen('tray')) {
-    markSeen('tray');
-    setTimeout(() => tray.classList.add('hint-bounce'), 700);
-    setTimeout(() => tray.classList.remove('hint-bounce'), 2100);
-  }
-}
+// 进 / 出编辑模式时由 edit.js 调用：托盘先收着，点底部"插入一件事"才拉上来
+export function onEditMode(on) { setTray('closed'); }
 
-const ORDER = ['peek', 'half', 'full'];
+const ORDER = ['closed', 'half', 'full'];
 function stepTray(dir) {
   const i = ORDER.indexOf(state);
   setTray(ORDER[Math.max(0, Math.min(ORDER.length - 1, i + dir))]);
@@ -130,7 +121,7 @@ function stepTray(dir) {
 // 插入之后：滚到新的一行、闪一下，提示插在哪，可以撤销
 function afterInsert(task, at) {
   document.body.classList.remove('dragging-tile');
-  setTray('peek');
+  setTray('closed');
   render();
   const row = document.querySelector(`#chainList .task-row[data-id="${task.id}"]`);
   if (row) {
@@ -224,7 +215,7 @@ export function initPalette() {
   head.addEventListener('touchend', () => { y0 = null; });
   head.addEventListener('click', () => {
     if (moved) { moved = false; return; }
-    setTray(state === 'peek' ? 'half' : 'peek');
+    setTray('closed');
   });
   // 托盘内容区往上滑到顶时也展开成大半屏
   tray.querySelector('.pal-body').addEventListener('scroll', e => {

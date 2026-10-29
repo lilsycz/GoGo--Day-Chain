@@ -45,6 +45,10 @@ function circleBtn(label, onclick, disabled=false) {
 function lastBtn(disabled=false) {
   return `<button class="circle-btn day-done" onclick="completeTask()" ${disabled?'disabled':''}><span>${t('day.done')}</span>${I.arrow}</button>`;
 }
+// 编辑列表里一行"第一步 xxx"，点文字就改
+export function stepLine(text, onclick) {
+  return `<div class="row-step"><span class="rs-label">${t('step')}</span><span class="rs-text" onclick="${onclick}">${esc(text)}</span></div>`;
+}
 function stepBox(inner, label=t('step')) {
   return `<div class="ft-note"><div class="ft-label">${label}</div>${inner}</div>`;
 }
@@ -138,14 +142,18 @@ function cardHTML(task, i, ci, canUndo) {
         ${canUndo ? `<button class="act" onclick="undoLast()">${I.undo}<span>${t('act.undo')}</span></button>` : ''}
       </div>
     </div>`;
-  } else if (isEditTarget) {
-    // 编辑模式展开体：有内容的字段点了就改；没有的只显示一个小 ＋ 按钮
-    if (task.hint) body += `<div class="row-hint" onclick="editField(event,'${task.id}','hint')">${esc(tt(task, 'hint'))}</div>`;
-    if (task.starter) body += stepBox(`<div class="ft-text" onclick="editField(event,'${task.id}','starter')">${esc(task.starter)}</div>`);
-    const adds = [!task.hint && 'hint', !task.starter && 'starter'].filter(Boolean);
+  } else if (editMode) {
+    // 编辑模式：没做完的每行都能写第一步——写了就显示、点一下改；没写只放一个小 ＋ 按钮
+    // 展开的那行再多出清单（已有的描述也能改）
+    const open = !done && !skipped;
+    if (isEditTarget && task.hint) body += `<div class="row-hint" onclick="editField(event,'${task.id}','hint')">${esc(tt(task, 'hint'))}</div>`;
+    if (open && task.starter) body += stepLine(task.starter, `editField(event,'${task.id}','starter')`);
+    const adds = [open && !task.starter && 'starter'].filter(Boolean);
     if (adds.length) body += `<div class="add-chips">${adds.map(f =>
       `<button class="add-chip" onclick="addField(event,'${task.id}','${f}')">${I.plus}<span>${t(f === 'hint' ? 'field.hint' : 'field.step')}</span></button>`
     ).join('')}</div>`;
+  }
+  if (isEditTarget) {
     if (task.type==='checklist') {
       body += '<div class="row-checks">' + (task.items||[]).map(it =>
         `<div class="check-row" data-item-id="${it.id}">

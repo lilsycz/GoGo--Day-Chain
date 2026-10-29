@@ -9,6 +9,7 @@ const HISTORY_KEY  = 'dc_history_v1';
 const TEMPLATES_KEY = 'dc_templates_v1';
 const ACTIVE_TPL_KEY = 'dc_active_tpl';
 const STARTERS_KEY = 'dc_starters_v1';
+const TMR_NOTES_KEY = 'dc_tmr_notes_v1';
 const THEME_KEY    = 'dc_theme2'; // 新风格从浅色开始
 const FEED_KEY     = 'job_feed_url';
 
@@ -59,6 +60,9 @@ export function setActiveTemplate(id) { if (id) localStorage.setItem(ACTIVE_TPL_
 // 长期记住的第一步 { [任务 id 去掉数字后缀]: '第一步' }
 export function loadStarters() { try { return JSON.parse(localStorage.getItem(STARTERS_KEY)) || {}; } catch { return {}; } }
 export function saveStarters(map) { localStorage.setItem(STARTERS_KEY, JSON.stringify(map)); }
+// 给明天写的第一步 { date: 写的那天, notes: { [任务 id 去掉数字后缀]: '第一步' } }
+export function loadTomorrowNotes() { try { return JSON.parse(localStorage.getItem(TMR_NOTES_KEY)); } catch { return null; } }
+export function saveTomorrowNotes(v) { localStorage.setItem(TMR_NOTES_KEY, JSON.stringify(v)); }
 export function hasNightItems() { return localStorage.getItem(NIGHT_KEY) != null; }
 
 // 一次性的小标记（比如新手动作提示看过没有）
@@ -66,7 +70,7 @@ export function seen(key)    { try { return localStorage.getItem('dc_seen_' + ke
 export function markSeen(key){ try { localStorage.setItem('dc_seen_' + key, '1'); } catch {} }
 
 // ── 备份：把所有数据打包成一个对象 / 从备份恢复 ──
-const BACKUP_KEYS = [DAY_KEY, CUSTOM_KEY, DEFAULTS_KEY, NIGHT_KEY, HISTORY_KEY, TEMPLATES_KEY, ACTIVE_TPL_KEY, STARTERS_KEY, THEME_KEY, 'dc_lang', FEED_KEY];
+const BACKUP_KEYS = [DAY_KEY, CUSTOM_KEY, DEFAULTS_KEY, NIGHT_KEY, HISTORY_KEY, TEMPLATES_KEY, ACTIVE_TPL_KEY, STARTERS_KEY, TMR_NOTES_KEY, THEME_KEY, 'dc_lang', FEED_KEY];
 
 export function exportAll() {
   const data = {};

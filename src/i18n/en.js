@@ -15,7 +15,7 @@ export default {
   'aria.edit': 'Edit tasks', 'edit.title': 'Edit', 'edit.hint': 'Tap text to rename · hold ≡ to reorder · drag new events in from below',
   'menu.export': 'Export data', 'menu.import': 'Import data',
   'export.done': 'Backup exported', 'import.title': 'Import backup?', 'import.body': 'Your tasks, log and settings on this device will be replaced with the ones in the backup.', 'import.ok': 'Import', 'import.bad': 'This file isn’t a GoGo backup',
-  'toast.insertedAfter': '“{t}” added after “{after}”', 'toast.insertedFirst': '“{t}” added at the top',
+  'toast.insertedAfter': '“{t}” comes after “{after}”', 'toast.insertedFirst': '“{t}” comes first',
   'field.hint': 'Note', 'field.step': 'First step', 'aria.style': 'Color and icon',
   'edit.today': 'Today', 'tpl.saveAs': 'Save as template', 'tpl.switch': 'Templates', 'tpl.newPh': 'New template name', 'tpl.overwrote': 'Saved to “{n}”',
   'tpl.label': 'Templates', 'tpl.generic': 'Basic', 'tpl.personal': 'Personal', 'tpl.save': '＋ Save as template',
@@ -73,7 +73,7 @@ export default {
   'log.ongoing': 'now', 'log.unfinished': 'unfinished', 'log.count': 'done', 'log.rest': 'Rest',
   'log.back': '← Calendar', 'log.today': 'Today · ', 'log.started': '{time} started the day',
   'log.notStarted': 'You haven’t started today.<br>Once you tap “Start today”, everything gets logged here.',
-  'log.empty': 'Nothing logged this day.',
+  'log.empty': 'Nothing logged this day.', 'log.delete': 'Delete this day', 'log.deleted': 'Day deleted',
   'cal.prev': 'Previous month', 'cal.next': 'Next month', 'cal.week': 'M,T,W,T,F,S,S', 'cal.month': '{name}',
 
   // Durations

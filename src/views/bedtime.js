@@ -17,9 +17,10 @@ import { esc } from './format.js';
 import { startInlineEdit } from './edit.js';
 import { dayRing } from './calendar.js';
 import { templateName } from './templates.js';
-import { stepInputHTML } from './stepInput.js';
+import { stepLine } from './chain.js';
 import { taskFromTpl, openCustomModal } from './palette.js';
 import * as haptic from '../services/haptics.js';
+import { showToast } from './toast.js';
 
 let sortable = null;
 let sel = null; // 明天列表里选中的那一行：新加的事插在它后面
@@ -29,19 +30,20 @@ export function openBedtime(focusTomorrow = false) {
   renderBedtime();
   const view = document.getElementById('bedtimeView');
   view.classList.add('active');
+  document.body.classList.add('bed-open'); // 底部提示让出固定按钮的位置
   view.scrollTop = 0;
   if (focusTomorrow) setTimeout(() => document.getElementById('tmrSection')?.scrollIntoView({ behavior:'smooth' }), 80);
 }
-export function closeBedtime() { document.getElementById('bedtimeView').classList.remove('active'); }
+export function closeBedtime() {
+  document.getElementById('bedtimeView').classList.remove('active');
+  document.body.classList.remove('bed-open');
+}
 
-function tomorrowRow(task, i) {
-  const step = task.starter || '';
-  const stepPart = i === 0
-    ? stepInputHTML(task, { tomorrow:true, value:step })
-    : step
-      ? `<div class="tmr-step" onclick="editTomorrowStep(event,'${task.id}')">${t('rest.firstStep', { s:esc(step) })}</div>`
-      : `<div class="add-chips"><button class="add-chip" onclick="editTomorrowStep(event,'${task.id}')">${I.plus}<span>${t('field.step')}</span></button></div>`;
-  return `<div class="tmr-row${i === 0 ? ' first' : ''}${task.id === sel ? ' sel' : ''}" data-id="${task.id}" style="${catVars(categoryOf(task))}" onclick="selectTomorrow('${task.id}')">
+function tomorrowRow(task) {
+  const stepPart = task.starter
+    ? stepLine(task.starter, `editTomorrowStep(event,'${task.id}')`)
+    : `<div class="add-chips"><button class="add-chip" onclick="editTomorrowStep(event,'${task.id}')">${I.plus}<span>${t('field.step')}</span></button></div>`;
+  return `<div class="tmr-row${task.id === sel ? ' sel' : ''}" data-id="${task.id}" style="${catVars(categoryOf(task))}" onclick="selectTomorrow('${task.id}')">
     <div class="row-top">
       <span class="dot"></span>
       <span class="row-icon">${glyph(task, 20)}</span>
@@ -73,7 +75,6 @@ export function renderBedtime() {
       `<button class="cat-chip${tpl.id === active ? ' on' : ''}" onclick="pickTomorrow('${tpl.id}')">${esc(templateName(tpl))}</button>`
     ).join('')}</div>
     <div id="tmrList" class="tmr-list">${chain.map(tomorrowRow).join('')}</div>
-    <button class="pal-add-btn" onclick="openTomorrowAdd()">${t('bed.add')}</button>
 
     <div class="sec-label">${t('bed.night')}</div>
     <div id="nightChecklist">${nightItems.map(item => {
@@ -132,13 +133,14 @@ export function renameTomorrow(e, id) {
   });
 }
 
+// 写 / 改明天的第一步：原地变成输入框，边打边存
 export function editTomorrowStep(e, id) {
   e.stopPropagation();
   setSel(id);
   const task = tomorrowChain().find(x => x.id === id);
   if (!task) return;
   const holder = e.currentTarget.closest('.tmr-body');
-  holder.innerHTML = '<div class="ft-text"></div>';
+  holder.innerHTML = '<div class="rs-text"></div>';
   startInlineEdit(holder.firstChild, task.starter || '', val => setTomorrowStarter(id, val), {
     allowEmpty:true, placeholder:exampleFor(task), onInput: val => setTomorrowStarter(id, val),
   });
@@ -177,8 +179,13 @@ export function newEventForTomorrow() {
 export function addTomorrowTpl(tpl) {
   const task = taskFromTpl(tpl);
   if (!task) return;
+  const chain = tomorrowChain();
+  const prev = sel ? chain.find(x => x.id === sel) : chain[chain.length - 1];
   addTomorrowTask(task, sel);
   haptic.tap();
+  const title = esc(tt(task, 'title'));
+  showToast(prev ? t('toast.insertedAfter', { t:title, after:esc(tt(prev, 'title')) }) : t('toast.insertedFirst', { t:title }),
+    t('undo'), () => { removeTomorrowTask(task.id); if (sel === task.id) sel = prev?.id || null; renderBedtime(); });
   sel = task.id; // 连续加会按顺序往下排
   document.getElementById('tmrModal').classList.add('hidden');
   renderBedtime();

@@ -60,7 +60,8 @@ export function editField(e, taskId, field) {
   startInlineEdit(el, tt(task, field) || '', val => {
     updateTaskField(taskId, field, val);
     el.innerHTML = val ? esc(val) : placeholder;
-  }, { allowEmpty: !!placeholder });
+    if (!val) setTimeout(render, 0); // 清空了就变回 ＋ 按钮
+  }, { allowEmpty: !!placeholder, onInput: val => updateTaskField(taskId, field, val), raw: task[field] || '' });
 }
 
 export function editCheckItem(e, taskId, itemId) {
@@ -83,11 +84,11 @@ export function addField(e, taskId, field) {
   const task = S.chain.find(t => t.id === taskId);
   if (!task) return;
   const holder = document.createElement('div');
-  holder.className = field === 'hint' ? 'row-hint' : 'ft-text';
+  holder.className = field === 'hint' ? 'row-hint' : 'rs-text';
   e.currentTarget.closest('.add-chips').before(holder);
   e.currentTarget.remove();
   startInlineEdit(holder, '', val => updateTaskField(taskId, field, val), {
-    allowEmpty: true,
+    allowEmpty: true, onInput: val => updateTaskField(taskId, field, val),
     placeholder: field === 'starter' ? exampleFor(task) : t('hint.edit.ph'),
   });
   holder.querySelector('input')?.addEventListener('blur', () => setTimeout(render, 0));
@@ -131,7 +132,7 @@ export function startInlineEdit(el, value, onSave, { allowEmpty = false, placeho
 export function initEdit() {
   document.getElementById('chainList').addEventListener('click', e => {
     if (!editMode) return;
-    if (e.target.closest('.row-title,.row-hint,.ft-text,.clabel,.row-del,.drag-handle,.circle-btn,.act,.text-link,.chain-fold,.add-chip,.style-btn')) return;
+    if (e.target.closest('.row-title,.row-hint,.ft-text,.rs-text,.clabel,.row-del,.drag-handle,.circle-btn,.act,.text-link,.chain-fold,.add-chip,.style-btn')) return;
     const row = e.target.closest('[data-id]');
     if (!row || row.dataset.id === editTarget) return;
     setEditTarget(row.dataset.id);

@@ -34,8 +34,8 @@ export function renderEditFooter() {
   const box = document.getElementById('editFooter');
   if (!box) return;
   box.innerHTML = editMode ? `
-    <button class="btn-primary" onclick="openSaveTemplate()">${I.saveFill} ${t('tpl.saveAs')}</button>
-    <button class="btn-ghost" onclick="openSwitchTemplate()">${I.swap} ${t('tpl.switch')}</button>` : '';
+    <button class="tpl-link" onclick="openSaveTemplate()">${I.saveFill}<span>${t('tpl.saveAs')}</span></button>
+    <button class="tpl-link" onclick="openSwitchTemplate()">${I.swap}<span>${t('tpl.switch')}</span></button>` : '';
 }
 
 function openSheet(html) {

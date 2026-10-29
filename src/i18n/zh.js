@@ -15,7 +15,7 @@ export default {
   'aria.edit': '编辑任务', 'edit.title': '编辑', 'edit.hint': '点文字改名 · 按住 ≡ 排序 · 从下面拖入新事件',
   'menu.export': '导出数据', 'menu.import': '导入数据',
   'export.done': '已导出备份', 'import.title': '导入备份？', 'import.body': '会用备份里的任务、记录和设置，替换这台设备上现在的数据。', 'import.ok': '导入', 'import.bad': '这个文件不是 GoGo 的备份',
-  'toast.insertedAfter': '「{t}」已插到「{after}」后面', 'toast.insertedFirst': '「{t}」已放在最前面',
+  'toast.insertedAfter': '「{t}」在「{after}」后进行', 'toast.insertedFirst': '「{t}」最先进行',
   'field.hint': '描述', 'field.step': '第一步', 'aria.style': '颜色和图标',
   'edit.today': '今天', 'tpl.saveAs': '存为模版', 'tpl.switch': '换模版', 'tpl.newPh': '新模版名字', 'tpl.overwrote': '已存进「{n}」',
   'tpl.label': '模版', 'tpl.generic': '通用', 'tpl.personal': '个人', 'tpl.save': '＋ 存为模版',
@@ -73,7 +73,7 @@ export default {
   'log.ongoing': '进行中', 'log.unfinished': '未完成', 'log.count': '件', 'log.rest': '休息',
   'log.back': '← 日历', 'log.today': '今天 · ', 'log.started': '{time} 开始今天',
   'log.notStarted': '还没开始今天。<br>点"开始今天"之后，这里会自动记下每件事。',
-  'log.empty': '这天没有记录。',
+  'log.empty': '这天没有记录。', 'log.delete': '删除本日记录', 'log.deleted': '已删除这天的记录',
   'cal.prev': '上个月', 'cal.next': '下个月', 'cal.week': '一,二,三,四,五,六,日', 'cal.month': '{m}月',
 
   // 时长

@@ -8,7 +8,7 @@ import {
 } from './views/chain.js';
 import { chooseReminder, snoozeRest, startNext, checkReminder } from './views/rest.js';
 import { initSwap, openSwap, closeSwap, chooseNext, laterCurrent, skipCurrent } from './views/swap.js';
-import { openToday, closeHistory } from './views/history.js';
+import { openToday, closeHistory, deleteDay } from './views/history.js';
 import { openCalendar, closeCalendar, shiftMonth, openDayFromCalendar, backToCalendar } from './views/calendar.js';
 import { rollOverIfNewDay } from './store/store.js';
 import {
@@ -38,7 +38,7 @@ Object.assign(window, {
   removeTask, editStarter,
   chooseReminder, snoozeRest, startNext,
   openSwap, closeSwap, chooseNext, laterCurrent, skipCurrent,
-  openToday, closeHistory,
+  openToday, closeHistory, deleteDay,
   openCalendar, closeCalendar, shiftMonth, openDayFromCalendar, backToCalendar,
   openPalette, closePalette, addTpl, pickCat,
   openCustomModal, closeCustomModal, saveCustomTemplate, delCustomTemplate, pickGlyph,
