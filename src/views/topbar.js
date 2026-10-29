@@ -22,7 +22,8 @@ export function updateDateLabel() {
 
 function syncThemeLabel() {
   const dark = document.documentElement.dataset.theme === 'dark';
-  document.getElementById('themeLabel').textContent = t(dark ? 'menu.light' : 'menu.dark');
+  // 浅色时显示月亮（点了变深），深色时显示太阳
+  document.getElementById('themeBtn').innerHTML = dark ? I.sunFill : I.moonFill;
   document.querySelector('meta[name="theme-color"]').content = dark ? '#121212' : '#f1f1ef';
 }
 

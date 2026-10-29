@@ -47,7 +47,8 @@
     <button class="date-badge" id="dateBadge" onclick="openCalendar()" data-i18n-aria="aria.calendar"></button>
     <div class="top-actions">
       <button class="icon-btn edit-btn" id="editBtn" onclick="toggleEditMode()" data-i18n-aria="aria.edit"><span class="ic-edit" data-icon="editFill"></span><span class="ic-done" data-icon="check"></span></button>
-      <button class="icon-btn" onclick="openBedtime()" data-i18n-aria="aria.bedtime" data-icon="moonFill"></button>
+      <button class="icon-btn" onclick="openBedtime()" data-i18n-aria="aria.bedtime" data-icon="zzzFill"></button>
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" data-i18n-aria="aria.theme"></button>
       <button class="icon-btn" onclick="openMenu()" data-i18n-aria="aria.menu" data-icon="more"></button>
     </div>
   </header>
@@ -72,7 +73,6 @@
   <div class="modal-box menu-box">
     <div class="menu-title" data-i18n="menu.title"></div>
     <button class="menu-item" onclick="menuAction('log')"><span class="mi-icon" data-icon="listFill"></span><span data-i18n="menu.log"></span></button>
-    <button class="menu-item" onclick="menuAction('theme')"><span class="mi-icon" data-icon="themeFill"></span><span id="themeLabel"></span></button>
     <button class="menu-item" onclick="menuAction('lang')"><span class="mi-icon" data-icon="langFill"></span><span data-i18n="menu.lang"></span></button>
     <button class="menu-item" onclick="menuAction('export')"><span class="mi-icon" data-icon="exportFill"></span><span data-i18n="menu.export"></span></button>
     <button class="menu-item" onclick="menuAction('import')"><span class="mi-icon" data-icon="importFill"></span><span data-i18n="menu.import"></span></button>
